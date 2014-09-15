@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Magi
+Comment=Magi P2P Cryptocurrency
+Comment[fr]=Magi, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Magi, eşten eşe kriptografik sanal para birimi
+Comment[es]=Magi, una criptomoneda P2P
+Exec=/usr/bin/magi-qt
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/bitcoin80.xpm
+MimeType=x-scheme-handler/magi;
+Categories=Office;

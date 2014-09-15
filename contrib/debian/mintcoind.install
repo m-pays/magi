@@ -1,0 +1,2 @@
+debian/bin/magid usr/bin
+src/magid usr/lib/magi

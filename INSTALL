@@ -1,0 +1,9 @@
+Building Magi
+
+See doc/readme-qt.rst for instructions on building Magi QT,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of Magi.
+
+See doc/build-*.txt for instructions on building magid,
+the intended-for-services, no-graphical-interface, reference
+implementation of Magi.
