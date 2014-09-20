@@ -67,10 +67,6 @@ inline uint256 hash_M7M(const T1 pbegin, const T1 pend)
     for(int i=0; i < 7; i++)
 	hash[i] = 0;
 
-//    int M7M = NM7M;
-//    int sw_Divs = SW_DIVS, nnNonce2 = (int)nnNonce;
-//    double sw_Min = 0., sw_Max = SW_MAX;
-
     const void* ptr = (pbegin == pend ? pblank : static_cast<const void*>(&pbegin[0]));
     size_t sz = (pend - pbegin) * sizeof(pbegin[0]);
 
@@ -125,14 +121,6 @@ inline uint256 hash_M7M(const T1 pbegin, const T1 pend)
     for(int i=0; i < 7; i++)
 	mpz_add(bns[7], bns[7], bns[i]);
 
-//    mpz_t rm_sw;
-//    mpz_init(rm_sw);
-//    mpz_cdiv_r_ui(rm_sw, bns[7], (uint32_t)0x7fffffff);
-//    nnNonce2 = mpz_get_ui(rm_sw);
-//    mpz_clear(rm_sw);
-//    unsigned int nnNonce3 = mpz_get_ui(bns[7]) / 2;
-//    nnNonce2 = (int)nnNonce3;
- 
     mpz_t product;
     mpz_init(product);
     mpz_set_ui(product,1);
@@ -141,21 +129,12 @@ inline uint256 hash_M7M(const T1 pbegin, const T1 pend)
 	mpz_mul(product,product,bns[i]);
     }
     mpz_pow_ui(product, product, 2);
-//    hash[7].pn[0]
 
     //    {
 //      char *tmp = mpz_get_str(NULL,16,product);
 //      printf("\nproduct: %s\n", tmp);
 //    }
 
-//    double rsw;
-//    rsw = __spectral_weight_m_MOD_sw(&nnNonce2, &sw_Divs);
-//    if (rsw < 1.) rsw = 1.01;
-//    mpz_t dSpectralWeight;
-//    mpz_init_set_d (dSpectralWeight, rsw);
-//    mpz_add(dSpectralWeight, dSpectralWeight, bns[7]);
-//    mpz_cdiv_q (product, product, dSpectralWeight);
-//    if (mpz_sgn(product) <= 0) mpz_set_ui(product,1);
 
 //    mpf_t rSpectralWeight, rproduct;
 //    mpf_init(rSpectralWeight);
@@ -185,8 +164,6 @@ for(int i=0; i < NM7M; i++)
     if(finalhash==0) finalhash = 1;
     mpz_set_uint256(bns[0],finalhash);
     mpz_add(bns[7], bns[7], bns[0]);
-//    mpz_add_ui(dSpectralWeight, bns[0], (uint32_t)rsw);
-//    if (mpz_sgn(dSpectralWeight) <= 0) mpz_set_ui(dSpectralWeight,1);
 
     mpz_mul(product,product,bns[7]);
     mpz_cdiv_q (product, product, bns[0]);
