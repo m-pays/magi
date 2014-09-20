@@ -1,0 +1,35 @@
+*.tar.gz
+*.ext
+src/*.exe
+src/magi
+src/magid
+src/test_magi
+.*.swp
+*.*~*
+*.bak
+*.rej
+*.orig
+*.o
+*.patch
+*.mod
+.magi
+
+# Compilation and Qt preprocessor part
+*.qm
+Makefile
+magi-qt
+magi-qt.app
+
+# Unit-tests
+Makefile.test
+magi-qt_test
+
+# Resources cpp
+qrc_*.cpp
+
+# Qt creator
+*.pro.user
+
+# Mac specific
+.DS_Store
+build
