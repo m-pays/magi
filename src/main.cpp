@@ -977,14 +977,26 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
     {
         nSubsidy = 112500 * COIN;
     }
-    else if (nHeight <= PRM_MAGI_POW_HEIGHT) // network dependent 1st phash magimining
+    else if (nHeight <= PRM_MAGI_POW_HEIGHT_V2) // network dependent 1st phash magimining
     {
-	// the higher diff, the greater subsidies for diff < 75; then less subsidies for further higher diff;
-	nSubsidy = 495.05 * pow( (5.55243*(exp_n(-0.3*nDiff/15.762) - exp_n(-0.6*nDiff/15.762)))*nDiff, 0.5) / 8.61553;
-        if (nSubsidy < 5) nSubsidy = 5;
-	nSubsidy *= COIN;
-	if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
-	                    nHeight, nSubsidy/COIN, nDiff);
+	if (nHeight <= BLOCK_REWARD_ADJT) {
+	    // the higher diff, the greater subsidies for diff < 75; then less subsidies for further higher diff;
+	    nSubsidy = 495.05 * pow( (5.55243*(exp_n(-0.3*nDiff/15.762) - exp_n(-0.6*nDiff/15.762)))*nDiff, 0.5) / 8.61553;
+	    if (nSubsidy < 5) nSubsidy = 5;
+	    nSubsidy *= COIN;
+	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
+				nHeight, nSubsidy/COIN, nDiff);
+	}
+	else {
+	    double nDiffcu = ((nHeight <= 2700) ? 2.2 : (2.2+(nHeight-2700)*0.0000274841));
+	    // the higher diff, the greater subsidies for diff < 75; then less subsidies for further higher diff;
+	    nSubsidy = 294.118 * pow( (5.55243*(exp_n(-0.3*nDiff/0.39) - exp_n(-0.6*nDiff/0.39)))*nDiff, 0.5) / 1.335
+			   * exp_n2(nDiff/0.08, nDiffcu/0.08);
+	    if (nSubsidy < 5) nSubsidy = 5;
+	    nSubsidy *= COIN;
+	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
+				nHeight, nSubsidy/COIN, nDiff);
+	}
     }
     else if (nHeight <= END_MAGI_POW_HEIGHT) // network dependent 2nd phash magimining
     {

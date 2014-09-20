@@ -29,7 +29,10 @@ class CNode;
 
 static const int MAX_MAGI_POW_HEIGHT = 25000000;
 static const int PRM_MAGI_POW_HEIGHT = 80000;
+static const int PRM_MAGI_POW_HEIGHT_V2 = 50000; // re-cal PoW-I end block
 static const int END_MAGI_POW_HEIGHT = 500000;
+
+static const int BLOCK_REWARD_ADJT = 2700;
 
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
@@ -60,7 +63,11 @@ inline bool IsMiningProofOfWork(int nHeight)
 inline bool IsMiningProofOfStake(int nHeight ) 
 {
     if (fTestNet) return nHeight > 10;
-    return nHeight > 6720; // two weeks
+    if (nHeight <= BLOCK_REWARD_ADJT) {
+	return nHeight > 6720; // two weeks
+    }
+    else
+	return nHeight > 10080; // three weeks
 }
 
 #ifdef USE_UPNP
@@ -168,6 +175,26 @@ inline double exp_n(double xt)
         return exp(xt);
 }
 
+// 1 / (1 + exp(x1-x2))
+inline double exp_n2(double x1, double x2)
+{
+    double p1 = -700., p2 = -37., p3 = -0.8e-8, p4 = 0.8e-8, p5 = 37., p6 = 700.;
+    double xt = x1 - x2;
+    if (xt < p1+1.e-200)
+        return 1.;
+    else if (xt > p1 && xt < p2 + 1.e-200)
+        return ( 1. - exp(xt) );
+    else if (xt > p2 && xt < p3 + 1.e-200)
+        return ( 1. / (1. + exp(xt)) );
+    else if (xt > p3 && xt < p4)
+        return ( 1. / (2. + xt) );
+    else if (xt > p4 - 1.e-200 && xt < p5)
+        return ( exp(-xt) / (1. + exp(-xt)) );
+    else if (xt > p5 - 1.e-200 && xt < p6)
+        return ( exp(-xt) );
+    else if (xt > p6 - 1.e-200)
+        return 0.;
+}
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
 
