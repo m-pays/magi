@@ -970,17 +970,16 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
     }
 
     // coins for swapping with prior magicoin
-    // 1.125 million out of 25 million total for swap, that is about 4.5%
+    // 1.125 million (finally 1.237505 million, 12 blocks) out of 25 million total for swap (4.95%)
     // Concern of coin swap has been discussed here: https://bitcointalk.org/index.php?topic=735170.msg8772649#msg8772649
     // Swap will be performed in a much slower pace than new XMG coin minting, so that it won't give price impact.
     if(nHeight <= 10 && !fTestNet)
     {
         nSubsidy = 112500 * COIN;
     }
-    else if (nHeight <= PRM_MAGI_POW_HEIGHT_V2) // network dependent 1st phash magimining
+    else if (nHeight <= PRM_MAGI_POW_HEIGHT_V2) // difficulty dependent PoW 1st phash mining
     {
 	if (nHeight <= BLOCK_REWARD_ADJT) {
-	    // the higher diff, the greater subsidies for diff < 75; then less subsidies for further higher diff;
 	    nSubsidy = 495.05 * pow( (5.55243*(exp_n(-0.3*nDiff/15.762) - exp_n(-0.6*nDiff/15.762)))*nDiff, 0.5) / 8.61553;
 	    if (nSubsidy < 5) nSubsidy = 5;
 	    nSubsidy *= COIN;
@@ -989,7 +988,6 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	}
 	else {
 	    double nDiffcu = ((nHeight <= 2700) ? 2.2 : (2.2+(nHeight-2700)*0.0000274841));
-	    // the higher diff, the greater subsidies for diff < 75; then less subsidies for further higher diff;
 	    nSubsidy = 294.118 * pow( (5.55243*(exp_n(-0.3*nDiff/0.39) - exp_n(-0.6*nDiff/0.39)))*nDiff, 0.5) / 1.335
 			   * exp_n2(nDiff/0.08, nDiffcu/0.08);
 	    if (nSubsidy < 5) nSubsidy = 5;
@@ -998,7 +996,7 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 				nHeight, nSubsidy/COIN, nDiff);
 	}
     }
-    else if (nHeight <= END_MAGI_POW_HEIGHT) // network dependent 2nd phash magimining
+    else if (nHeight <= END_MAGI_POW_HEIGHT) // difficulty dependent PoW 2nd phash mining
     {
 	nSubsidy = 15. * 2500. / (pow((nDiff+500.)/10., 2.));
         if (nSubsidy < 3) nSubsidy = 3;
