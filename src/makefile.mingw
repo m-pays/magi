@@ -97,7 +97,8 @@ OBJS= \
     obj/sha2.o \
     obj/sha2big.o \
     obj/tiger.o \
-    obj/whirlpool.o
+    obj/whirlpool.o \
+    obj/magimath.o
 
 all: magid.exe
 
