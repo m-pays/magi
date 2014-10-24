@@ -31,8 +31,10 @@ static const int MAX_MAGI_POW_HEIGHT = 25000000;
 static const int PRM_MAGI_POW_HEIGHT = 80000;
 static const int PRM_MAGI_POW_HEIGHT_V2 = 50000; // re-cal PoW-I end block
 static const int END_MAGI_POW_HEIGHT = 500000;
+static const int END_MAGI_POW_HEIGHT_V2 = 5000000; // PoW-II aims to issue 12 mil and more than 10 years
 
 static const int BLOCK_REWARD_ADJT = 2700;
+static const int BLOCK_REWARD_ADJT_M7M_V2 = 32750;
 
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
@@ -956,7 +958,12 @@ public:
 	}
 	else
 	{
-	    return hash_M7M(BEGIN(nVersion), END(nNonce));
+	    if(nTime<1414330200) {
+		return hash_M7M(BEGIN(nVersion), END(nNonce));
+	    }
+	    else {
+		return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
+	    }
 	}
     
     }

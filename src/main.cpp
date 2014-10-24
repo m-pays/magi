@@ -951,6 +951,7 @@ double GetDifficultyFromBits(unsigned int nBits){
 
 // miner's coin base reward based on nBits
 // prev nBits, nHeight
+#define M7Mv2_SCALE 2.545
 int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 {
     double nDiff = GetDifficultyFromBits(nBits);
@@ -969,16 +970,18 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	       nHeight, nSubsidy/COIN, nDiff);
 	return nSubsidy + nFees;
     }
-
+    /*
     // coins for swapping with prior magicoin
-    // 1.125 million (finally 1.237505 million, 12 blocks) out of 25 million total for swap (4.95%)
-    // Concern of coin swap has been discussed here: https://bitcointalk.org/index.php?topic=735170.msg8772649#msg8772649
-    // Swap will be performed in a much slower pace than new XMG coin minting, so that it won't give price impact.
+    Initial discussion: https://bitcointalk.org/index.php?topic=735170.msg8772649#msg8772649
+    10/07/2014 - Final swap plan: 227,140 XMG used for swap, that is only 0.9% of total XMG supply; 
+                 part of remaining unswapped will be used for PoM campaign, others will be destroyed. 
+                 https://bitcointalk.org/index.php?topic=821170.msg9190490#msg9190490;
+    */
     if(nHeight <= 10 && !fTestNet)
     {
         nSubsidy = 112500 * COIN;
     }
-    else if (nHeight <= PRM_MAGI_POW_HEIGHT_V2) // difficulty dependent PoW 1st phash mining
+    else if (nHeight <= PRM_MAGI_POW_HEIGHT_V2) // difficulty dependent PoW-I mining
     {
 	if (nHeight <= BLOCK_REWARD_ADJT) {
 	    nSubsidy = 495.05 * pow( (5.55243*(exp_n(-0.3*nDiff/15.762) - exp_n(-0.6*nDiff/15.762)))*nDiff, 0.5) / 8.61553;
@@ -987,7 +990,7 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
 				nHeight, nSubsidy/COIN, nDiff);
 	}
-	else {
+	else if (nHeight <= BLOCK_REWARD_ADJT_M7M_V2) {
 	    double nDiffcu = ((nHeight <= 2700) ? 2.2 : (2.2+(nHeight-2700)*0.0000274841));
 	    nSubsidy = 294.118 * pow( (5.55243*(exp_n(-0.3*nDiff/0.39) - exp_n(-0.6*nDiff/0.39)))*nDiff, 0.5) / 1.335
 			   * exp_n2(nDiff/0.08, nDiffcu/0.08);
@@ -996,17 +999,33 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
 				nHeight, nSubsidy/COIN, nDiff);
 	}
+	else {
+	    double nDiffcu = ((nHeight <= 2700) ? 2.2 / M7Mv2_SCALE : ( (2.2+(nHeight-2700)*0.0000183227)) / M7Mv2_SCALE );
+	    nSubsidy = 294.118 * pow( (5.55243*(exp_n(-0.3*nDiff/0.39*M7Mv2_SCALE) - exp_n(-0.6*nDiff/0.39*M7Mv2_SCALE)))*nDiff, 0.5) / 0.8456
+			   * exp_n2(nDiff/(0.08/M7Mv2_SCALE), nDiffcu/(0.08/M7Mv2_SCALE));
+	    if (nSubsidy < 5) nSubsidy = 5;
+	    nSubsidy *= COIN;
+	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
+				nHeight, nSubsidy/COIN, nDiff);
+	}
     }
-    else if (nHeight <= END_MAGI_POW_HEIGHT) // difficulty dependent PoW 2nd phash mining
+    else if (nHeight <= END_MAGI_POW_HEIGHT_V2) // difficulty dependent PoW-II mining
     {
-	nSubsidy = 15. * 2500. / (pow((nDiff+500.)/10., 2.));
-        if (nSubsidy < 3) nSubsidy = 3;
+	double nDiffcu = log(nHeight)*0.1;
+	nSubsidy = 50 * pow( (5.55243*(exp_n(-0.3*nDiff/0.39*M7Mv2_SCALE) - exp_n(-0.6*nDiff/0.39*M7Mv2_SCALE)))*nDiff, 0.5) / 0.8456
+			* exp_n2(nDiff/(0.16/M7Mv2_SCALE), nDiffcu/(0.16/M7Mv2_SCALE));
+	if (nSubsidy < 3) nSubsidy = 3;
 	nSubsidy *= COIN;
+	if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
+			    nHeight, nSubsidy/COIN, nDiff);
+//	nSubsidy = 15. * 2500. / (pow((nDiff+500.)/10., 2.));
+//	if (nSubsidy < 3) nSubsidy = 3;
+//	nSubsidy *= COIN;
 	for(int i = 525600; i <= nHeight; i += 525600) nSubsidy *= 0.93; // yearly decline (7%)
     }
-    else
-	nSubsidy = MIN_TX_FEE;
-
+    else {
+      nSubsidy = MIN_TX_FEE;
+    }
     return nSubsidy + nFees;
 }
 
@@ -1180,11 +1199,100 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     return bnNew.GetCompact();
 }
 
+#define MQW_TIME_COEFF_TESNT 1.0
+#define MQW_AVER_COEFF_TESNT 1.0
+#define MQW_EXPON_COEFF_TESNT 2.3
+#define WEIGHT_SCALE_TESNT 100.0
+unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
+    /* Magi Quantum Wave (MQW) for XMG - Coin Magi, written by Joe Lao */
+    if (fProofOfStake) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
+
+    int64 nActualBlockSpacing, nActualTimeSpanMQW;
+    int64 nAveragedBlocks = 1, nTotPastBlocks = 15;
+    CBigNum bnAverage;
+    CBigNum bnAveragePrev;
+
+    CBigNum bnTargetLimit = bnProofOfWorkLimit;
+    if (fProofOfStake)
+    {
+        // Proof-of-Stake blocks has own target limit since nVersion=3 supermajority on mainNet and always on testNet
+        bnTargetLimit = bnProofOfStakeLimit;
+    }
+
+    if (pindexLast == NULL)
+        return bnTargetLimit.GetCompact(); // genesis block
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+    if (pindexPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // first block
+
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+    if (pindexPrevPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // second block
+
+    nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+    if(nActualBlockSpacing < 0) { nActualBlockSpacing = 1; }
+    nActualTimeSpanMQW = nActualBlockSpacing;
+    double fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(nTargetSpacingWork)) * MQW_AVER_COEFF_TESNT;
+    bnAverage.SetCompact(pindexPrev->nBits);
+    bnAverage = bnAverage * ((int64)(fw*WEIGHT_SCALE_TESNT));
+    
+    int64 nWeightTot = ((int64)(fw*WEIGHT_SCALE_TESNT));
+    double rWeight = 1.-fw;
+
+    for(unsigned int i = 1; pindexPrevPrev; i++)
+    {
+        if (i >= nTotPastBlocks) { break; }
+//        if (i == 1) { bnAverage.SetCompact(pindexPrev->nBits); }
+ //       else {
+	pindexPrev = pindexPrevPrev;
+	pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+        if (pindexPrevPrev == NULL) { assert(pindexPrev); break; }
+	nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+	if (nActualBlockSpacing > 0)
+	{
+	    nAveragedBlocks++;
+	    nActualTimeSpanMQW += nActualBlockSpacing;
+	    fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(nTargetSpacingWork)) * MQW_AVER_COEFF_TESNT;
+//	    int64 w1 = fw * WEIGHT_SCALE_TESNT;
+//	    int64 w2 = (1.-fw) * WEIGHT_SCALE_TESNT;
+//		bnAverage = (w1 * (CBigNum().SetCompact(pindexPrev->nBits)) + w2 * bnAveragePrev) / (w1 + w2);
+	    bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
+	    nWeightTot += ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
+	    rWeight *= (1.-fw);
+	}
+//	}
+//	bnAveragePrev = bnAverage;
+    }
+    bnAverage /= nWeightTot;
+
+    CBigNum bnNew(bnAverage);
+
+    int64 nTargetTimeSpanMQW = nAveragedBlocks*nTargetSpacingWork;
+
+    if (nActualTimeSpanMQW < nTargetTimeSpanMQW/3)
+        nActualTimeSpanMQW = nTargetTimeSpanMQW/3;
+    if (nActualTimeSpanMQW > nTargetTimeSpanMQW*3)
+        nActualTimeSpanMQW = nTargetTimeSpanMQW*3;
+
+    // Retarget
+    bnNew *= nActualTimeSpanMQW;
+    bnNew /= nTargetTimeSpanMQW;
+
+    if (bnNew > bnProofOfWorkLimit){
+        bnNew = bnProofOfWorkLimit;
+    }
+     
+    return bnNew.GetCompact();
+}
+
 #define MQW_TIME_COEFF 1.0
 #define MQW_AVER_COEFF 1.0
-//#define MQW_EXPON_COEFF 1.60938
-#define MQW_EXPON_COEFF 2.3
+#define MQW_EXPON_COEFF 0.15
 #define WEIGHT_SCALE 100.0
+#define WEIGHT_MIN 0.005
+#define WEIGHT_MAX 0.8
 unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     /* Magi Quantum Wave (MQW) for XMG - Coin Magi, written by Joe Lao */
@@ -1216,9 +1324,11 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
     nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     if(nActualBlockSpacing < 0) { nActualBlockSpacing = 1; }
     nActualTimeSpanMQW = nActualBlockSpacing;
-    double fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) * MQW_AVER_COEFF;
+    double fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) ) * MQW_AVER_COEFF;
+    if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
+    else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
     bnAverage.SetCompact(pindexPrev->nBits);
-    bnAverage = bnAverage * ((int64)(fw*WEIGHT_SCALE));
+    bnAverage *= ((int64)(fw*WEIGHT_SCALE));
     
     int64 nWeightTot = ((int64)(fw*WEIGHT_SCALE));
     double rWeight = 1.-fw;
@@ -1236,7 +1346,9 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 	{
 	    nAveragedBlocks++;
 	    nActualTimeSpanMQW += nActualBlockSpacing;
-	    fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) * MQW_AVER_COEFF;
+	    fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) ) * MQW_AVER_COEFF;
+	    if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
+	    else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
 //	    int64 w1 = fw * WEIGHT_SCALE;
 //	    int64 w2 = (1.-fw) * WEIGHT_SCALE;
 //		bnAverage = (w1 * (CBigNum().SetCompact(pindexPrev->nBits)) + w2 * bnAveragePrev) / (w1 + w2);
@@ -1276,11 +1388,15 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
             if (pindexLast->nHeight+1 >= 20370) { DiffMode = 2; }
         }
         else {
-//            if (pindexLast->nHeight+1 >= 10) { DiffMode = 2; }
+            if (pindexLast->nHeight+1 >= 33500) { DiffMode = 2; }
         }
 
         if (DiffMode == 1) { return GetNextTargetRequired_v1(pindexLast, fProofOfStake); }
-        else if (DiffMode == 2) { return MagiQuantumWave(pindexLast, fProofOfStake); }
+        else if (DiffMode == 2)
+	{ 
+	    if (fTestNet) {return MagiQuantumWave_TESNT(pindexLast, fProofOfStake);}
+	    return MagiQuantumWave(pindexLast, fProofOfStake);
+	}
         return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
 }
 
