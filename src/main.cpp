@@ -1385,18 +1385,15 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
         int DiffMode = 1;
         if (fTestNet) {
-            if (pindexLast->nHeight+1 >= 20370) { DiffMode = 2; }
+            if ((pindexLast->nHeight+1 >= 20370) && (pindexLast->nHeight+1 < 24500)) { DiffMode = 21; }
+            else { DiffMode = 2; }
         }
         else {
             if (pindexLast->nHeight+1 >= 33500) { DiffMode = 2; }
         }
-
         if (DiffMode == 1) { return GetNextTargetRequired_v1(pindexLast, fProofOfStake); }
-        else if (DiffMode == 2)
-	{ 
-	    if (fTestNet) {return MagiQuantumWave_TESNT(pindexLast, fProofOfStake);}
-	    return MagiQuantumWave(pindexLast, fProofOfStake);
-	}
+        else if (DiffMode == 2) { return MagiQuantumWave(pindexLast, fProofOfStake); }
+	else if (DiffMode == 21) { return MagiQuantumWave_TESNT(pindexLast, fProofOfStake); }
         return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
 }
 
