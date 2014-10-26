@@ -1385,8 +1385,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
         int DiffMode = 1;
         if (fTestNet) {
-            if ((pindexLast->nHeight+1 >= 20370) && (pindexLast->nHeight+1 < 24500)) { DiffMode = 21; }
-            else { DiffMode = 2; }
+            if (pindexLast->nHeight+1 >= 24500) { DiffMode = 2; }
+            else if (pindexLast->nHeight+1 >= 20370) { DiffMode = 21; }
         }
         else {
             if (pindexLast->nHeight+1 >= 33500) { DiffMode = 2; }
