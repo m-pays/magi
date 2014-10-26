@@ -1005,7 +1005,7 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 			   * exp_n2(nDiff/(0.08/M7Mv2_SCALE), nDiffcu/(0.08/M7Mv2_SCALE));
 	    if (nSubsidy < 5) nSubsidy = 5;
 	    nSubsidy *= COIN;
-	    if (fDebug && fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
+	    if (fDebugMagi) printf("@@GPoWR nHeight = %d, nSubsidy = %"PRI64d", nDiff = %f\n", 
 				nHeight, nSubsidy/COIN, nDiff);
 	}
     }
@@ -1244,8 +1244,6 @@ unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfS
     for(unsigned int i = 1; pindexPrevPrev; i++)
     {
         if (i >= nTotPastBlocks) { break; }
-//        if (i == 1) { bnAverage.SetCompact(pindexPrev->nBits); }
- //       else {
 	pindexPrev = pindexPrevPrev;
 	pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
         if (pindexPrevPrev == NULL) { assert(pindexPrev); break; }
@@ -1255,15 +1253,10 @@ unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfS
 	    nAveragedBlocks++;
 	    nActualTimeSpanMQW += nActualBlockSpacing;
 	    fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(nTargetSpacingWork)) * MQW_AVER_COEFF_TESNT;
-//	    int64 w1 = fw * WEIGHT_SCALE_TESNT;
-//	    int64 w2 = (1.-fw) * WEIGHT_SCALE_TESNT;
-//		bnAverage = (w1 * (CBigNum().SetCompact(pindexPrev->nBits)) + w2 * bnAveragePrev) / (w1 + w2);
 	    bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
 	    nWeightTot += ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
 	    rWeight *= (1.-fw);
 	}
-//	}
-//	bnAveragePrev = bnAverage;
     }
     bnAverage /= nWeightTot;
 
@@ -1385,8 +1378,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
         int DiffMode = 1;
         if (fTestNet) {
-            if ((pindexLast->nHeight+1 >= 20370) && (pindexLast->nHeight+1 < 24500)) { DiffMode = 21; }
-            else { DiffMode = 2; }
+            if (pindexLast->nHeight+1 >= 24500) { DiffMode = 2; }
+            else if (pindexLast->nHeight+1 >= 20370) { DiffMode = 21; }
         }
         else {
             if (pindexLast->nHeight+1 >= 33500) { DiffMode = 2; }
