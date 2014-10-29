@@ -23,13 +23,28 @@ typedef std::map<int, unsigned int> MapModifierCheckpoints;
 // Hard checkpoints of stake modifiers to ensure they are deterministic
 static std::map<int, unsigned int> mapStakeModifierCheckpoints =
     boost::assign::map_list_of
-    (     0, 0xfd11f4e7u )
+    ( 0,	0xfd11f4e7 )
+    ( 9,	0x4fdba6a6 )
+    ( 19,	0x8300e57b )
+    ( 99,	0xb74d1791 )
+    ( 199,	0x52ae43ca )
+    ( 999,	0x47fecb89 )
+    ( 1999,	0x256f6e94 )
+    ( 9999,	0x66bb24af )
+    ( 19999,	0xadc5749e )
+    ( 29999,	0x839a4815 )
+    ( 37090,	0x5e04a01a )
 ;
 
 // Hard checkpoints of stake modifiers to ensure they are deterministic (TestNet)
 static std::map<int, unsigned int> mapStakeModifierCheckpointsTestNet =
     boost::assign::map_list_of
-        ( 0, 0x0e00670b )
+        ( 0,	0x0e00670b )
+        ( 999,	0x727489b2 )
+        ( 1999,	0x654dcb7e )
+        ( 9999,	0x2c9333e0 )
+        ( 19999,0xf40a3252 )
+        ( 27680,0xe7957d36 )
     ;
 
 inline double wfa(double x)
@@ -505,7 +520,6 @@ unsigned int GetStakeModifierChecksum(const CBlockIndex* pindex)
 // Check stake modifier hard checkpoints
 bool CheckStakeModifierCheckpoints(int nHeight, unsigned int nStakeModifierChecksum)
 {
-    return true;
     MapModifierCheckpoints& checkpoints = (fTestNet ? mapStakeModifierCheckpointsTestNet : mapStakeModifierCheckpoints);
     if (checkpoints.count(nHeight))
         return nStakeModifierChecksum == checkpoints[nHeight];
