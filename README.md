@@ -1,7 +1,7 @@
 
 Magi development tree
 
-Magi is a PoS-based cryptocurrency.
+Magi is a hybrid PoW/PoS-based cryptocurrency. Magi is also a CPU coin. 
 
 Development process
 ===========================
@@ -30,3 +30,9 @@ in this manner will have their corresponding issue labeled 'stagnant'.
 Issues with no commits will be given a similar warning, and closed after
 15 days from their last activity. Issues closed in this manner will be 
 labeled 'stale'.
+
+Magi names: Coin Magi, Coin of the Magi.
+Symbol: XMG
+
+Bitcointalk thread: https://bitcointalk.org/index.php?topic=735170.0
+Website: http://www.cryptomagic.com/
