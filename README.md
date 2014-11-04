@@ -36,3 +36,5 @@ Symbol: XMG
 
 Bitcointalk thread: https://bitcointalk.org/index.php?topic=735170.0
 Website: http://www.cryptomagic.com/
+
+Coins Source Verification
