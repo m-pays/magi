@@ -207,7 +207,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getconnectioncount",     &getconnectioncount,     true,   false },
     { "getpeerinfo",            &getpeerinfo,            true,   false },
     { "getdifficulty",          &getdifficulty,          true,   false },
-    { "getnetworkMhashps",      &getnetworkMhashps,      true,   false },
+    { "getnetworkmhashps",      &getnetworkmhashps,      true,   false },
     { "getgenerate",            &getgenerate,            true,   false },
     { "setgenerate",            &setgenerate,            true,   false },
     { "gethashespersec",        &gethashespersec,        true,   false },
@@ -1148,8 +1148,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "stop"                   && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "setgenerate"            && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "setgenerate"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
-    if (strMethod == "getnetworkMhashps"      && n > 0) ConvertTo<boost::int64_t>(params[0]);
-    if (strMethod == "getnetworkMhashps"      && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getnetworkmhashps"      && n > 0) ConvertTo<boost::int64_t>(params[0]);
+    if (strMethod == "getnetworkmhashps"      && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "sendtoaddress"          && n > 1) ConvertTo<double>(params[1]);
     if (strMethod == "settxfee"               && n > 0) ConvertTo<double>(params[0]);
     if (strMethod == "getreceivedbyaddress"   && n > 1) ConvertTo<boost::int64_t>(params[1]);
