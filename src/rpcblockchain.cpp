@@ -155,7 +155,7 @@ Value getblockcount(const Array& params, bool fHelp)
 }
 
 
-Value getdifficulty(const Array& params, bool fHelp)
+Value getdifficultym(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
@@ -170,7 +170,7 @@ Value getdifficulty(const Array& params, bool fHelp)
 }
 
 
-Value getDifficulty(const Array& params, bool fHelp)
+Value getdifficulty(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
