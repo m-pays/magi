@@ -170,6 +170,16 @@ Value getdifficulty(const Array& params, bool fHelp)
 }
 
 
+Value getDifficulty(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getdifficulty\n"
+            "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.");
+
+    return GetDifficulty();
+}
+
 Value settxfee(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 1 || AmountFromValue(params[0]) < MIN_TX_FEE)
