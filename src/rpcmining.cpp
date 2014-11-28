@@ -127,18 +127,8 @@ Value GetNetworkHashPS(int lookup) {
     return (boost::int64_t)(((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
 }
 
+
 Value getnetworkhashps(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw runtime_error(
-            "getnetworkhashps [blocks]\n"
-            "Returns the estimated network hashes per second based on the last 120 blocks.\n"
-            "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.");
-
-    return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 120);
-}
-
-Value getnetworkmhashps(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
         throw runtime_error(
