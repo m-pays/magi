@@ -136,7 +136,7 @@ Value getnetworkhashps(const Array& params, bool fHelp)
             "Returns the estimated network hashes per second based on the last 120 blocks.\n"
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.");
 
-    return GetPoWMHashPS();
+    return (GetPoWMHashPS()*1.e6);
 }
 
 
