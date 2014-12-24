@@ -4697,19 +4697,21 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
         pblock->nTime          = max(pindexPrev->GetMedianTimePast()+1, pblock->GetMaxTransactionTime());
         pblock->nTime          = max(pblock->GetBlockTime(), pindexPrev->GetBlockTime() - nMaxClockDrift);
         if (pblock->IsProofOfWork())
-            pblock->UpdateTime(pindexPrev);
-	if (fTestNet)
 	{
-	    if(pblock->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
+            pblock->UpdateTime(pindexPrev);
+	    if (fTestNet)
+	    {
+		if(pblock->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
+		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
+		}
+		else {
+		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, false);
+		}
+	    }
+	    else
+	    {
 		pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
 	    }
-	    else {
-		pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, false);
-	    }
-	}
-	else
-	{
-	    pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
 	}
         pblock->nNonce         = 0;
     }
