@@ -26,7 +26,6 @@ class CInv;
 class CRequestTracker;
 class CNode;
 
-
 static const int MAX_MAGI_POW_HEIGHT = 25000000;
 static const int PRM_MAGI_POW_HEIGHT = 80000;
 static const int PRM_MAGI_POW_HEIGHT_V2 = 50000; // re-cal PoW-I end block
@@ -56,6 +55,8 @@ inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONE
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
 
+#define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
+
 inline bool IsMiningProofOfWork(int nHeight)
 {
     return nHeight <= MAX_MAGI_POW_HEIGHT;
@@ -66,11 +67,19 @@ inline bool IsMiningProofOfStake(int nHeight )
 {
     if (fTestNet) return nHeight > 10;
     if (nHeight <= BLOCK_REWARD_ADJT) {
-	return nHeight > 6720; // two weeks
+	return (nHeight > 6720); // two weeks
     }
     else
-	return nHeight > 10080; // three weeks
+	return (nHeight > 10080); // three weeks
 }
+
+
+inline bool IsBlockrewardProtocolV2(int nHeight)
+{
+    if (fTestNet) return (nHeight > 40000);
+    return (nHeight > 200000);
+}
+
 
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
@@ -146,6 +155,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
 bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey);
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
 int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees);
+int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
 int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees, CBlockIndex* pindex);
 unsigned int ComputeMinWork(unsigned int nBase, int64 nTime);
 unsigned int ComputeMinStake(unsigned int nBase, int64 nTime, unsigned int nBlockTime);

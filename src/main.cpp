@@ -949,8 +949,144 @@ double GetDifficultyFromBits(unsigned int nBits){
     return dDiff;
 }
 
-// miner's coin base reward based on nBits
-// prev nBits, nHeight
+#define BRW_BLKTIME_COEFF 0.1 // block time effect on average weight; the larger value, the less effect
+#define BRW_AVER_COEFF 0.25 // the larger value, the regular moving average
+
+#define BRW_EXPON_COEFF 0.15
+#define BRW_WEIGHT_MIN 0.0001
+#define BRW_WEIGHT_MAX 0.8
+#define BRW_WEIGHT_SCALE 10000.0
+
+#define DAMPINGCU 0.55
+#define DAMPINGRATE 0.075
+#define DAMPINMIN 0.3
+#define DAMPINGAMP 2.0
+
+#define BBLOCK 100
+#define BBLOCK_AVER 2000
+// diff data filter to stabilize the rewards
+double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
+{
+    int64 nWeightTot, nActualBlockSpacing;
+    double rDiffAverEMA, rDiffAver, rfw, rWeight;
+    const CBlockIndex* pindexPrev = pindex0;
+
+    // finding the average diff over up to 2000 backward blocks
+    rDiffAver = GetDifficultyFromBits(pindexPrev->nBits);
+    nWeightTot = 1;
+    for(int i = 1; i <= BBLOCK_AVER-1; i++)
+    {
+	pindexPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
+	if (!pindexPrev || pindexPrev->nHeight==0) {
+	    printf("WARNING: averaged over less than BBLOCK_AVER blocks --> GetDifficultyFromBitsV2\n");
+	    break;
+	}
+      	rDiffAver += GetDifficultyFromBits(pindexPrev->nBits);
+	nWeightTot++;
+    }
+    rDiffAver /= double(nWeightTot);
+
+    pindexPrev = pindex0;
+    const CBlockIndex* pindexPrevPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
+    if (!pindexPrevPrev || pindexPrevPrev->nHeight==0) {
+	printf("ERROR: no actual average done --> GetDifficultyFromBitsV2\n");
+	return rDiffAver;
+    }
+    nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+    // moving average factor depending on block time; less rfw, smoother the diff
+    rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(nTargetSpacingWork)) ) * BRW_AVER_COEFF;
+    if (rfw < BRW_WEIGHT_MIN) { rfw = BRW_WEIGHT_MIN; }
+    else if (rfw > BRW_WEIGHT_MAX) { rfw = BRW_WEIGHT_MAX; }
+
+    rDiffAverEMA = GetDifficultyFromBits(pindexPrev->nBits) * ((int64)(rfw * BRW_WEIGHT_SCALE));
+    nWeightTot = ((int64)(rfw*BRW_WEIGHT_SCALE));
+    rWeight = 1.-rfw;
+    for(int i = 1; i <= BBLOCK-1; i++)
+    {
+	pindexPrev = pindexPrevPrev;
+	pindexPrevPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
+	if (!pindexPrevPrev || pindexPrevPrev->nHeight==0) {
+	    printf("WARNING: averaged over less than BBLOCK --> GetDifficultyFromBitsV2\n");
+	    break;
+	}
+	nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+	rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(nTargetSpacingWork)) ) * BRW_AVER_COEFF;
+	if (rfw < BRW_WEIGHT_MIN) { rfw = BRW_WEIGHT_MIN; }
+	else if (rfw > BRW_WEIGHT_MAX) { rfw = BRW_WEIGHT_MAX; }
+	rDiffAverEMA += GetDifficultyFromBits(pindexPrev->nBits) * ((int64)(rfw * rWeight * BRW_WEIGHT_SCALE));
+	nWeightTot += ((int64)(rfw * rWeight * BRW_WEIGHT_SCALE));
+	rWeight *= (1.-rfw);
+    }
+    rDiffAverEMA /= double(nWeightTot);
+    // apply damping
+    double deviation = rDiffAverEMA - rDiffAver;
+    double damping;
+    if (deviation > 0.) {
+	damping = DAMPINGAMP * exp_n2(DAMPINGCU/DAMPINGRATE, deviation/DAMPINGRATE) + DAMPINMIN;
+    }
+    else {
+	damping = DAMPINGAMP * exp_n2(1.5*DAMPINGCU/DAMPINGRATE, abs(deviation)/DAMPINGRATE) + DAMPINMIN;
+    }
+    rDiffAverEMA = deviation * damping  +  rDiffAver;
+    return rDiffAverEMA;
+}
+
+
+int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
+{
+    int nHeight = pindex0->nHeight;
+    double M7Mv2_move = ( (nHeight <= 75000) ? 2.85 : ( 2.85 - pow( log(nHeight) - log(75000.), 0.3 )*1.5 ) );
+    double rDiff = GetDifficultyFromBitsV2(pindex0);
+    double rDiffcu = 2.2 / M7Mv2_move;
+    double rSubsidy = 0.;
+    rSubsidy = 50. * pow( (5.55243*(exp_n(-0.3*rDiff/0.39*M7Mv2_move) - exp_n(-0.6*rDiff/0.39*M7Mv2_move)))*rDiff, 0.5)
+		    / (3.02849*exp_n(-M7Mv2_move / 0.14814) + 1.794*exp_n(-M7Mv2_move / 0.89044) + 0.74536)
+		    * exp_n2(rDiff/(0.16/M7Mv2_move), rDiffcu/(0.16/M7Mv2_move));
+    if (rDiff > rDiffcu && rSubsidy < 3.) {
+	rSubsidy = 6. * exp_n2( pow( abs( rDiff - (18.02428*exp_n(-M7Mv2_move/0.17628) + 6.58466*exp_n(-M7Mv2_move/0.71943) + 0.93489) )/(1./M7Mv2_move), 0.5 ), 0.);
+    }
+    rSubsidy *= double(COIN);
+    if (rSubsidy > 50*COIN) { rSubsidy = 50*COIN; }
+    else if (rSubsidy < MIN_TX_FEE) { rSubsidy = MIN_TX_FEE; }
+    for(int i = 500000; i <= nHeight; i += 500000) rSubsidy *= 0.93; // yearly decline (7%)
+    return (int64)rSubsidy;
+}
+
+
+int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock)
+{
+    const CBlockIndex* pindex0 = ( fLastBlock ? GetLastPoWBlockIndex(pindexPrev) : pindexPrev );
+    int nHeight = pindex0->nHeight;
+    int64 nSubsidy = 0;
+
+    if (fTestNet) {
+	if (nHeight%2 == 0)
+	{
+	    nSubsidy = 100 * COIN;
+	}
+	else {
+	    nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+	}
+	return nSubsidy + nFees;
+    }
+
+    if (nHeight <= END_MAGI_POW_HEIGHT_V2) {	// difficulty dependent PoW-II mining
+	nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+    }
+    else {
+	nSubsidy = MIN_TX_FEE;
+    }
+
+    if (fDebugMagi) {
+      double rDiff = GetDifficultyFromBitsV2(pindex0); 
+      printf("@@BLKV2 (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
+	  nHeight, rDiff, double(nSubsidy)/double(COIN));
+    }
+
+    return nSubsidy + nFees;
+}
+
+
 #define M7Mv2_SCALE 2.545
 int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 {
@@ -1024,8 +1160,9 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	for(int i = 525600; i <= nHeight; i += 525600) nSubsidy *= 0.93; // yearly decline (7%)
     }
     else {
-      nSubsidy = MIN_TX_FEE;
+	nSubsidy = MIN_TX_FEE;
     }
+
     return nSubsidy + nFees;
 }
 
@@ -1110,7 +1247,7 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
     return pindex;
 }
 
-// find the nearest PoS block (except pindex)
+// find the nearest PoS block (including pindex)
 const CBlockIndex* GetLastPoSBlockIndex(const CBlockIndex* pindex)
 {
     while (true)
@@ -1123,23 +1260,27 @@ const CBlockIndex* GetLastPoSBlockIndex(const CBlockIndex* pindex)
 	    printf("ERROR: GetLastPoSBlockIndex() pindex null identified\n");
 	    break;
 	}
-	pindex = pindex->pprev;
 	if (pindex->IsProofOfStake()) break;
+	pindex = pindex->pprev;
     }
     return pindex;
 }
 
-// find the nearest PoW block (except pindex)
+// find the nearest PoW block (including pindex)
 const CBlockIndex* GetLastPoWBlockIndex(const CBlockIndex* pindex)
 {
     while (true)
     {
+	if (pindex->nHeight==0) {
+	    printf("WARNING: GetLastPoWBlockIndex() not found; return pindexGenesisBlock\n");
+	    break;
+	}
 	if (!pindex) {
 	    printf("ERROR: GetLastPoWBlockIndex() pindex null identified\n");
 	    break;
 	}
-	pindex = pindex->pprev;
 	if (pindex->IsProofOfWork()) break;
+	pindex = pindex->pprev;
     }
     return pindex;
 }
@@ -1882,8 +2023,24 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     if (IsProofOfWork()) // the block under processing is PoW
     {
 //	const CBlockIndex* pIndex0 = GetLastPoWBlockIndex(pindex); // find the nearest PoW block
-        int64 nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
-        // Check coinbase reward
+//        int64 nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
+        int64 nPoWReward;
+
+	if (fTestNet)
+	{
+	    if(pindex->pprev->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
+		nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
+	    }
+	    else {
+		nPoWReward = GetProofOfWorkRewardV2(pindex->pprev, nFees, true);
+	    }
+	}
+	else
+	{
+	    nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
+	}
+	
+	// Check coinbase reward
         if (vtx[0].GetValueOut() > nPoWReward)
             return DoS(50, error("ConnectBlock() : coinbase reward exceeded (actual=%"PRI64d" vs calculated=%"PRI64d", height=%i)",
                    vtx[0].GetValueOut(),
@@ -4523,13 +4680,14 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
 	    }
 	}
 
-
+/*
 	if (pblock->IsProofOfWork()) // the block under minting is PoW
 	{
 	    // find the most recent already minted PoW block
 //	    const CBlockIndex* pIndex0 = ((pindexPrev->IsProofOfWork()) ? pindexPrev : GetLastPoWBlockIndex(pindexPrev));
             pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
 	}
+*/
 	
         // Fill in header
         pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
@@ -4540,6 +4698,19 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
         pblock->nTime          = max(pblock->GetBlockTime(), pindexPrev->GetBlockTime() - nMaxClockDrift);
         if (pblock->IsProofOfWork())
             pblock->UpdateTime(pindexPrev);
+	if (fTestNet)
+	{
+	    if(pblock->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
+		pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
+	    }
+	    else {
+		pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, false);
+	    }
+	}
+	else
+	{
+	    pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
+	}
         pblock->nNonce         = 0;
     }
 
