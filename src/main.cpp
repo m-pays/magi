@@ -4469,7 +4469,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
 	if (nSearchTime > nLastCoinStakeSearchTime)
 	{
 			// printf(">>> OK1\n");
-	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
+	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, 0, txCoinStake))
 	    {
 				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
 		{   // make sure coinstake would meet timestamp protocol
