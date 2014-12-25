@@ -1058,7 +1058,12 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
     const CBlockIndex* pindex0 = ( fLastBlock ? GetLastPoWBlockIndex(pindexPrev) : pindexPrev );
     int nHeight = pindex0->nHeight;
     int64 nSubsidy = 0;
+    
+      double rDiff = GetDifficultyFromBitsV2(pindex0); 
+      printf("@@BLKV2-test (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
+	  nHeight, rDiff, double(nSubsidy)/double(COIN));
 
+      
     if (fTestNet) {
 	if (nHeight%2 == 0)
 	{
@@ -4703,7 +4708,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
 		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
 		}
 		else {
-		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, false);
+		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, true);
 		}
 	    }
 	    else
