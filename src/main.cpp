@@ -4460,7 +4460,30 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     // ppcoin: if coinstake available add coinstake tx
     static int64 nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
     CBlockIndex* pindexPrev = pindexBest;
-
+	
+    if (fProofOfStake)  // attempt to find a coinstake
+    {
+	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
+	CTransaction txCoinStake;
+	int64 nSearchTime = txCoinStake.nTime; // search to current time
+	if (nSearchTime > nLastCoinStakeSearchTime)
+	{
+			// printf(">>> OK1\n");
+	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
+	    {
+				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+		{   // make sure coinstake would meet timestamp protocol
+		    // as it would be the same as the block timestamp
+		    pblock->vtx[0].vout[0].SetEmpty();
+		    pblock->vtx[0].nTime = txCoinStake.nTime;
+		    pblock->vtx.push_back(txCoinStake);
+		}
+	    }
+	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+	    nLastCoinStakeSearchTime = nSearchTime;
+	}
+    }
+	
     pblock->nBits = GetNextTargetRequired(pindexPrev, pblock->IsProofOfStake());
 
     // Collect memory pool transactions into the block
@@ -4654,31 +4677,6 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
 
         if (fDebug && GetBoolArg("-printpriority"))
             printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
-
-	
-	
-	if (fProofOfStake)  // attempt to find a coinstake
-	{
-	    pblock->nBits = GetNextTargetRequired(pindexPrev, true);
-	    CTransaction txCoinStake;
-	    int64 nSearchTime = txCoinStake.nTime; // search to current time
-	    if (nSearchTime > nLastCoinStakeSearchTime)
-	    {
-			    // printf(">>> OK1\n");
-		if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
-		{
-				    if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
-		    {   // make sure coinstake would meet timestamp protocol
-			// as it would be the same as the block timestamp
-			pblock->vtx[0].vout[0].SetEmpty();
-			pblock->vtx[0].nTime = txCoinStake.nTime;
-			pblock->vtx.push_back(txCoinStake);
-		    }
-		}
-		nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
-		nLastCoinStakeSearchTime = nSearchTime;
-	    }
-	}
 
 /*
 	if (pblock->IsProofOfWork()) // the block under minting is PoW
