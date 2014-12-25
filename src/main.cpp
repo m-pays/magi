@@ -1059,10 +1059,9 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
     int nHeight = pindex0->nHeight;
     int64 nSubsidy = 0;
     
-      double rDiff = GetDifficultyFromBitsV2(pindex0); 
-      printf("@@BLKV2-test (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
-	  nHeight, rDiff, double(nSubsidy)/double(COIN));
-
+//      double rDiff = GetDifficultyFromBitsV2(pindex0); 
+//      printf("@@BLKV2-test (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
+//	  nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
 	if (nHeight%2 == 0)
