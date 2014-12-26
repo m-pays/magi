@@ -395,6 +395,10 @@ bool AppInit2()
 
     fDebug = GetBoolArg("-debug");
     fDebugMagi = GetBoolArg("-debugmagi");
+    fDebugMagiPoS = GetBoolArg("-debugmagipos");
+    if (fDebug) printf("fDebug enabled...\n");
+    if (fDebugMagi) printf("fDebugMagi enabled...\n");
+    if (fDebugMagiPoS) printf("fDebugMagiPoS enabled...\n");
 
     // -debug implies fDebug*
     if (fDebug)
