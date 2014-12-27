@@ -1397,6 +1397,8 @@ bool CWallet::GetStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWe
     if (setCoins.empty())
         return false;
 
+    nWeight = 0;
+
     CTxDB txdb("r");
     BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
     {
@@ -1412,6 +1414,8 @@ bool CWallet::GetStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWe
 	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
 	int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
         CBigNum bnCoinDayWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
+	if (fDebugMagiPoS)
+            printf("@CWallet::GetStakeWeight -> %"PRI64d" %"PRI64d"\n", txPrev.vout[prevout.n].nValue, pcoin.first->vout[pcoin.second].nValue);
 
 	// Weight is greater than zero
         if (nTimeWeight > 0)

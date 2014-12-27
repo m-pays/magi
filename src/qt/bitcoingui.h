@@ -102,7 +102,7 @@ private:
 
     QMovie *syncIconMovie;
 
-    uint64 nMinMax;
+    uint64 nMinWeight, nMaxWeight;
     uint64 nWeight;
     uint64 nNetworkWeight;
 

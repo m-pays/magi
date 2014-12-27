@@ -1032,6 +1032,25 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
 }
 
 
+double GetDifficultyFromBitsAver(const CBlockIndex* pindex0, int nBlocksAver0)
+{
+    const CBlockIndex* pindexPrev = pindex0;
+    int nBlocksAver = (nBlocksAver0 > 0) ? nBlocksAver0 : 50;
+
+    // finding the average diff over backward blocks
+    double rDiffAver = GetDifficultyFromBits(pindexPrev->nBits);
+    int nWeightTot = 1;
+    for(int i = 1; i <= nBlocksAver-1; i++)
+    {
+	pindexPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
+	if (!pindexPrev || pindexPrev->nHeight==0) break;
+      	rDiffAver += GetDifficultyFromBits(pindexPrev->nBits);
+	nWeightTot++;
+    }
+    return rDiffAver/double(nWeightTot);
+}
+
+
 int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
 {
     int nHeight = pindex0->nHeight;

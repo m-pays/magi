@@ -962,6 +962,7 @@ void BitcoinGUI::toggleHidden()
 
 void BitcoinGUI::updateMintingIcon()
 {
+    updateMintingWeights();
     if (pwalletMain && pwalletMain->IsLocked())
     {
         labelMintingIcon->setToolTip(tr("Not staking because wallet is locked."));
@@ -1016,13 +1017,30 @@ void BitcoinGUI::updateMintingIcon()
 
 void BitcoinGUI::updateMintingWeights()
 {
+    if (!pwalletMain)
+        return;
+
+    TRY_LOCK(cs_main, lockMain);
+    if (!lockMain)
+        return;
+
+    TRY_LOCK(pwalletMain->cs_wallet, lockWallet);
+    if (!lockWallet)
+        return;
+
+    pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
+    nNetworkWeight = GetPoSKernelPS();
+}
+
+void BitcoinGUI::updateMintingWeights_old()
+{
     // Only update if we have the network's current number of blocks, or weight(s) are zero (fixes lagging GUI)
     if ((clientModel && clientModel->getNumBlocks() == clientModel->getNumBlocksOfPeers()) || !nWeight || !nNetworkWeight)
     {
         nWeight = 0;
 
         if (pwalletMain)
-            pwalletMain->GetStakeWeight(nMinMax, nMinMax, nWeight);
+            pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
 
         nNetworkWeight = GetPoSKernelPS();
     }

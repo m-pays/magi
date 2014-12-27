@@ -42,36 +42,94 @@ double GetDifficulty(const CBlockIndex* blockindex)
     return dDiff;
 }
 
-double GetPoWMHashPS()
+
+// hashrate = diff * 2^32/blocktime = diff * 4 294 967 296 / blocktime
+double GetPoSKernelPSV2(const CBlockIndex* blockindex, int lookup)
 {
-    if (pindexBest->nHeight >= MAX_MAGI_POW_HEIGHT)
-        return 0;
+    int nPoSInterval = lookup;
+    double diffTot = 0.;
 
-    int nPoWInterval = 72;
-    int64_t nTargetSpacingWorkMin = 30, nTargetSpacingWork = 30;
+    const CBlockIndex* pindex0 = ((blockindex == NULL) ? GetLastBlockIndex(pindexBest, true) : blockindex);
+    const CBlockIndex* pindexPrev = GetLastPoSBlockIndex(pindex0);
+    if (pindexPrev == NULL || !pindexPrev->nHeight) return 0;
+    const CBlockIndex* pindexPrevPrev = GetLastPoSBlockIndex(pindexPrev->pprev);
+    if (pindexPrevPrev == NULL || !pindexPrevPrev->nHeight) return 0;
 
-    CBlockIndex* pindex = pindexGenesisBlock;
-    CBlockIndex* pindexPrevWork = pindexGenesisBlock;
-
-    while (pindex)
+    int nActualBlockTime = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime(), nActualBlockTimeTot = nActualBlockTime;
+    int nStakesHandled = 1;
+//    if (nActualBlockTime <= 0) {
+//	nActualBlockTimeTot = 0;
+//	nStakesHandled = 0;
+//    }
+//    else {
+      diffTot = GetDifficulty(pindexPrev);
+//    }
+    for(int i = 1; i < nPoSInterval; i++)
     {
-        if (pindex->IsProofOfWork())
-        {
-            int64_t nActualSpacingWork = pindex->GetBlockTime() - pindexPrevWork->GetBlockTime();
-            nTargetSpacingWork = ((nPoWInterval - 1) * nTargetSpacingWork + nActualSpacingWork + nActualSpacingWork) / (nPoWInterval + 1);
-            nTargetSpacingWork = max(nTargetSpacingWork, nTargetSpacingWorkMin);
-            pindexPrevWork = pindex;
-        }
-
-        pindex = pindex->pnext;
+	pindexPrev = pindexPrevPrev;
+	pindexPrevPrev = GetLastPoSBlockIndex(pindexPrev->pprev);
+	if (pindexPrevPrev == NULL || !pindexPrevPrev->nHeight) break;
+	nActualBlockTime = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+//	if (nActualBlockTime > 0)
+//	{
+	    diffTot += GetDifficulty(pindexPrev);
+	    nActualBlockTimeTot += nActualBlockTime;
+	    nStakesHandled++;
+//	}
     }
+    if (nActualBlockTimeTot == 0 || nStakesHandled == 0) return 0;
+    if (fDebugMagi)
+	printf("@GetPoSKernelPSV2 -> aver diff = %f, block time = %f\n", diffTot / (double)nStakesHandled, (double)nActualBlockTimeTot / (double)nStakesHandled);
 
-    return GetDifficulty() * 4294.967296 / nTargetSpacingWork;
+    return diffTot*4294967296.0/double(nActualBlockTimeTot);
 }
 
-double GetPoSKernelPS(const CBlockIndex* blockindex)
+double GetPoSKernelPSV3(const CBlockIndex* blockindex)
 {
     int nPoSInterval = 72;
+    double dStakeKernelsTriedAvg = 0., diff = 0.;
+
+    const CBlockIndex* pindex0 = ((blockindex == NULL) ? GetLastBlockIndex(pindexBest, true) : blockindex);
+    const CBlockIndex* pindexPrev = GetLastPoSBlockIndex(pindex0);
+    if (pindexPrev == NULL || !pindexPrev->nHeight) return 0;
+    const CBlockIndex* pindexPrevPrev = GetLastPoSBlockIndex(pindexPrev->pprev);
+    if (pindexPrevPrev == NULL || !pindexPrevPrev->nHeight) return 0;
+
+    int nActualBlockTime = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime(), nActualBlockTimeTot = nActualBlockTime;
+    int nStakesHandled = 1;
+    if (nActualBlockTime <= 0) {
+	nActualBlockTimeTot = 0;
+	nStakesHandled = 0;
+    }
+    else {
+      diff = GetDifficulty(pindexPrev);
+      dStakeKernelsTriedAvg = GetDifficulty(pindexPrev) * 4294967296.0 / double(nActualBlockTime);
+    }
+    for(int i = 1; i < nPoSInterval; i++)
+    {
+	pindexPrev = pindexPrevPrev;
+	pindexPrevPrev = GetLastPoSBlockIndex(pindexPrev->pprev);
+	if (pindexPrevPrev == NULL || !pindexPrevPrev->nHeight) break;
+	nActualBlockTime = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+	if (nActualBlockTime > 0)
+	{
+	    diff += GetDifficulty(pindexPrev);
+	    dStakeKernelsTriedAvg += GetDifficulty(pindexPrev) * 4294967296.0 / double(nActualBlockTime);
+	    nActualBlockTimeTot += nActualBlockTime;
+	    nStakesHandled++;
+	}
+    }
+    if (nActualBlockTimeTot == 0 || nStakesHandled == 0) return 0;
+    if (fDebugMagi)
+	printf("@GetPoSKernelPSV2 -> aver diff = %f, block time = %f\n", diff / (double)nStakesHandled, (double)nActualBlockTimeTot / (double)nStakesHandled);
+
+    return dStakeKernelsTriedAvg / double(nStakesHandled);
+}
+
+
+double GetPoSKernelPS(const CBlockIndex* blockindex, int lookup)
+{
+    int nPoSInterval = lookup;
     double dStakeKernelsTriedAvg = 0;
     int nStakesHandled = 0, nStakesTime = 0;
 
@@ -90,6 +148,8 @@ double GetPoSKernelPS(const CBlockIndex* blockindex)
 
         pindex = pindex->pprev;
     }
+    if (fDebugMagi)
+	printf("@GetPoSKernelPS -> stake blocks for average = %d\n", nStakesHandled);
 
     return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
 }
@@ -275,7 +335,7 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 Value getnewblockvaluebynumber(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 2)
+    if (fHelp || params.size() != 1)
         throw runtime_error(
             "getnewblockvaluebynumber <number>\n"
             "Returns a block reward with given block-number.");

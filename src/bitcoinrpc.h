@@ -128,8 +128,11 @@ extern int64 AmountFromValue(const json_spirit::Value& value);
 extern json_spirit::Value ValueFromAmount(int64 amount);
 extern double GetDifficulty(const CBlockIndex* blockindex = NULL);
 
+extern double GetPoWHashPS(int lookup = 120, int height = -1);
 extern double GetPoWMHashPS();
-extern double GetPoSKernelPS(const CBlockIndex* blockindex = NULL);
+extern double GetPoSKernelPS(const CBlockIndex* blockindex = NULL, int lookup = 72);
+extern double GetPoSKernelPSV2(const CBlockIndex* blockindex = NULL, int lookup = 72);
+extern double GetPoSKernelPSV3(const CBlockIndex* blockindex = NULL);
 
 extern std::string HexBits(unsigned int nBits);
 extern std::string HelpRequiringPassphrase();
@@ -190,6 +193,8 @@ extern json_spirit::Value makekeypair(const json_spirit::Array& params, bool fHe
 extern json_spirit::Value validatepubkey(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getnewpubkey(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getnetworkhashps(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getnetstakeweight(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getminingbykhps(const json_spirit::Array& params, bool fHelp);
 
 extern json_spirit::Value getrawtransaction(const json_spirit::Array& params, bool fHelp); // in rcprawtransaction.cpp
 extern json_spirit::Value listunspent(const json_spirit::Array& params, bool fHelp);
