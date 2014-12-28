@@ -73,6 +73,18 @@ inline bool IsMiningProofOfStake(int nHeight )
 	return (nHeight > 10080); // three weeks
 }
 
+inline bool IsPoSIIV2(int nHeight ) 
+{
+    if (fTestNet) 
+    {
+      return nHeight > 45000;
+    }
+    else
+    {
+      return (nHeight > 121500);
+    }
+}
+
 
 inline bool IsBlockrewardProtocolV2(int nHeight)
 {

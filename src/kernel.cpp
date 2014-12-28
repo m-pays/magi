@@ -62,6 +62,21 @@ inline double wfc(double x)
     return (1 / (1 + exp_n( (x-0.6)/0.3 )));
 }
 
+inline double wfaV2(double x)
+{
+    return (1 / (1 + exp_n( (x-0.045)/0.0075 ))) + 1;
+}
+
+inline double wfbV2(double x)
+{
+    return (1 / (1 + exp_n( (x-0.08)/0.08 ))) + 1;
+}
+
+inline double wfcV2(double x)
+{
+    return (1 / (1 + exp_n( (x-0.25)/0.125 )));
+}
+
 // Get time weight
 int64 GetMagiWeight_TestNet(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd)
 {
@@ -93,6 +108,28 @@ int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd
     if (fTestNet) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
     
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 4. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 4. / 8.177) ) * rStakeDays;
+
+    return max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge));
+}
+
+// Get time weight
+int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd)
+{
+    double nWeight = 0;
+    int64 nnMoneySupply = MAX_MONEY_STAKE_REF;
+
+    if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
+    
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfaV2(rMro)/wfbV2(rMro)/wfcV2(rMro));
+
+    if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
+
+    if (fTestNet) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
+    
+//    nWeight = 33.9537 * ( pow(rEpf, -0.55 * rStakeDays / 0.4719) - pow(rEpf, -0.6 * rStakeDays / 0.4719) ) * rStakeDays;
+//    nWeight = 37.7178 * ( pow(rEpf, -0.55 * (rStakeDays+1.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+1.) / 0.4719) ) * rStakeDays;
+    nWeight = 42.2474 * ( pow(rEpf, -0.55 * (rStakeDays+2.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+2.) / 0.4719) ) * rStakeDays;
 
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge));
 }

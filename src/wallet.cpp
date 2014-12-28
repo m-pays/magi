@@ -1415,7 +1415,7 @@ bool CWallet::GetStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWe
 	int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
         CBigNum bnCoinDayWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
 	if (fDebugMagiPoS)
-            printf("@CWallet::GetStakeWeight -> %"PRI64d" %"PRI64d"\n", txPrev.vout[prevout.n].nValue, pcoin.first->vout[pcoin.second].nValue);
+            printf("@CWallet::GetStakeWeight -> %"PRI64d" %"PRI64d" %"PRI64d" %"PRI64d"\n", txPrev.vout[prevout.n].nValue, pcoin.first->vout[pcoin.second].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
 
 	// Weight is greater than zero
         if (nTimeWeight > 0)

@@ -1206,6 +1206,15 @@ double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR)
     return rAPR;
 }
 
+double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
+{
+    double rAPR, rWeit=250000.;
+//    if (fTestNet) return GetAnnualInterest_TestNet(nNetWorkWeit, rMaxAPR);
+    rAPR = ( ( 2./( 1.+exp_n(1./(nNetWorkWeit/rWeit+1.)) ) - 0.53788 ) * rMaxAPR 
+           / ( 2./( 1.+exp_n(1./(rWeit+1.)) ) - 0.53788 ) );
+    return rAPR;
+}
+
 // miner's coin stake reward based on nBits and coin age spent (coin-days)
 int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees, CBlockIndex* pindex)
 {
@@ -2412,7 +2421,7 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, uint64& nCoinAge) const
 	CBigNum bnCoinDayPrint = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
 
 	if (fDebugMagiPoS)
-            printf("@Tx.GetCoinAge -> nValueIn=%"PRI64d" nTimeDiff=%d bnCoinDay=%s\n", nValueIn / COIN, nTime - txPrev.nTime, bnCoinDayPrint.ToString().c_str());
+            printf("@Tx.GetCoinAge -> nValueIn=%"PRI64d"  txPrev.nTime=%d  nTimeDiff=%d  nTimeDiff=%d  bnCoinDay=%s\n", nValueIn / COIN, txPrev.nTime, nTime, nTime - txPrev.nTime, bnCoinDayPrint.ToString().c_str());
 	
         if (fDebug && GetBoolArg("-printcoinage"))
             printf("coin age nValueIn=%"PRI64d" nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
@@ -4495,6 +4504,8 @@ if (fTestNet || pindexBest->nHeight >= 121500) {
 	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
 	CTransaction txCoinStake;
 	int64 nSearchTime = txCoinStake.nTime; // search to current time
+	if (fDebugMagiPoS)
+            printf("@CreateNewBlock -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
 	if (nSearchTime > nLastCoinStakeSearchTime)
 	{
 			// printf(">>> OK1\n");
@@ -4505,7 +4516,9 @@ if (fTestNet || pindexBest->nHeight >= 121500) {
 		    // as it would be the same as the block timestamp
 		    pblock->vtx[0].vout[0].SetEmpty();
 		    pblock->vtx[0].nTime = txCoinStake.nTime;
-		    pblock->vtx.push_back(txCoinStake);
+		    pblock->vtx.push_back(txCoinStake); 
+		    if (fDebugMagiPoS)
+			printf("@CreateNewBlock-PoS found -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
 		}
 	    }
 	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
