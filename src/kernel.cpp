@@ -103,6 +103,8 @@ int64 GetMagiWeight_TestNetV2(int64 nValueIn, int64 nIntervalBeginning, int64 nI
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 480. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 480. / 8.177) ) * rStakeDays * 240.;
 
+    if (fDebugMagiPoS) printf("@GetMagiWeight_TestNetV2 = %"PRI64d"\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge))));
+
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge)));
 }
 
@@ -119,7 +121,7 @@ int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd
 
     if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
 
-    if (fTestNet) return GetMagiWeight_TestNetV2(nValueIn, nIntervalBeginning, nIntervalEnd);
+    if (fTestNet) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
     
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 4. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 4. / 8.177) ) * rStakeDays;
 
@@ -139,7 +141,7 @@ int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalE
 
     if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
 
-    if (fTestNet) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
+    if (fTestNet & !fTestNetWeightV2) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
     
 //    nWeight = 33.9537 * ( pow(rEpf, -0.55 * rStakeDays / 0.4719) - pow(rEpf, -0.6 * rStakeDays / 0.4719) ) * rStakeDays;
 //    nWeight = 37.7178 * ( pow(rEpf, -0.55 * (rStakeDays+1.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+1.) / 0.4719) ) * rStakeDays;

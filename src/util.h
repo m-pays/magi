@@ -158,6 +158,7 @@ extern bool fTestNet;
 extern bool fNoListen;
 extern bool fLogTimestamps;
 extern bool fReopenDebugLog;
+extern bool fTestNetWeightV2;
 
 void RandAddSeed();
 void RandAddSeedPerfmon();
