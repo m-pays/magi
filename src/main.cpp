@@ -1208,7 +1208,7 @@ double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR)
 
 double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
 {
-    double rAPR, rWeit=250000.;
+    double rAPR, rWeit=500000.;
 //    if (fTestNet) return GetAnnualInterest_TestNet(nNetWorkWeit, rMaxAPR);
     rAPR = ( ( 2./( 1.+exp_n(1./(nNetWorkWeit/rWeit+1.)) ) - 0.53788 ) * rMaxAPR 
            / ( 2./( 1.+exp_n(1./(rWeit+1.)) ) - 0.53788 ) );
