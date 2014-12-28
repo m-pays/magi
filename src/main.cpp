@@ -1102,7 +1102,7 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 
     if (fDebugMagi) {
       double rDiff = GetDifficultyFromBitsV2(pindex0); 
-      printf("@@BLKV2 (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
+      printf("@@PoWII-V2 (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
 	  nHeight, rDiff, double(nSubsidy)/double(COIN));
     }
 
@@ -1212,6 +1212,7 @@ double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
 //    if (fTestNet) return GetAnnualInterest_TestNet(nNetWorkWeit, rMaxAPR);
     rAPR = ( ( 2./( 1.+exp_n(1./(nNetWorkWeit/rWeit+1.)) ) - 0.53788 ) * rMaxAPR 
            / ( 2./( 1.+exp_n(1./(rWeit+1.)) ) - 0.53788 ) );
+    if (fDebugMagiPoS) printf("@PoS-APRV2 rAPR = %f\n", rAPR);
     return rAPR;
 }
 
@@ -1219,7 +1220,9 @@ double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
 int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees, CBlockIndex* pindex)
 {
     int64 nNetWorkWeit = GetPoSKernelPS(pindex);
-    double rAPR = GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
+    double rAPR = (IsPoSIIProtocolV2(pindex->nHeight+1)) ? 
+		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
+		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
 
     int64 nSubsidy = nCoinAge * rAPR * COIN * 33 / (365 * 33 + 8);
 
@@ -2056,22 +2059,9 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     {
 //	const CBlockIndex* pIndex0 = GetLastPoWBlockIndex(pindex); // find the nearest PoW block
 //        int64 nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
-        int64 nPoWReward;
-
-	if (fTestNet)
-	{
-	    if(pindex->pprev->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
-		nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
-	    }
-	    else {
-		nPoWReward = GetProofOfWorkRewardV2(pindex->pprev, nFees, true);
-	    }
-	}
-	else
-	{
-	    nPoWReward = GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
-	}
-	
+        int64 nPoWReward = (IsPoWIIRewardProtocolV2(pindex->pprev->nTime)) ? 
+			    GetProofOfWorkRewardV2(pindex->pprev, nFees, true) : 
+			    GetProofOfWorkReward(pindex->pprev->nBits, pindex->pprev->nHeight, nFees);
 	// Check coinbase reward
         if (vtx[0].GetValueOut() > nPoWReward)
             return DoS(50, error("ConnectBlock() : coinbase reward exceeded (actual=%"PRI64d" vs calculated=%"PRI64d", height=%i)",
@@ -2084,7 +2074,8 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     {
         // ppcoin: coin stake tx earns reward instead of paying fee
         uint64 nCoinAge;
-        if (!vtx[1].GetCoinAge(txdb, nCoinAge))
+	bool fTxGetCoinAge = (IsPoSIIProtocolV2(pindex->nHeight)) ? vtx[1].GetCoinAgeV2(txdb, nCoinAge) : vtx[1].GetCoinAge(txdb, nCoinAge);
+        if (!fTxGetCoinAge)
             return error("ConnectBlock() : %s unable to get coin age for coinstake", vtx[1].GetHash().ToString().substr(0,10).c_str());
 //	const CBlockIndex* pIndex0 = GetLastPoSBlockIndex(pindex); // find the nearest PoS block
 	// this is mostly due to finding 1st PoS block, otherwise something wrong
@@ -2385,6 +2376,55 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 // guaranteed to be in main chain by sync-checkpoint. This rule is
 // introduced to help nodes establish a consistent view of the coin
 // age (trust score) of competing branches.
+bool CTransaction::GetCoinAgeV2(CTxDB& txdb, uint64& nCoinAge) const
+{
+    CBigNum bnCentSecond = 0;  // coin age in the unit of cent-seconds
+    int64 nValueIn, nTimeWeight;
+    nCoinAge = 0;
+
+    if (IsCoinBase())
+        return true;
+
+    BOOST_FOREACH(const CTxIn& txin, vin)
+    {
+        // First try finding the previous transaction in database
+        CTransaction txPrev;
+        CTxIndex txindex;
+
+	if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
+            continue;  // previous transaction not in main chain
+        if (nTime < txPrev.nTime)
+            return false;  // Transaction timestamp violation
+
+        // Read block header
+        CBlock block;
+        if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
+            return false; // unable to read block of previous transaction
+
+        nValueIn = txPrev.vout[txin.prevout.n].nValue;
+        nTimeWeight = GetMagiWeightV2(nValueIn, block.GetBlockTime(), nTime);
+            if (nTimeWeight < nStakeMinAge)
+            continue; // only count coins meeting min age requirement
+
+        nTimeWeight = GetMagiWeightV2(nValueIn, txPrev.nTime, nTime);
+        bnCentSecond += CBigNum(nValueIn) * nTimeWeight / CENT;
+
+	CBigNum bnCoinDayPrint = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
+
+	if (fDebugMagiPoS)
+            printf("@Tx.GetCoinAgeV2 -> nValueIn=%"PRI64d"  txPrev.nTime=%d  nTimeDiff=%d  nTimeDiff=%d  bnCoinDay=%s\n", nValueIn / COIN, txPrev.nTime, nTime, nTime - txPrev.nTime, bnCoinDayPrint.ToString().c_str());
+	
+        if (fDebug && GetBoolArg("-printcoinage"))
+            printf("coin age nValueIn=%"PRI64d" nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+    }
+
+    CBigNum bnCoinDay = bnCentSecond * CENT / COIN / (24 * 60 * 60);
+    if (fDebug && GetBoolArg("-printcoinage"))
+        printf("coin age bnCoinDay=%s\n", bnCoinDay.ToString().c_str());
+    nCoinAge = bnCoinDay.getuint64();
+    return true;
+}
+
 bool CTransaction::GetCoinAge(CTxDB& txdb, uint64& nCoinAge) const
 {
     CBigNum bnCentSecond = 0;  // coin age in the unit of cent-seconds
@@ -2443,7 +2483,7 @@ bool CBlock::GetCoinAge(uint64& nCoinAge) const
     BOOST_FOREACH(const CTransaction& tx, vtx)
     {
         uint64 nTxCoinAge;
-        if (tx.GetCoinAge(txdb, nTxCoinAge))
+        if (tx.GetCoinAgeV2(txdb, nTxCoinAge))
             nCoinAge += nTxCoinAge;
         else
             return false;
@@ -4498,7 +4538,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     static int64 nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
     CBlockIndex* pindexPrev = pindexBest;
 	
-if (fTestNet || pindexBest->nHeight >= 121500) {
+if (fTestNet || pindexBest->nHeight >= 124500) {
     if (fProofOfStake)  // attempt to find a coinstake
     {
 	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
@@ -4509,7 +4549,7 @@ if (fTestNet || pindexBest->nHeight >= 121500) {
 	if (nSearchTime > nLastCoinStakeSearchTime)
 	{
 			// printf(">>> OK1\n");
-	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, 0, txCoinStake))
+	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, 0, txCoinStake))
 	    {
 				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
 		{   // make sure coinstake would meet timestamp protocol
@@ -4721,7 +4761,7 @@ if (fTestNet || pindexBest->nHeight >= 121500) {
         if (fDebug && GetBoolArg("-printpriority"))
             printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
 	
-if (!fTestNet && pindexBest->nHeight < 121500) {
+if (!fTestNet && pindexBest->nHeight < 124500) {
     if (fProofOfStake)  // attempt to find a coinstake
     {
 	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
@@ -4730,7 +4770,7 @@ if (!fTestNet && pindexBest->nHeight < 121500) {
 	if (nSearchTime > nLastCoinStakeSearchTime)
 	{
 			// printf(">>> OK1\n");
-	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
+	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
 	    {
 				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
 		{   // make sure coinstake would meet timestamp protocol
@@ -4765,19 +4805,9 @@ if (!fTestNet && pindexBest->nHeight < 121500) {
         if (pblock->IsProofOfWork())
 	{
             pblock->UpdateTime(pindexPrev);
-	    if (fTestNet)
-	    {
-		if(pblock->nTime < FORK_BLOCK_REWARDS_V2_TESNT) {
-		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
-		}
-		else {
-		    pblock->vtx[0].vout[0].nValue = GetProofOfWorkRewardV2(pindexPrev, nFees, true);
-		}
-	    }
-	    else
-	    {
-		pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
-	    }
+	    pblock->vtx[0].vout[0].nValue = (IsPoWIIRewardProtocolV2(pblock->nTime)) ? 
+					    GetProofOfWorkRewardV2(pindexPrev, nFees, true) : 
+					    GetProofOfWorkReward(pindexPrev->nBits, pindexPrev->nHeight, nFees);
 	}
         pblock->nNonce         = 0;
     }

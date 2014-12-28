@@ -92,6 +92,20 @@ int64 GetMagiWeight_TestNet(int64 nValueIn, int64 nIntervalBeginning, int64 nInt
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge));
 }
 
+int64 GetMagiWeight_TestNetV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd)
+{
+    double nWeight = 0;
+    int64 nnMoneySupply = MAX_MONEY_STAKE_REF;
+
+    if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
+    
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
+    nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 480. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 480. / 8.177) ) * rStakeDays * 240.;
+
+    return max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge)));
+}
+
 // Get time weight
 int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd)
 {
@@ -105,7 +119,7 @@ int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd
 
     if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
 
-    if (fTestNet) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
+    if (fTestNet) return GetMagiWeight_TestNetV2(nValueIn, nIntervalBeginning, nIntervalEnd);
     
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 4. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 4. / 8.177) ) * rStakeDays;
 
@@ -116,9 +130,9 @@ int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd
 int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd)
 {
     double nWeight = 0;
-    int64 nnMoneySupply = MAX_MONEY_STAKE_REF;
+    int64 nnMoneySupply = MAX_MONEY_STAKE_REF_V2;
 
-    if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
+    if (nValueIn >= MAX_MONEY_STAKE_REF_V2) return 0;
     
     double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfaV2(rMro)/wfbV2(rMro)/wfcV2(rMro));
@@ -130,6 +144,8 @@ int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalE
 //    nWeight = 33.9537 * ( pow(rEpf, -0.55 * rStakeDays / 0.4719) - pow(rEpf, -0.6 * rStakeDays / 0.4719) ) * rStakeDays;
 //    nWeight = 37.7178 * ( pow(rEpf, -0.55 * (rStakeDays+1.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+1.) / 0.4719) ) * rStakeDays;
     nWeight = 42.2474 * ( pow(rEpf, -0.55 * (rStakeDays+2.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+2.) / 0.4719) ) * rStakeDays;
+
+    if (fDebugMagiPoS) printf("@GetMagiWeightV2 = %"PRI64d"\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge)));
 
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge));
 }
@@ -412,7 +428,9 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
     // this change increases active coins participating the hash and helps
     // to secure the network when proof-of-stake difficulty is low
 //    int64 nTimeWeight = min((int64)nTimeTx - txPrev.nTime, (int64)nStakeMaxAge) - nStakeMinAge;
-    int64 nTimeWeight = GetMagiWeight(nValueIn, txPrev.nTime, nTimeTx);
+    int64 nTimeWeight = (IsPoSIIProtocolV2(pindexPrev->nHeight+1)) ?
+			GetMagiWeightV2(nValueIn, txPrev.nTime, nTimeTx) : 
+			GetMagiWeight(nValueIn, txPrev.nTime, nTimeTx);
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
 
 	// printf(">>> CheckStakeKernelHash: nTimeWeight = %"PRI64d"\n", nTimeWeight);

@@ -43,19 +43,18 @@ static const unsigned int MAX_INV_SZ = 50000;
 static const int64 MIN_TX_FEE = .0001 * COIN;
 static const int64 MIN_RELAY_TX_FEE = MIN_TX_FEE;
 static const int64 MAX_MONEY = 25000000 * COIN;			// 25 mil
-//static const int64 MAX_MONEY_POW_PRM = 10000000 * COIN;		// 10 mil; 5.5 mil in 1st magipow
-//static const int64 MAX_MONEY_POW_END = 15000000 * COIN;		// 15 mil; 5 mil in 2nd magipow
+//static const int64 MAX_MONEY_POW_PRM = 10000000 * COIN;	// 10 mil; 5.5 mil in 1st magipow
+//static const int64 MAX_MONEY_POW_END = 15000000 * COIN;	// 15 mil; 5 mil in 2nd magipow
 static const double MAX_MAGI_PROOF_OF_STAKE = 0.05;		// dynamic annual interest, max 5%
 static const double MAX_MAGI_BALANCE_in_STAKE = 0.15;		// balance/money supply, max 15%
-static const int64 MAX_MONEY_STAKE_REF = MAX_MONEY/5;		// MAX_MONEY/5
+static const int64 MAX_MONEY_STAKE_REF = 5000000 * COIN;	// 5 mil
+static const int64 MAX_MONEY_STAKE_REF_V2 = 500000 * COIN;	// 0.5 mil
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
-
-#define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
 
 inline bool IsMiningProofOfWork(int nHeight)
 {
@@ -73,23 +72,27 @@ inline bool IsMiningProofOfStake(int nHeight )
 	return (nHeight > 10080); // three weeks
 }
 
-inline bool IsPoSIIV2(int nHeight ) 
+
+#define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
+#define FORK_BLOCK_REWARDS_V2 1420218000
+inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 {
-    if (fTestNet) 
-    {
-      return nHeight > 45000;
+    if (fTestNet) {
+      return (nTime0 > FORK_BLOCK_REWARDS_V2_TESNT);
     }
-    else
-    {
-      return (nHeight > 121500);
+    else {
+      return (nTime0 > FORK_BLOCK_REWARDS_V2);
     }
 }
 
-
-inline bool IsBlockrewardProtocolV2(int nHeight)
+inline bool IsPoSIIProtocolV2(int nHeight)
 {
-    if (fTestNet) return (nHeight > 40000);
-    return (nHeight > 200000);
+    if (fTestNet) {
+      return nHeight > 40780;
+    }
+    else {
+      return (nHeight > 124650);
+    }
 }
 
 
@@ -763,6 +766,7 @@ public:
     bool CheckTransaction() const;
     bool AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs=true, bool* pfMissingInputs=NULL);
     bool GetCoinAge(CTxDB& txdb, uint64& nCoinAge) const;  // ppcoin: get transaction coin age
+    bool GetCoinAgeV2(CTxDB& txdb, uint64& nCoinAge) const;  // ppcoin: get transaction coin age
 
 protected:
     const CTxOut& GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const;

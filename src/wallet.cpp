@@ -1412,7 +1412,9 @@ bool CWallet::GetStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWe
 //        int64 nTimeWeight = GetWeight((int64)pcoin.first->nTime, (int64)GetTime());
 	CTransaction txPrev=*pcoin.first;
 	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
+	int64 nTimeWeight = (IsPoSIIProtocolV2(nBestHeight+1)) ?
+			    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)GetTime()) : 
+			    GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
         CBigNum bnCoinDayWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
 	if (fDebugMagiPoS)
             printf("@CWallet::GetStakeWeight -> %"PRI64d" %"PRI64d" %"PRI64d" %"PRI64d"\n", txPrev.vout[prevout.n].nValue, pcoin.first->vout[pcoin.second].nValue, (int64)pcoin.first->nTime, (int64)GetTime());
@@ -1440,7 +1442,7 @@ bool CWallet::GetStakeWeight(uint64& nMinWeight, uint64& nMaxWeight, uint64& nWe
 }
 
 // ppcoin: create coin stake transaction
-bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64 nSearchInterval, int64_t nFees, CTransaction& txNew)
+bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int nHeightV2, int64 nSearchInterval, int64_t nFees, CTransaction& txNew)
 {
     CBigNum bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(nBits);
@@ -1492,7 +1494,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
 	CTransaction txPrev=*pcoin.first;
 	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval));
+	int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+			    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval)) : 
+			    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval));
 
 		if (fDebugMagi && (pindexBest->nHeight%10 == 0)) printf(">* CreateCoinStake : block.GetBlockTime() = %"PRI64d", nStakeMinAge = %d, txNew.nTime = %d, nTimeWeight = %"PRI64d" \n", block.GetBlockTime(), nStakeMinAge, txNew.nTime, nTimeWeight);
         if (nTimeWeight < nStakeMinAge)
@@ -1555,7 +1559,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
 		CTransaction txPrev=*pcoin.first;
 		COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-		int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime);
+		int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+				    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime) : 
+				    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime);
 
 		if ((unsigned int)nTimeWeight < nStakeSplitAge)
                     txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
@@ -1597,7 +1603,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 	    // Do not add input that is still too young
 	    CTransaction txPrev=*pcoin.first;
 	    COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	    int64 nTimeWeight = GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
+	    int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+				GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime) : 
+				GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
             if (nTimeWeight < nStakeMinAge)
                 continue;
             txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
@@ -1618,8 +1626,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 //	    printf("WARNING: CreateCoinStake() set pIndex0 to pindexBest:\n");
 //	    pIndex0->print();
 //	}
-
-        if (!txNew.GetCoinAge(txdb, nCoinAge))
+	bool fTxGetCoinAge = (IsPoSIIProtocolV2(nHeightV2)) ? txNew.GetCoinAgeV2(txdb, nCoinAge) : txNew.GetCoinAge(txdb, nCoinAge);
+        if (!fTxGetCoinAge)
             return error("CreateCoinStake : failed to calculate coin age");
         nCredit += GetProofOfStakeReward(nCoinAge, nFees, pindexBest);
 	if (fDebugMagiPoS)
