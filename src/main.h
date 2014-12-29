@@ -88,7 +88,7 @@ inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 inline bool IsPoSIIProtocolV2(int nHeight)
 {
     if (fTestNet) {
-      if (nHeight > 40850) fTestNetWeightV2 = true;
+      if (nHeight > 40860) fTestNetWeightV2 = true;
       else fTestNetWeightV2 = false;
       return nHeight > 40780;
     }
