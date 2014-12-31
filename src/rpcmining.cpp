@@ -61,7 +61,10 @@ Value gethashespersec(const Array& params, bool fHelp)
     return (boost::int64_t)dHashesPerSec;
 }
 
-inline double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR, int nHeight);
+int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
+double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
+double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
+double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR);
 Value getmininginfo(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -69,11 +72,14 @@ Value getmininginfo(const Array& params, bool fHelp)
             "getmininginfo\n"
             "Returns an object containing mining-related information.");
     uint64 nWeight = 0, nMinWeight = 0, nMaxWeight = 0;
-    double nNetworkWeight = GetPoSKernelPS();
     pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
     int64_t nNetWorkWeit = GetPoSKernelPS();
     uint64 nEstimateTime = 90 * GetPoSKernelPS() / nWeight;
-
+    double blockvalue = ((double)GetProofOfWorkRewardV2(pindexBest, 0, true))/((double)COIN); 
+    double rAPR = (IsPoSIIProtocolV2(pindexBest->nHeight+1)) ? 
+		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
+		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
+    
     Object obj, diff, weight;
     obj.push_back(Pair("blocks",           (int)nBestHeight));
     obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
@@ -84,7 +90,9 @@ Value getmininginfo(const Array& params, bool fHelp)
     diff.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
     obj.push_back(Pair("difficulty",       diff));
 
-    obj.push_back(Pair("blockvalue",       (uint64_t)(GetProofOfWorkReward(pindexBest->nBits, pindexBest->nHeight, 0)/COIN)));
+//    obj.push_back(Pair("blockvalue",       (uint64_t)(GetProofOfWorkReward(pindexBest->nBits, pindexBest->nHeight, 0)/COIN)));
+    obj.push_back(Pair("blockvalue",       blockvalue));
+
     obj.push_back(Pair("netmhashps",       GetPoWMHashPS()));
     obj.push_back(Pair("netstakeweight",   GetPoSKernelPS()));
 //    obj.push_back(Pair("netstakeweightV2", GetPoSKernelPSV2()));
@@ -112,7 +120,7 @@ Value getmininginfo(const Array& params, bool fHelp)
     {
 	obj.push_back(Pair("Expected PoS (days)", (uint64_t)nEstimateTime/(60*60*24)));
     }
-    obj.push_back(Pair("stakeinterest",    (double)GetAnnualInterest((int64)nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE)));
+    obj.push_back(Pair("stakeinterest",    rAPR));
     obj.push_back(Pair("testnet",          fTestNet));
 
     obj.push_back(Pair("generate",         GetBoolArg("-gen")));
@@ -287,7 +295,6 @@ Value getnetstakeweight(const Array& params, bool fHelp)
 }
 
 
-int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
 double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 double GetDifficultyFromBitsAver(const CBlockIndex* pindex0, int nBlocksAver0);
 Value getminingbykhps(const Array& params, bool fHelp)

@@ -43,6 +43,33 @@ double GetDifficulty(const CBlockIndex* blockindex)
 }
 
 
+double GetPoSKernelPS(const CBlockIndex* blockindex, int lookup)
+{
+    int nPoSInterval = lookup;
+    double dStakeKernelsTriedAvg = 0;
+    int nStakesHandled = 0, nStakesTime = 0;
+
+    const CBlockIndex* pindex = ((blockindex == NULL) ? GetLastBlockIndex(pindexBest, true) : blockindex);
+    const CBlockIndex* pindexPrevStake = NULL;
+
+    while (pindex && nStakesHandled < nPoSInterval)
+    {
+        if (pindex->IsProofOfStake())
+        {
+            dStakeKernelsTriedAvg += GetDifficulty(pindex) * 4294967296.0;
+            nStakesTime += pindexPrevStake ? (pindexPrevStake->nTime - pindex->nTime) : 0;
+            pindexPrevStake = pindex;
+            nStakesHandled++;
+        }
+
+        pindex = pindex->pprev;
+    }
+    if (fDebugMagi)
+	printf("@GetPoSKernelPS -> stake blocks for average = %d\n", nStakesHandled);
+
+    return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
+}
+
 // hashrate = diff * 2^32/blocktime = diff * 4 294 967 296 / blocktime
 double GetPoSKernelPSV2(const CBlockIndex* blockindex, int lookup)
 {
@@ -124,34 +151,6 @@ double GetPoSKernelPSV3(const CBlockIndex* blockindex)
 	printf("@GetPoSKernelPSV2 -> aver diff = %f, block time = %f\n", diff / (double)nStakesHandled, (double)nActualBlockTimeTot / (double)nStakesHandled);
 
     return dStakeKernelsTriedAvg / double(nStakesHandled);
-}
-
-
-double GetPoSKernelPS(const CBlockIndex* blockindex, int lookup)
-{
-    int nPoSInterval = lookup;
-    double dStakeKernelsTriedAvg = 0;
-    int nStakesHandled = 0, nStakesTime = 0;
-
-    const CBlockIndex* pindex = ((blockindex == NULL) ? GetLastBlockIndex(pindexBest, true) : blockindex);
-    const CBlockIndex* pindexPrevStake = NULL;
-
-    while (pindex && nStakesHandled < nPoSInterval)
-    {
-        if (pindex->IsProofOfStake())
-        {
-            dStakeKernelsTriedAvg += GetDifficulty(pindex) * 4294967296.0;
-            nStakesTime += pindexPrevStake ? (pindexPrevStake->nTime - pindex->nTime) : 0;
-            pindexPrevStake = pindex;
-            nStakesHandled++;
-        }
-
-        pindex = pindex->pprev;
-    }
-    if (fDebugMagi)
-	printf("@GetPoSKernelPS -> stake blocks for average = %d\n", nStakesHandled);
-
-    return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
 }
 
 Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPrintTransactionDetail)
