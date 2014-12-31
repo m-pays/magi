@@ -75,7 +75,7 @@ inline bool IsMiningProofOfStake(int nHeight )
 
 
 #define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
-#define FORK_BLOCK_REWARDS_V2 1420218000
+#define FORK_BLOCK_REWARDS_V2 1420650000
 inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 {
     if (fTestNet) {
