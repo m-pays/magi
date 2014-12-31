@@ -354,13 +354,11 @@ Value getnewblockvaluebynumber(const Array& params, bool fHelp)
 	obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
 	obj.push_back(Pair("difficulty-V2", 0));
 	obj.push_back(Pair("blockvalue", 0));
-	obj.push_back(Pair("blockvalue2", 0));
     }
     else {
 	obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
 	obj.push_back(Pair("difficulty-V2", GetDifficultyFromBitsV2(pblockindex)));
 	obj.push_back(Pair("blockvalue", ((double)GetProofOfWorkRewardV2(pblockindex, 0, false))/((double)COIN)));
-	obj.push_back(Pair("blockvalue2", ((double)GetProofOfWorkRewardV2(pblockindex, 0, true))/((double)COIN)));
     }
     return obj;
 }
