@@ -4549,7 +4549,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     static int64 nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
     CBlockIndex* pindexPrev = pindexBest;
 	
-if (fTestNet || pindexBest->nHeight >= 124500) {
+if (fTestNet || pindexBest->nHeight >= 131100) {
     if (fProofOfStake)  // attempt to find a coinstake
     {
 	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
@@ -4772,7 +4772,7 @@ if (fTestNet || pindexBest->nHeight >= 124500) {
         if (fDebug && GetBoolArg("-printpriority"))
             printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
 	
-if (!fTestNet && pindexBest->nHeight < 124500) {
+if (!fTestNet && pindexBest->nHeight < 131100) {
     if (fProofOfStake)  // attempt to find a coinstake
     {
 	pblock->nBits = GetNextTargetRequired(pindexPrev, true);

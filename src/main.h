@@ -35,13 +35,12 @@ static const int END_MAGI_POW_HEIGHT_V2 = 5000000; // PoW-II aims to issue 12 mi
 static const int BLOCK_REWARD_ADJT = 2700;
 static const int BLOCK_REWARD_ADJT_M7M_V2 = 32750;
 
-static const int COINS_BURNED = 720000 * COIN; // Notes: https://bitcointalk.org/index.php?topic=735170.msg9475622#msg9475622
-
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
 static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const unsigned int MAX_INV_SZ = 50000;
+static const int64 COINS_BURNED = 720000 * COIN; // Notes: https://bitcointalk.org/index.php?topic=735170.msg9475622#msg9475622
 static const int64 MIN_TX_FEE = .0001 * COIN;
 static const int64 MIN_RELAY_TX_FEE = MIN_TX_FEE;
 static const int64 MAX_MONEY = 25000000 * COIN + COINS_BURNED;  // NOte: the amount of COINS_BURNED is unspendable
@@ -95,7 +94,7 @@ inline bool IsPoSIIProtocolV2(int nHeight)
       return nHeight > 40780;
     }
     else {
-      return (nHeight > 124650);
+      return (nHeight > 131300);
     }
 }
 
@@ -107,9 +106,7 @@ static const int fHaveUPnP = false;
 #endif
 
 static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff34291ad671e59ae46630ffd8f985dd56cc");
-//static const uint256 hashGenesisBlockOfficial("0x0000094d72610766beea0afa6a3941c05b1debc5dd3a19aa74c98198709c5a80");
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
-//static const uint256 hashGenesisBlockTestNet ("0x00000a35ec89cf297d5403ea161e6c04a4e53793c1000359c078eabb74e8ea91");
 
 static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
 
