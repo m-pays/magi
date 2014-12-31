@@ -143,8 +143,6 @@ int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalE
 
     if (fTestNet & !fTestNetWeightV2) return GetMagiWeight_TestNet(nValueIn, nIntervalBeginning, nIntervalEnd);
     
-//    nWeight = 33.9537 * ( pow(rEpf, -0.55 * rStakeDays / 0.4719) - pow(rEpf, -0.6 * rStakeDays / 0.4719) ) * rStakeDays;
-//    nWeight = 37.7178 * ( pow(rEpf, -0.55 * (rStakeDays+1.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+1.) / 0.4719) ) * rStakeDays;
     nWeight = 42.2474 * ( pow(rEpf, -0.55 * (rStakeDays+2.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+2.) / 0.4719) ) * rStakeDays;
 
     if (fDebugMagiPoS) printf("@GetMagiWeightV2 = %"PRI64d"\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge)));
