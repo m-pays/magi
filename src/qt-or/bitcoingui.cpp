@@ -1010,17 +1010,3 @@ void BitcoinGUI::updateMintingWeights()
     pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
     nNetworkWeight = GetPoSKernelPS();
 }
-
-void BitcoinGUI::updateMintingWeights_old()
-{
-    // Only update if we have the network's current number of blocks, or weight(s) are zero (fixes lagging GUI)
-    if ((clientModel && clientModel->getNumBlocks() == clientModel->getNumBlocksOfPeers()) || !nWeight || !nNetworkWeight)
-    {
-        nWeight = 0;
-
-        if (pwalletMain)
-            pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
-
-        nNetworkWeight = GetPoSKernelPS();
-    }
-}
