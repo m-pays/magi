@@ -1129,12 +1129,23 @@ int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
 	       nHeight, nSubsidy/COIN, nDiff);
 	return nSubsidy + nFees;
     }
-    /*
-    // coins for swapping with prior magicoin
-    Initial discussion: https://bitcointalk.org/index.php?topic=735170.msg8772649#msg8772649
-    10/07/2014 - Final swap plan: 227,140 XMG used for swap, that is only 0.9% of total XMG supply; 
-                 part of remaining unswapped will be used for PoM campaign, others will be destroyed. 
-                 https://bitcointalk.org/index.php?topic=821170.msg9190490#msg9190490;
+    
+    /*	Notes of 11 premined blocks, totally: 1,237,505 XMG
+	Coins burned: 720,000 XMG https://bchain.info/XMG/addr/93m4hAxmCcGXMfnjVPfNhWSjb69sDziGSY
+				  https://bitcointalk.org/index.php?topic=735170.msg9475622#msg9475622
+	Coins used to push PoM campaign: 112,505 XMG (https://bitcointalk.org/index.php?topic=802681.0)
+
+	Remaining coins are: 404,995 (1.65%), that includes: 
+	Coin swap: 233,319 XMG (0.93%)
+	Leftover: 171,676 XMG (0.69%) - promotion (givaway + bounties for community members' contribution), staff salary
+
+	Coin swap: rule of swap - total coins swapped/Coins in circulation ~ 10% or less
+	Some of posts regarding the coin swap: 
+	https://bitcointalk.org/index.php?topic=821170.0
+	https://bitcointalk.org/index.php?topic=735170.msg8950501#msg8950501
+	https://bitcointalk.org/index.php?topic=735170.msg9111697#msg9111697
+	
+	Details: https://bitcointalk.org/index.php?topic=735170.msg9900074#msg9900074
     */
     if(nHeight <= 10 && !fTestNet)
     {
