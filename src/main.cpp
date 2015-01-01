@@ -1083,8 +1083,7 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 //	  nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
-	if (nHeight%2 == 0)
-	{
+	if (nHeight%2 == 0) {
 	    nSubsidy = 100 * COIN;
 	}
 	else {

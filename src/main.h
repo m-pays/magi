@@ -73,28 +73,27 @@ inline bool IsMiningProofOfStake(int nHeight )
 	return (nHeight > 10080); // three weeks
 }
 
-
 #define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
 #define FORK_BLOCK_REWARDS_V2 1420650000
 inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 {
     if (fTestNet) {
-      return (nTime0 > FORK_BLOCK_REWARDS_V2_TESNT);
+	return (nTime0 > FORK_BLOCK_REWARDS_V2_TESNT);
     }
     else {
-      return (nTime0 > FORK_BLOCK_REWARDS_V2);
+	return (nTime0 > FORK_BLOCK_REWARDS_V2);
     }
 }
 
 inline bool IsPoSIIProtocolV2(int nHeight)
 {
     if (fTestNet) {
-      if (nHeight > 40860) fTestNetWeightV2 = true;
-      else fTestNetWeightV2 = false;
-      return nHeight > 40780;
+	if (nHeight > 40860) fTestNetWeightV2 = true;
+	else fTestNetWeightV2 = false;
+	return nHeight > 40780;
     }
     else {
-      return (nHeight > 131300);
+	return (nHeight > 131300);
     }
 }
 
