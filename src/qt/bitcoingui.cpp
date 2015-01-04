@@ -1,9 +1,9 @@
-/*
- * Qt4 bitcoin GUI.
- *
- * W.J. van der Laan 2011-2012
- * The Bitcoin Developers 2011-2012
- */
+// Copyright (c) 2011-2013 The Bitcoin developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#include <QApplication>
+
 #include "bitcoingui.h"
 #include "transactiontablemodel.h"
 #include "addressbookpage.h"
@@ -79,7 +79,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     resize(850, 550);
-    setWindowTitle(tr("CoinMagi") + " - " + tr("Wallet"));
+    setWindowTitle(tr("Coin Magi") + " - " + tr("Wallet"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -980,7 +980,7 @@ void BitcoinGUI::updateMintingIcon()
     }
     else if (!nWeight)
     {
-        labelMintingIcon->setToolTip(tr("Not staking because you don't have mature coins."));
+        labelMintingIcon->setToolTip(tr("Not staking because you don't have enough weight."));
         labelMintingIcon->setEnabled(false);
     }
     else if (nLastCoinStakeSearchInterval)
