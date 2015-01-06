@@ -17,7 +17,7 @@ src/test_magi
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-magi-qt
+magi-qt*
 magi-qt.app
 
 # Unit-tests

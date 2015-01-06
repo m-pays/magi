@@ -284,6 +284,25 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
     return ret;
 }
 
+Value getaddresses(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getaddresses\n"
+            "Returns the list of addresses.");
+
+    Object obj;
+    obj.push_back(Pair("flags", "accounts for receiving coins"));
+    BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, pwalletMain->mapAddressBook)
+    {
+        const CBitcoinAddress& address = item.first;
+        const string& strName = item.second;
+	obj.push_back(Pair(strName, address.ToString()));
+    }
+    return obj;
+}
+
+
 Value sendtoaddress(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
@@ -919,6 +938,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
         else
         {
             Object obj;
+            obj.push_back(Pair("flags",         "coins received"));
             obj.push_back(Pair("address",       address.ToString()));
             obj.push_back(Pair("account",       strAccount));
             obj.push_back(Pair("amount",        ValueFromAmount(nAmount)));
@@ -934,6 +954,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
             int64 nAmount = (*it).second.nAmount;
             int nConf = (*it).second.nConf;
             Object obj;
+            obj.push_back(Pair("flags",         "coins received"));
             obj.push_back(Pair("account",       (*it).first));
             obj.push_back(Pair("amount",        ValueFromAmount(nAmount)));
             obj.push_back(Pair("confirmations", (nConf == std::numeric_limits<int>::max() ? 0 : nConf)));
