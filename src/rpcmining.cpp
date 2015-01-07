@@ -75,12 +75,14 @@ Value getmininginfo(const Array& params, bool fHelp)
     pwalletMain->GetStakeWeight(nMinWeight, nMaxWeight, nWeight);
     int64_t nNetWorkWeit = GetPoSKernelPS();
     uint64 nEstimateTime = 90 * GetPoSKernelPS() / nWeight;
-    double blockvalue = ((double)GetProofOfWorkRewardV2(pindexBest, 0, true))/((double)COIN); 
+    double bvalue = (IsPoWIIRewardProtocolV2(pindexBest->nTime)) ? 
+		  ((double)GetProofOfWorkRewardV2(pindexBest, 0, true))/((double)COIN) : 
+		  (double)((uint64_t)(GetProofOfWorkReward(pindexBest->nBits, pindexBest->nHeight, 0)/COIN));
     double rAPR = (IsPoSIIProtocolV2(pindexBest->nHeight+1)) ? 
 		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
 		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
-    
-    Object obj, diff, weight;
+GetDifficultyFromBitsV2(pblockindex)
+    Object obj, diff, blockvalue, weight;
     obj.push_back(Pair("blocks",           (int)nBestHeight));
     obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
     obj.push_back(Pair("currentblocktx",   (uint64_t)nLastBlockTx));
@@ -91,6 +93,8 @@ Value getmininginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("difficulty",       diff));
 
 //    obj.push_back(Pair("blockvalue",       (uint64_t)(GetProofOfWorkReward(pindexBest->nBits, pindexBest->nHeight, 0)/COIN)));
+    blockvalue.push_back(Pair("difficulty-V2",  GetDifficultyFromBitsV2(pindexBest)));
+    blockvalue.push_back(Pair("blockvalue",  bvalue));
     obj.push_back(Pair("blockvalue",       blockvalue));
 
     obj.push_back(Pair("netmhashps",       GetPoWMHashPS()));
