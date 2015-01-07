@@ -81,7 +81,7 @@ Value getmininginfo(const Array& params, bool fHelp)
     double rAPR = (IsPoSIIProtocolV2(pindexBest->nHeight+1)) ? 
 		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
 		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
-GetDifficultyFromBitsV2(pblockindex)
+
     Object obj, diff, blockvalue, weight;
     obj.push_back(Pair("blocks",           (int)nBestHeight));
     obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
