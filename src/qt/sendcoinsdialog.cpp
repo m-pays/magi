@@ -109,7 +109,6 @@ SendCoinsDialog::~SendCoinsDialog()
     delete ui;
 }
 
-
 void SendCoinsDialog::on_sendButton_clicked()
 {
     QList<SendCoinsRecipient> recipients;
@@ -518,4 +517,3 @@ void SendCoinsDialog::updateDisplayUnit()
     }
 }	
 
-	

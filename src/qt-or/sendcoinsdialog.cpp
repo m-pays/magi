@@ -517,4 +517,3 @@ void SendCoinsDialog::updateDisplayUnit()
     }
 }	
 
-	

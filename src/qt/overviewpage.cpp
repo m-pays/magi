@@ -13,6 +13,9 @@
 #include <QAbstractItemDelegate>
 #include <QPainter>
 
+#include <QDesktopServices>  //Added for openURL()
+#include <QUrl>
+
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
 
