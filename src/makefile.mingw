@@ -8,21 +8,21 @@ USE_UPNP:=-
 USE_IPV6:=1
 
 DEPSDIR?=/usr/local
-BOOST_SUFFIX?=-mgw49-mt-s-1_55
+BOOST_SUFFIX?=-mgw49-mt-s-1_57
 
 INCLUDEPATHS= \
- -I"c:/deps/boost_1_55_0" \
+ -I"c:/deps/boost_1_57_0" \
  -I"c:/deps/db-4.8.30.NC/build_unix" \
  -I"c:/deps/miniupnpc" \
  -I"c:/deps/gmp-6.0.0" \
- -I"c:/deps/openssl-1.0.1h/include"
+ -I"c:/deps/openssl-1.0.1j/include"
 
 LIBPATHS= \
- -L"c:/deps/boost_1_55_0/stage/lib" \
+ -L"c:/deps/boost_1_57_0/stage/lib" \
  -L"c:/deps/db-4.8.30.NC/build_unix" \
  -L"c:/deps/miniupnpc" \
  -L"c:/deps/gmp-6.0.0/.libs" \
- -L"c:/deps/openssl-1.0.1h"
+ -L"c:/deps/openssl-1.0.1j"
  
 LIBS= \
  -l boost_system$(BOOST_SUFFIX) \
