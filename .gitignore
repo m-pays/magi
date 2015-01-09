@@ -18,7 +18,10 @@ src/test_magi
 *.qm
 Makefile
 magi-qt*
-magi-qt.app
+Magi-Qt.app
+qt-builds/version-og/Makefile
+qt-builds/version-og/magi-qt*
+qt-builds/version-og/Magi-Qt.app
 
 # Unit-tests
 Makefile.test
@@ -26,6 +29,7 @@ magi-qt_test
 
 # Resources cpp
 qrc_*.cpp
+qt-builds/version-og/qrc_*.cpp
 
 # Qt creator
 *.pro.user
@@ -33,3 +37,4 @@ qrc_*.cpp
 # Mac specific
 .DS_Store
 build
+qt-builds/version-og/build

@@ -233,7 +233,7 @@ Value getdifficultym(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
-            "getdifficulty\n"
+            "getdifficultym\n"
             "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.");
 
     return GetDifficulty();
