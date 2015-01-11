@@ -175,7 +175,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     timerMintingWeights->start(30 * 1000);
     connect(timerMintingWeights, SIGNAL(timeout()), this, SLOT(updateMintingWeights()));
     // Set initial values for user and network weights
-    nWeight, nNetworkWeight = 0;
+    nWeight = 0, nNetworkWeight = 0;
 
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
