@@ -300,7 +300,7 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord *wtx) cons
         switch(wtx->status.maturity)
         {
         case TransactionStatus::Immature:
-            status += "\n" + tr("Mined balance will be available when it matures in %n more block(s)", "", wtx->status.matures_in);
+            status += "\n" + tr("Generated balance will be available when it matures in %n more block(s)", "", wtx->status.matures_in);
             break;
         case TransactionStatus::Mature:
             break;
@@ -360,6 +360,7 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::SendToSelf:
         return tr("Payment to yourself");
     case TransactionRecord::StakeMint:
+        return tr("Generated");
     case TransactionRecord::Generated:
         return tr("Mined");
     default:

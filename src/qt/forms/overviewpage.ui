@@ -210,7 +210,7 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>Mined balance that has not yet matured</string>
+             <string>Generated balance that has not yet matured</string>
             </property>
             <property name="styleSheet">
              <string notr="true">color: #464747;</string>
