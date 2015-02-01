@@ -29,6 +29,7 @@ Dependencies
  libboost    Boost             C++ Library
  miniupnpc   UPnP Support      Optional firewall-jumping support
  libqrencode QRCode generation Optional QRCode generation
+ libgmp3     GMP               Multiple precision arithmetic library
 
 Note that libexecinfo should be installed, if you building under *BSD systems. 
 This library provides backtrace facility.
