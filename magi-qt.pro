@@ -127,8 +127,19 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     DEFINES += HAVE_BUILD_INFO
 }
 
-QMAKE_CXXFLAGS += -msse2
-QMAKE_CFLAGS += -msse2
+# If we have an arm device, we can't use sse2, so define as thumb
+# Otherwise, assume sse2 exists
+!equals($$QMAKE_HOST.arch, armv7l) {
+    message(FOUND host = $$QMAKE_HOST.arch)
+    QMAKE_CXXFLAGS += -mthumb
+    QMAKE_CFLAGS += -mthumb
+}
+else {
+    QMAKE_CXXFLAGS += -msse2
+    QMAKE_CFLAGS += -msse2
+}
+#endif
+
 QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
 
 # Input
