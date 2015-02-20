@@ -1,7 +1,32 @@
+Magi development tree - 1.2.1.1+armv7l
+===
 
-Magi development tree
+Magi is a hybrid PoW/PoS-based cryptocurrency. Magi is also a CPU coin.
 
-Magi is a hybrid PoW/PoS-based cryptocurrency. Magi is also a CPU coin. 
+Fork Information
+===
+
+This branch is an unofficial offshoot that allows building for armv7l
+architecture CPUs. It was made for the convenience of people that either 
+use an ARM desktop or run an ARM server and who want to keep their 
+wallet open to mint coins via POS or want to run an energy-efficient 
+node for solo mining.
+
+This for really only adds a few lines of changes to the Makefile and 
+Qt's version of a makefile. It might even be a drop-in solution for the 
+future, if neither have significant changes made to them. (Either that
+or the Magi team will merge it.)
+
+<b>CAUTION:</b> This build uses libdb5.1 ! Essentially, this means that
+you can't swap the blockchain database that these binaries create (or 
+have opened) back to an official wallet/server build because they use 
+libdb4.8. This was done to simplify the build process dramatically (just
+an extra apt-get entry) instead of installing and relying on an 
+unsupported libdb4.8-armhf binary.
+
+Information for building is located in:
+[doc/build-unix-arm.txt](doc/build-unix-arm.txt) for headless and
+[doc/readme-qt-arm.rst](doc/readme-qt-arm.rst) for the Qt GUI.
 
 Development process
 ===========================
