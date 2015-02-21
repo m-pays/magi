@@ -100,8 +100,17 @@ DEBUGFLAGS=-g
 
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
-xCXXFLAGS=-O2 -msse2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
+xCXXFLAGS=-O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
+
+# If we have an arm device, we can't use sse2, so define as thumb
+# Otherwise, assume sse2 exists
+# xCPUARCH is passed in as a define (xCPUARCH=armv7l)
+ifeq ($(xCPUARCH),armv7l)
+    xCXXFLAGS+=-mthumb
+else
+    xCXXFLAGS+=-msse2
+endif
 
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
