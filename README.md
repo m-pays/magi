@@ -12,7 +12,7 @@ use an ARM desktop or run an ARM server and who want to keep their
 wallet open to mint coins via POS or want to run an energy-efficient 
 node for solo mining.
 
-This for really only adds a few lines of changes to the Makefile and 
+This fork really only adds a few lines of changes to the Makefile and 
 Qt's version of a makefile. It might even be a drop-in solution for the 
 future, if neither have significant changes made to them. (Either that
 or the Magi team will merge it.)
