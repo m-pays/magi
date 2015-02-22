@@ -1,3 +1,4 @@
+Copyright (c) 2015 Magi Developers
 Copyright (c) 2009-2012 Bitcoin Developers
 Distributed under the MIT/X11 software license, see the accompanying
 file license.txt or http://www.opensource.org/licenses/mit-license.php.
@@ -10,22 +11,39 @@ software written by Thomas Bernard.
 UNIX BUILD NOTES
 ================
 
-To Build
+To Build On i386, amd64
 --------
 
 cd src/
-make -f makefile.unix            # Headless bitcoin
+make -f makefile.unix                          # Headless bitcoin
+
+To Build On armv7l
+--------
+cd src/
+make -f makefile.unix CPUARCH=armv7l           # Headless bitcoin
 
 See readme-qt.rst for instructions on building Bitcoin QT,
 the graphical bitcoin.
 
-Dependencies
+Dependencies for i386, amd64
 ------------
 
  Library     Purpose           Description
  -------     -------           -----------
  libssl      SSL Support       Secure communications
  libdb4.8    Berkeley DB       Blockchain & wallet storage
+ libboost    Boost             C++ Library
+ miniupnpc   UPnP Support      Optional firewall-jumping support
+ libqrencode QRCode generation Optional QRCode generation
+ libgmp3     GMP               Multiple precision arithmetic library
+
+Dependencies for armv7l
+------------
+
+ Library     Purpose           Description
+ -------     -------           -----------
+ libssl      SSL Support       Secure communications
+ libdb5.1    Berkeley DB       Blockchain & wallet storage
  libboost    Boost             C++ Library
  miniupnpc   UPnP Support      Optional firewall-jumping support
  libqrencode QRCode generation Optional QRCode generation
@@ -60,12 +78,22 @@ Versions used in this release:
  Boost         1.37
  miniupnpc     1.6
 
-Dependency Build Instructions: Ubuntu & Debian
+Dependency Build Instructions: Ubuntu & Debian (i386, amd64)
 ----------------------------------------------
 sudo apt-get install build-essential
 sudo apt-get install libssl-dev
 sudo apt-get install libdb4.8-dev
 sudo apt-get install libdb4.8++-dev
+ Boost 1.40+: sudo apt-get install libboost-all-dev
+ or Boost 1.37: sudo apt-get install libboost1.37-dev
+sudo apt-get install libqrencode-dev
+
+Dependency Build Instructions: Ubuntu & Debian (armv7l)
+----------------------------------------------
+sudo apt-get install build-essential
+sudo apt-get install libssl-dev
+sudo apt-get install libdb5.1-dev
+sudo apt-get install libdb5.1++-dev
  Boost 1.40+: sudo apt-get install libboost-all-dev
  or Boost 1.37: sudo apt-get install libboost1.37-dev
 sudo apt-get install libqrencode-dev
