@@ -20,7 +20,7 @@ make -f makefile.unix                          # Headless bitcoin
 To Build On armv7l
 --------
 cd src/
-make -f makefile.unix CPUARCH=armv7l           # Headless bitcoin
+make -f makefile.unix xCPUARCH=armv7l           # Headless bitcoin
 
 See readme-qt.rst for instructions on building Bitcoin QT,
 the graphical bitcoin.
