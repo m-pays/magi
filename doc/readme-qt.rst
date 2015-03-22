@@ -23,7 +23,7 @@ then execute the following:
     qmake
     make
 
-Debian (armv7l)
+Debian (armv6l, armv7l)
 -------
 
 First, make sure that the required packages for Qt4 development of your
