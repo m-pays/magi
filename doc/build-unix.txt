@@ -15,12 +15,17 @@ To Build On i386, amd64
 --------
 
 cd src/
-make -f makefile.unix                          # Headless bitcoin
+make -f makefile.unix                          # Headless magi
+
+To Build On armv6l
+--------
+cd src/
+make -f makefile.unix xCPUARCH=armv6l           # Headless magi
 
 To Build On armv7l
 --------
 cd src/
-make -f makefile.unix xCPUARCH=armv7l           # Headless bitcoin
+make -f makefile.unix xCPUARCH=armv7l           # Headless magi
 
 See readme-qt.rst for instructions on building Bitcoin QT,
 the graphical bitcoin.
@@ -37,7 +42,7 @@ Dependencies for i386, amd64
  libqrencode QRCode generation Optional QRCode generation
  libgmp3     GMP               Multiple precision arithmetic library
 
-Dependencies for armv7l
+Dependencies for armv6l, armv7l
 ------------
 
  Library     Purpose           Description
