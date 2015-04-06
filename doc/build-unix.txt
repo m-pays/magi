@@ -33,26 +33,26 @@ the graphical bitcoin.
 Dependencies for i386, amd64
 ------------
 
- Library     Purpose           Description
- -------     -------           -----------
- libssl      SSL Support       Secure communications
- libdb4.8    Berkeley DB       Blockchain & wallet storage
- libboost    Boost             C++ Library
- miniupnpc   UPnP Support      Optional firewall-jumping support
- libqrencode QRCode generation Optional QRCode generation
- libgmp3     GMP               Multiple precision arithmetic library
+ Library      Purpose           Description
+ -------      -------           -----------
+ libssl       SSL Support       Secure communications
+ libdb4.8     Berkeley DB       Blockchain & wallet storage
+ libboost     Boost             C++ Library
+ libminiupnpc UPnP Support      Optional firewall-jumping support
+ libqrencode  QRCode generation Optional QRCode generation
+ libgmp       GMP               Multiple precision arithmetic library
 
 Dependencies for armv6l, armv7l
 ------------
 
- Library     Purpose           Description
- -------     -------           -----------
- libssl      SSL Support       Secure communications
- libdb5.1    Berkeley DB       Blockchain & wallet storage
- libboost    Boost             C++ Library
- miniupnpc   UPnP Support      Optional firewall-jumping support
- libqrencode QRCode generation Optional QRCode generation
- libgmp3     GMP               Multiple precision arithmetic library
+ Library      Purpose           Description
+ -------      -------           -----------
+ libssl       SSL Support       Secure communications
+ libdb5.1     Berkeley DB       Blockchain & wallet storage
+ libboost     Boost             C++ Library
+ libminiupnpc UPnP Support      Optional firewall-jumping support
+ libqrencode  QRCode generation Optional QRCode generation
+ libgmp       GMP               Multiple precision arithmetic library
 
 Note that libexecinfo should be installed, if you building under *BSD systems. 
 This library provides backtrace facility.
