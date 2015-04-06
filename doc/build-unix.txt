@@ -89,6 +89,8 @@ sudo apt-get install build-essential
 sudo apt-get install libssl-dev
 sudo apt-get install libdb4.8-dev
 sudo apt-get install libdb4.8++-dev
+sudo apt-get install libgmp-dev
+sudo apt-get install libminiupnpc-dev
  Boost 1.40+: sudo apt-get install libboost-all-dev
  or Boost 1.37: sudo apt-get install libboost1.37-dev
 sudo apt-get install libqrencode-dev
@@ -99,6 +101,8 @@ sudo apt-get install build-essential
 sudo apt-get install libssl-dev
 sudo apt-get install libdb5.1-dev
 sudo apt-get install libdb5.1++-dev
+sudo apt-get install libgmp-dev
+sudo apt-get install libminiupnpc-dev
  Boost 1.40+: sudo apt-get install libboost-all-dev
  or Boost 1.37: sudo apt-get install libboost1.37-dev
 sudo apt-get install libqrencode-dev
