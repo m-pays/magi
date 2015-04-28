@@ -24,7 +24,7 @@
        <property name="styleSheet">
         <string notr="true">#frame { background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(70,71,71,15), stop:1.0 rgba(70,71,71,0)); }</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_4">   
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
@@ -243,6 +243,39 @@
             </property>
             <property name="text">
              <string notr="true">0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="labelUpdateStatic">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: #464747;</string>
+            </property>
+            <property name="text">
+             <string>Update </string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="labelUpdateStatus">
+            <property name="toolTip">
+             <string>A new client version has been released!</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QLabel { color: red; }</string>
+            </property>
+            <property name="text">
+             <string notr="true">(checking for updates)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>

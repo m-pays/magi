@@ -5,6 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
+class UpdateCheck;
 QT_END_NAMESPACE
 
 namespace Ui {
@@ -25,6 +26,8 @@ public:
 
     void setModel(WalletModel *model);
     void showOutOfSyncWarning(bool fShow);
+    void showUpdateWarning(bool fShow);
+    void showUpdateLayout(bool fShow);
 
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
@@ -44,9 +47,14 @@ private:
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
+    UpdateCheck *m_pUpdCtrl;
+    QTimer *updateTimer;
+
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+    void timerUpdate();
+    void checkForUpdates();
 };
 
 #endif // OVERVIEWPAGE_H
