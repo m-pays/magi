@@ -1,22 +1,25 @@
-1.2.1.3 (May 18, 2015)
+1.2.1.3 
 =============
 
 - Update check points;
 - Berkeley DB v4.8 will be used officially in all of wallets to be released; downloads: http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz;
+(May 18, 2015)
 
-1.2.1.2 (Mar 13, 2015)
+1.2.1.2
 =============
 
 Merge updates by feldenthorne for arm compilation. 
-
-1.2.1.1 (Jan. 8, 2015)
+(Mar 13, 2015)
+ 
+1.2.1.1
 =============
 
 - Fix for macosx compiling;
 - Update getmininginfo;
 - Other miscellaneous updates.
+(Jan. 8, 2015)
 
-1.2.0.1 (Dec. 31, 2014)
+1.2.0.1
 =============
 
 - Hard fork: https://bitcointalk.org/index.php?topic=735170.msg9991269#msg9991269;
@@ -31,7 +34,10 @@ Merge updates by feldenthorne for arm compilation.
 
 - New API calls: getnetstakeweight, getmininginfo, getminingbykhps (mining calculator).
 
-1.1.0.1 (Oct. 24, 2014)
+(Dec. 31, 2014)
+
+
+1.1.0.1
 =============
 
 - Hard fork: https://bitcointalk.org/index.php?topic=735170.msg9310611#msg9310611;
@@ -42,7 +48,9 @@ Merge updates by feldenthorne for arm compilation.
 
 - Difficulty adjustment method - Magi quantum wave (MQW) hard fork at block #33,500.
 
-1.0.0.2 (Sep. 20, 2014)
+(Oct. 24, 2014)
+
+1.0.0.2
 =============
 
 - Hard fork; mandatory wallet update needed before block #2700;
@@ -50,8 +58,11 @@ Merge updates by feldenthorne for arm compilation.
 - Changing of PoS-II block starting at block 10080;
 - https://bitcointalk.org/index.php?topic=735170.msg8898198#msg8898198.
 
-1.0.0.1 (Sep. 15, 2014)
+(Sep. 20, 2014)
+
+1.0.0.1
 =============
 - Launch of Coin Magi (XMG) on Sep. 15, 2014 5:00 PM EST
 - https://bitcointalk.org/index.php?topic=735170.msg8834934#msg8834934
 - https://bitcointalk.org/index.php?topic=735170.msg8834974#msg8834974
+(Sep. 15, 2014)
