@@ -4,11 +4,11 @@ Bitcoin-qt: Qt4 GUI for Bitcoin
 Build instructions
 ===================
 
-Debian
+Debian (i386, amd64)
 -------
 
 First, make sure that the required packages for Qt4 development of your
-distribution are installed, for Debian and Ubuntu these are:
+distribution are installed, for Debian and Ubuntu (i386, amd64) these are:
 
 ::
 
@@ -23,9 +23,28 @@ then execute the following:
     qmake
     make
 
-Alternatively, install Qt Creator and open the `bitcoin-qt.pro` file.
+Debian (armv7l)
+-------
 
-An executable named `bitcoin-qt` will be built.
+First, make sure that the required packages for Qt4 development of your
+distribution are installed, for Debian and Ubuntu (i386, amd64) these are:
+
+::
+
+    apt-get install qt4-qmake libqt4-dev build-essential libboost-dev libboost-system-dev \
+        libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev \
+        libssl-dev libdb5.1++-dev
+
+then execute the following:
+
+::
+
+    qmake
+    make
+
+Alternatively, install Qt Creator and open the `magi-qt.pro` file.
+
+An executable named `magi-qt` will be built.
 
 
 Windows
@@ -131,6 +150,9 @@ If the globally installed development package of Berkely DB installed on your sy
 build yourself will be linked against that. The first time you run with a 5.X version the database will be upgraded,
 and 4.X cannot open the new format. This means that you cannot go back to the old statically linked version without
 significant hassle!
+
+For ease-of-adoption of a Linaro-based ARM build, 5.X should be used by default, as 4.X is not available from
+official repositories.
 
 .. _`this Debian issue`: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=621425
 
