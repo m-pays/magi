@@ -8,7 +8,8 @@
 1.2.1.2
 =============
 
-Merge updates by feldenthorne for arm compilation. 
+Merge updates by feldenthorne for arm compilation.
+
 (Mar 13, 2015)
  
 1.2.1.1
@@ -17,6 +18,7 @@ Merge updates by feldenthorne for arm compilation.
 - Fix for macosx compiling;
 - Update getmininginfo;
 - Other miscellaneous updates.
+
 (Jan. 8, 2015)
 
 1.2.0.1
@@ -65,4 +67,5 @@ Merge updates by feldenthorne for arm compilation.
 - Launch of Coin Magi (XMG) on Sep. 15, 2014 5:00 PM EST
 - https://bitcointalk.org/index.php?topic=735170.msg8834934#msg8834934
 - https://bitcointalk.org/index.php?topic=735170.msg8834974#msg8834974
+
 (Sep. 15, 2014)
