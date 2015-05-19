@@ -11,16 +11,13 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     QT += widgets
 }
 
-# for boost 1.37, add -mt to the boost libraries
+# for boost > 1.37, add -mt to the boost libraries
 # use: qmake BOOST_LIB_SUFFIX=-mt
 # for boost thread win32 with _win32 sufix
 # use: BOOST_THREAD_LIB_SUFFIX=_win32-...
-# or when linking against a specific BerkelyDB version: BDB_LIB_SUFFIX=-4.8
+# when linking against a specific BerkelyDB version: BDB_LIB_SUFFIX=-4.8
 
-# Dependency library locations can be customized with:
-#    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
-#    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
-
+# Dependency library locations can be customized using following settings 
 # winbuild dependencies
 win32 {
 BOOST_LIB_SUFFIX=-mgw49-mt-s-1_57
