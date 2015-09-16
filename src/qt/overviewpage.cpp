@@ -9,11 +9,15 @@
 #include "guiutil.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
+#include "updatecheck.h"
+#include "../version.h"
+#include <vector>
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
 
 #include <QDesktopServices>  //Added for openURL()
+#include <QTimer>            //Added for update timer
 #include <QUrl>
 
 #define DECORATION_SIZE 64
@@ -123,9 +127,25 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // init "out of sync" warning labels
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
     ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelUpdateStatus->setText("(" + tr("checking for updates") + ")");
+    ui->labelUpdateStatus->setTextFormat(Qt::RichText);
+    ui->labelUpdateStatus->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    ui->labelUpdateStatus->setOpenExternalLinks(true);
+
+    // Setup a timer to regularly check for updates to the wallet
+    // Have it trigger once, immediately, then set it to check once ever 24 hours
+    // The update timer conversion factor (_UPDATE_MS_TO_HOURS) is located in
+    // updatecheck.h
+    timerUpdate();
+    updateTimer = new QTimer(this);
+    connect(updateTimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
+    updateTimer->start(_UPDATE_INTERVAL*_UPDATE_MS_TO_HOURS);
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
+
+    // show the "checking for updates" warning
+    showUpdateWarning(true);
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -211,4 +231,97 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+}
+
+void OverviewPage::showUpdateWarning(bool fShow)
+{
+    ui->labelUpdateStatus->setVisible(fShow);
+}
+
+void OverviewPage::showUpdateLayout(bool fShow)
+{
+    ui->labelUpdateStatic->setVisible(fShow);
+    ui->labelUpdateStatus->setVisible(fShow);
+}
+
+void OverviewPage::timerUpdate()
+{
+    // Create a connection to the website to check for updates
+    QUrl updateUrl(_UPDATE_VERSION_URL);
+    m_pUpdCtrl = new UpdateCheck(updateUrl, this);
+    
+    connect(m_pUpdCtrl, SIGNAL (downloaded()), this, SLOT (checkForUpdates()));
+}
+
+void OverviewPage::checkForUpdates()
+{
+    // Grab the internal wallet version and the online version string
+    QString siteVersion(m_pUpdCtrl->downloadedData());
+    QString internalVersion;
+    internalVersion = QString::number(DISPLAY_VERSION_MAJOR);
+    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_MINOR);
+    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_REVISION);
+    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_BUILD);
+
+    QString report = QString("The wallet is up to date");
+
+    // Split the online version string and compare it against the internal version
+    // If at any point we find that the internal version is less than the online
+    // version, exit without setting bool isUpToDate. If the internal version is
+    // equal to or greater than the online version, set isUpToDate = true.
+    bool isUpToDate = true;
+    int value = 0;
+    std::vector<std::string> v_siteString = m_pUpdCtrl->splitString(siteVersion.toStdString(), ".");
+    if (v_siteString.size() != (size_t) 4)
+    {
+        report = QString("Malformed wallet version retrieved");
+    }
+    else
+    {
+        value = atoi(v_siteString.at(0).c_str());
+        if (value > DISPLAY_VERSION_MAJOR)
+        {
+            isUpToDate = false;
+        }
+        else
+        {
+            value = atoi(v_siteString.at(1).c_str());
+            if (value > DISPLAY_VERSION_MINOR)
+            {
+                isUpToDate = false;
+            }
+            else
+            {
+                value = atoi(v_siteString.at(2).c_str());
+                if (value > DISPLAY_VERSION_REVISION)
+                {
+                    isUpToDate = false;
+                }
+                else
+                {
+                    value = atoi(v_siteString.at(3).c_str());
+                    if (value > DISPLAY_VERSION_BUILD)
+                    {
+                        isUpToDate = false;
+                    }
+                }
+            }
+        }
+    }
+
+    // If versions are the same, remove the update section, otherwise make sure
+    // it is visible and show a link to the wallet download site
+    if (isUpToDate)
+    {
+        showUpdateLayout(false);
+    }
+    else
+    {
+        report = QString(_UPDATE_DOWNLOAD_URL);
+        report = QString("<a href=\"" + report + "\">Wallet version " + siteVersion + " available!</a>");
+        showUpdateLayout(true);
+    }
+
+    // Set the update label text and exit
+    ui->labelUpdateStatus->setText(report);
 }
