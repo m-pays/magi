@@ -103,10 +103,10 @@ DEBUGFLAGS=-g
 xCXXFLAGS=-O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 
-# If we have an arm device, we can't use sse2, so define as thumb
-# Otherwise, assume sse2 exists
-# xCPUARCH is passed in as a define (xCPUARCH=armv7l)
+# If we have an ARM device, we can't use SSE2 instructions, so don't try to use them
+# xCPUARCH is passed in as a define (xCPUARCH=armv7l, xCPUARCH=armv6l)
 ifeq ($(xCPUARCH),armv7l)
+else ifeq ($(xCPUARCH),armv6l)
 else
     xCXXFLAGS+=-msse2
 endif
