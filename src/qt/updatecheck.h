@@ -33,7 +33,7 @@
  *  of the version string file. The file can be hosted be hosted in the official
  *  repository (using the raw file URL) or the coin's website.
  */
-#define _UPDATE_VERSION_URL "http://starflakenights.net/crypto/magiversion/version.txt"
+#define _UPDATE_VERSION_URL "http://coinmagi.org/files/magi-release/version.txt"
 
 /** \def _UPDATE_DOWNLOAD_URL The URL linked when a new wallet version is available
  *  \details This URL string should reflect the offical wallet download location, be
