@@ -277,6 +277,10 @@ void OverviewPage::checkForUpdates()
     {
         report = QString("Malformed wallet version retrieved");
     }
+
+    // Here, we need to check version very thoroughly, otherwise the version numbers of
+    // higher significance (Major, Minor, Revision) can be ignored if the lower
+    // significance numbers are higher
     else
     {
         value = atoi(v_siteString.at(0).c_str());
@@ -289,21 +293,57 @@ void OverviewPage::checkForUpdates()
             value = atoi(v_siteString.at(1).c_str());
             if (value > DISPLAY_VERSION_MINOR)
             {
-                isUpToDate = false;
+                // Check to make sure major version is also greater than or equal to
+                // the current version
+                value = atoi(v_siteString.at(0).c_str());
+                if (value >= DISPLAY_VERSION_MAJOR)
+                {
+                    isUpToDate = false;
+                }
             }
             else
             {
                 value = atoi(v_siteString.at(2).c_str());
                 if (value > DISPLAY_VERSION_REVISION)
                 {
-                    isUpToDate = false;
+                    // Check to make sure minor version is also greater than or equal
+                    // to the current version
+                    value = atoi(v_siteString.at(1).c_str());
+                    if (value >= DISPLAY_VERSION_MINOR)
+                    {
+                        // Check to make sure major version is also greater than or
+                        // equal to the current version
+                        value = atoi(v_siteString.at(0).c_str());
+                        if (value >= DISPLAY_VERSION_MAJOR)
+                        {
+                            isUpToDate = false;
+                        }
+                    }
                 }
                 else
                 {
                     value = atoi(v_siteString.at(3).c_str());
                     if (value > DISPLAY_VERSION_BUILD)
                     {
-                        isUpToDate = false;
+                        // Check to make sure revision number is also greater than or
+                        // equal to the current revision
+                        value = atoi(v_siteString.at(2).c_str());
+                        if (value >= DISPLAY_VERSION_REVISION)
+                         {
+                            // Check to make sure minor version is also greater than or
+                            // equal to the current version
+                            value = atoi(v_siteString.at(1).c_str());
+                            if (value >= DISPLAY_VERSION_MINOR)
+                            {
+                                // Check to make sure major version is also greater than
+                                // or equal to the current version
+                                value = atoi(v_siteString.at(0).c_str());
+                                if (value >= DISPLAY_VERSION_MAJOR)
+                                {
+                                    isUpToDate = false;
+                                }
+                            }
+                        }
                     }
                 }
             }
