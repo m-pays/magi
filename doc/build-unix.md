@@ -1,5 +1,5 @@
-Copyright (c) 2015 Magi Developers
 Copyright (c) 2009-2012 Bitcoin Developers
+Copyright (c) 2014-2015 Magi Developers
 Distributed under the MIT/X11 software license, see the accompanying
 file license.txt or http://www.opensource.org/licenses/mit-license.php.
 This product includes software developed by the OpenSSL Project for use in
@@ -48,7 +48,7 @@ Dependencies for armv6l, armv7l
  Library      Purpose           Description
  -------      -------           -----------
  libssl       SSL Support       Secure communications
- libdb5.1     Berkeley DB       Blockchain & wallet storage
+ libdb4.8     Berkeley DB       Blockchain & wallet storage
  libboost     Boost             C++ Library
  libminiupnpc UPnP Support      Optional firewall-jumping support
  libqrencode  QRCode generation Optional QRCode generation
@@ -99,8 +99,8 @@ Dependency Build Instructions: Ubuntu & Debian (armv7l)
 ----------------------------------------------
 sudo apt-get install build-essential
 sudo apt-get install libssl-dev
-sudo apt-get install libdb5.1-dev
-sudo apt-get install libdb5.1++-dev
+sudo apt-get install libdb4.8-dev
+sudo apt-get install libdb4.8++-dev
 sudo apt-get install libgmp-dev
 sudo apt-get install libminiupnpc-dev
  Boost 1.40+: sudo apt-get install libboost-all-dev
