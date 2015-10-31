@@ -1,58 +1,84 @@
 Copyright (c) 2009-2012 Bitcoin Developers
-Copyright (c) 2014-2015 Magi Developers
-Distributed under the MIT/X11 software license, see the accompanying
-file license.txt or http://www.opensource.org/licenses/mit-license.php.
-This product includes software developed by the OpenSSL Project for use in
-the OpenSSL Toolkit (http://www.openssl.org/).  This product includes
-cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP
-software written by Thomas Bernard.
 
+Copyright (c) 2014-2015 Magi Developers
+
+Distributed under the MIT/X11 software license, see the accompanying file license.txt or http://www.opensource.org/licenses/mit-license.php. This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/).  This product includes cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP
+software written by Thomas Bernard.
 
 UNIX BUILD NOTES
 ================
 
+It is recommeded to use Berkeley DB 4.8 for building Magi wallet (see the following instructions). 
+
+The Magi wallet is recom
+
+Build magid
+================
+
 To Build On i386, amd64
 --------
-
-cd src/
-make -f makefile.unix                          # Headless magi
+	cd src/
+	make -f makefile.unix                          # Headless magi
 
 To Build On armv6l
 --------
-cd src/
-make -f makefile.unix xCPUARCH=armv6l           # Headless magi
+	cd src/
+	make -f makefile.unix xCPUARCH=armv6l           # Headless magi
 
 To Build On armv7l
 --------
-cd src/
-make -f makefile.unix xCPUARCH=armv7l           # Headless magi
+	cd src/
+	make -f makefile.unix xCPUARCH=armv7l           # Headless magi
 
-See readme-qt.rst for instructions on building Bitcoin QT,
-the graphical bitcoin.
+The release is built with GCC and then "strip bitcoind" to strip the debug symbols, which reduces the executable size by about 90%.
+
+Build magi-qt
+================
+
+See readme-qt.rst for instructions on building Magi-QT. In general, the QT wallet can be built through following commands (provided dependencies are properly installed):
+	qmake magi-qt.pro
+	make
+
+To compile Berkeley DB 4.8 on your own:
+	```bash
+wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+# Verify source
+echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+tar -xzvf db-4.8.30.NC.tar.gz
+cd db-4.8.30.NC/build_unix
+# Build and install DB4.8 under /opt/local/db-4.8.30.NC
+../dist/configure --disable-shared --enable-cxx --disable-replication --with-pic --prefix=/opt/local/db-4.8.30.NC
+make
+sudo make install
+# Build Qt wallet with explicit setting of DB paths
+qmake magi-qt.pro BDB_INCLUDE_PATH=/opt/local/db-4.8.30.NC/include BDB_LIB_PATH=/opt/local/db-4.8.30.NC/lib BDB_LIB_SUFFIX=-4.8
+make
+
+```
 
 Dependencies for i386, amd64
 ------------
 
- Library      Purpose           Description
- -------      -------           -----------
- libssl       SSL Support       Secure communications
- libdb4.8     Berkeley DB       Blockchain & wallet storage
- libboost     Boost             C++ Library
- libminiupnpc UPnP Support      Optional firewall-jumping support
- libqrencode  QRCode generation Optional QRCode generation
- libgmp       GMP               Multiple precision arithmetic library
+ Library      | Purpose           | Description
+ -------------|-------------------|----------------------
+ libssl       | SSL Support       | Secure communications
+ libdb4.8     | Berkeley DB       | Blockchain & wallet storage
+ libboost     | Boost             | C++ Library
+ libminiupnpc | UPnP Support      | Optional firewall-jumping support
+ libqrencode  | QRCode generation | Optional QRCode generation
+ libgmp       | GMP               | Multiple precision arithmetic library
 
 Dependencies for armv6l, armv7l
 ------------
 
- Library      Purpose           Description
- -------      -------           -----------
- libssl       SSL Support       Secure communications
- libdb4.8     Berkeley DB       Blockchain & wallet storage
- libboost     Boost             C++ Library
- libminiupnpc UPnP Support      Optional firewall-jumping support
- libqrencode  QRCode generation Optional QRCode generation
- libgmp       GMP               Multiple precision arithmetic library
+ Library      | Purpose           Description
+ -------------|-------------------|----------------------
+ libssl       | SSL Support       | Secure communications
+ libdb4.8     | Berkeley DB       | Blockchain & wallet storage
+ libboost     | Boost             | C++ Library
+ libminiupnpc | UPnP Support      | Optional firewall-jumping support
+ libqrencode  | QRCode generation | Optional QRCode generation
+ libgmp       | GMP               | Multiple precision arithmetic library
 
 Note that libexecinfo should be installed, if you building under *BSD systems. 
 This library provides backtrace facility.
@@ -60,6 +86,7 @@ This library provides backtrace facility.
 miniupnpc may be used for UPnP port mapping.  It can be downloaded from
 http://miniupnp.tuxfamily.org/files/.  UPnP support is compiled in and
 turned off by default.  Set USE_UPNP to a different value to control this:
+
  USE_UPNP=-    No UPnP support - miniupnp not required
  USE_UPNP=0    (the default) UPnP support turned off by default at runtime
  USE_UPNP=1    UPnP support turned on by default at runtime
@@ -67,93 +94,42 @@ turned off by default.  Set USE_UPNP to a different value to control this:
 libqrencode may be used for QRCode image generation. It can be downloaded
 from http://fukuchi.org/works/qrencode/index.html.en, or installed via
 your package manager. Set USE_QRCODE to control this:
+
  USE_QRCODE=0   (the default) No QRCode support - libqrcode not required
  USE_QRCODE=1   QRCode support enabled
 
 Licenses of statically linked libraries:
+
  Berkeley DB   New BSD license with additional requirement that linked
                software must be free open source
  Boost         MIT-like license
  miniupnpc     New (3-clause) BSD license
 
-Versions used in this release:
- GCC           4.3.3
- OpenSSL       1.0.1g
- Berkeley DB   4.8.30.NC
- Boost         1.37
- miniupnpc     1.6
-
 Dependency Build Instructions: Ubuntu & Debian (i386, amd64)
 ----------------------------------------------
-sudo apt-get install build-essential
-sudo apt-get install libssl-dev
-sudo apt-get install libdb4.8-dev
-sudo apt-get install libdb4.8++-dev
-sudo apt-get install libgmp-dev
-sudo apt-get install libminiupnpc-dev
- Boost 1.40+: sudo apt-get install libboost-all-dev
- or Boost 1.37: sudo apt-get install libboost1.37-dev
-sudo apt-get install libqrencode-dev
+See above db4.8 building if you cannot find it through apt installation. The version libgmp may change, for example, libgmp3-dev as in the latest Debian distribution, you'll need to make sure the right version to be installed. 
+
+	sudo apt-get install build-essential libtool autotools-dev autoconf automake
+	sudo apt-get install libssl-dev
+	sudo apt-get install libdb4.8-dev
+	sudo apt-get install libdb4.8++-dev
+	sudo apt-get install libgmp-dev
+	sudo apt-get install libminiupnpc-dev
+	sudo apt-get install libboost-all-dev
+	sudo apt-get install libprotobuf-dev libqrencode-dev
 
 Dependency Build Instructions: Ubuntu & Debian (armv7l)
 ----------------------------------------------
-sudo apt-get install build-essential
-sudo apt-get install libssl-dev
-sudo apt-get install libdb4.8-dev
-sudo apt-get install libdb4.8++-dev
-sudo apt-get install libgmp-dev
-sudo apt-get install libminiupnpc-dev
- Boost 1.40+: sudo apt-get install libboost-all-dev
- or Boost 1.37: sudo apt-get install libboost1.37-dev
-sudo apt-get install libqrencode-dev
+See above db4.8 building if you cannot find it through apt installation. The version libgmp may change, for example, libgmp3-dev as in the latest Debian distribution, you'll need to make sure the right version to be installed. 
 
-If using Boost 1.37, append -mt to the boost libraries in the makefile.
-
-
-Dependency Build Instructions: Gentoo
--------------------------------------
-
-Note: If you just want to install bitcoind on Gentoo, you can add the Bitcoin
-      overlay and use your package manager:
-          layman -a bitcoin && emerge bitcoind
-
-emerge -av1 --noreplace boost glib openssl sys-libs/db:4.8
-
-Take the following steps to build (no UPnP support):
- cd ${BITCOIN_DIR}/src
- make -f makefile.unix USE_UPNP= BDB_INCLUDE_PATH='/usr/include/db4.8'
- strip bitcoind
-
-
-Notes
------
-The release is built with GCC and then "strip bitcoind" to strip the debug
-symbols, which reduces the executable size by about 90%.
-
-
-miniupnpc
----------
-tar -xzvf miniupnpc-1.6.tar.gz
-cd miniupnpc-1.6
-make
-sudo su
-make install
-
-
-Berkeley DB
------------
-You need Berkeley DB 4.8.  If you have to build Berkeley DB yourself:
-../dist/configure --enable-cxx
-make
-
-
-Boost
------
-If you need to build Boost yourself:
-sudo su
-./bootstrap.sh
-./bjam install
-
+	sudo apt-get install build-essential
+	sudo apt-get install libssl-dev
+	sudo apt-get install libdb4.8-dev
+	sudo apt-get install libdb4.8++-dev
+	sudo apt-get install libgmp-dev
+	sudo apt-get install libminiupnpc-dev
+	sudo apt-get install libboost-all-dev
+	sudo apt-get install libprotobuf-dev libqrencode-dev
 
 Security
 --------
