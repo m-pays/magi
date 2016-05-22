@@ -10,8 +10,6 @@ UNIX BUILD NOTES
 
 It is recommeded to use Berkeley DB 4.8 for building Magi wallet (see the following instructions). 
 
-The Magi wallet is recom
-
 Build magid
 ================
 
@@ -40,7 +38,8 @@ See readme-qt.rst for instructions on building Magi-QT. In general, the QT walle
 	make
 
 To compile Berkeley DB 4.8 on your own:
-	```bash
+
+```bash
 wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
 # Verify source
 echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
@@ -50,11 +49,12 @@ cd db-4.8.30.NC/build_unix
 ../dist/configure --disable-shared --enable-cxx --disable-replication --with-pic --prefix=/opt/local/db-4.8.30.NC
 make
 sudo make install
-# Build Qt wallet with explicit setting of DB paths
-qmake magi-qt.pro BDB_INCLUDE_PATH=/opt/local/db-4.8.30.NC/include BDB_LIB_PATH=/opt/local/db-4.8.30.NC/lib BDB_LIB_SUFFIX=-4.8
-make
-
 ```
+Then Build Qt wallet with explicit DB paths:
+
+	qmake magi-qt.pro BDB_INCLUDE_PATH=/opt/local/db-4.8.30.NC/include BDB_LIB_PATH=/opt/local/db-4.8.30.NC/lib BDB_LIB_SUFFIX=-4.8
+	make
+
 
 Dependencies for i386, amd64
 ------------
@@ -87,23 +87,16 @@ miniupnpc may be used for UPnP port mapping.  It can be downloaded from
 http://miniupnp.tuxfamily.org/files/.  UPnP support is compiled in and
 turned off by default.  Set USE_UPNP to a different value to control this:
 
- USE_UPNP=-    No UPnP support - miniupnp not required
- USE_UPNP=0    (the default) UPnP support turned off by default at runtime
- USE_UPNP=1    UPnP support turned on by default at runtime
+	USE_UPNP=-    No UPnP support - miniupnp not required
+	USE_UPNP=0    (the default) UPnP support turned off by default at runtime
+	USE_UPNP=1    UPnP support turned on by default at runtime
 
 libqrencode may be used for QRCode image generation. It can be downloaded
 from http://fukuchi.org/works/qrencode/index.html.en, or installed via
 your package manager. Set USE_QRCODE to control this:
 
- USE_QRCODE=0   (the default) No QRCode support - libqrcode not required
- USE_QRCODE=1   QRCode support enabled
-
-Licenses of statically linked libraries:
-
- Berkeley DB   New BSD license with additional requirement that linked
-               software must be free open source
- Boost         MIT-like license
- miniupnpc     New (3-clause) BSD license
+	USE_QRCODE=0   (the default) No QRCode support - libqrcode not required
+	USE_QRCODE=1   QRCode support enabled
 
 Dependency Build Instructions: Ubuntu & Debian (i386, amd64)
 ----------------------------------------------
