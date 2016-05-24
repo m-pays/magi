@@ -40,3 +40,10 @@ qt-builds/version-og/qrc_*.cpp
 .DS_Store
 build
 qt-builds/version-og/build
+
+# some other builds
+qt-builds/*
+qt-builds
+src/qt-og/*
+src/qt-og
+magi-qt-unix*
