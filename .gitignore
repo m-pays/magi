@@ -4,6 +4,7 @@ src/*.exe
 src/magi
 src/magid
 src/test_magi
+src/makefile-static.unix
 .*.swp
 *.*~*
 *.bak
