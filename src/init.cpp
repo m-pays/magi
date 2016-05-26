@@ -27,6 +27,8 @@ using namespace boost;
 CWallet* pwalletMain;
 CClientUIInterface uiInterface;
 
+bool fUseFastIndex;
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -354,6 +356,7 @@ bool AppInit2()
     // ********************************************************* Step 2: parameter interactions
 
     fTestNet = GetBoolArg("-testnet");
+    fUseFastIndex = GetBoolArg("-fastindex", true);
     if (fTestNet) {
         SoftSetBoolArg("-irc", true);
     }
