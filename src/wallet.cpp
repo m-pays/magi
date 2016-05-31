@@ -6,6 +6,7 @@
 #include "main.h"
 #include "wallet.h"
 #include "walletdb.h"
+#include "txdb.h"
 #include "crypter.h"
 #include "ui_interface.h"
 #include "base58.h"

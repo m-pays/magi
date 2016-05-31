@@ -2,14 +2,13 @@
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include "db.h"
+#include "init.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
+#include "txdb.h"
 #include "net.h"
-#include "init.h"
 #include "util.h"
 #include "ui_interface.h"
-#include "checkpoints.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -655,19 +654,17 @@ bool AppInit2()
         }
     }
 
-    if (mapArgs.count("-checkpointkey")) // ppcoin: checkpoint master priv key
-    {
-        if (!Checkpoints::SetCheckpointPrivKey(GetArg("-checkpointkey", "")))
-            InitError(_("Unable to sign checkpoint, wrong checkpointkey?\n"));
-    }
-
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
         AddOneShot(strDest);
 
     // TODO: replace this by DNSseed
     // AddOneShot(string(""));
 
-    // ********************************************************* Step 7: load blockchain
+    // ********************************************************* Step 7: load block chain
+
+    filesystem::path blocksDir = GetDataDir() / "blocks";
+    if (!filesystem::exists(blocksDir))
+        filesystem::create_directories(blocksDir);
 
     if (!bitdb.Open(GetDataDir()))
     {
@@ -689,7 +686,7 @@ bool AppInit2()
     printf("Loading block index...\n");
     nStart = GetTimeMillis();
     if (!LoadBlockIndex())
-        return InitError(_("Error loading blkindex.dat"));
+        return InitError(_("Error loading block database"));
 
     // as LoadBlockIndex can take several minutes, it's possible the user
     // requested to kill bitcoin-qt during the last operation. If so, exit.
