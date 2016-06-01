@@ -38,10 +38,7 @@ void init_blockindex(leveldb::Options& options, bool fRemoveOld = false) {
     filesystem::path directory = GetDataDir() / "blocks" / "index";
 
     if (fRemoveOld) {
-//      destroy_blockindex();
 		filesystem::path directory = GetDataDir() / "blocks" / "index";
-//		printf("Destroying LevelDB in: %s\n", directory.string().c_str());
-//		MilliSleep(500);
 		filesystem::remove_all(directory); // remove directory
 		unsigned int nFile = 1;
 
@@ -59,7 +56,7 @@ void init_blockindex(leveldb::Options& options, bool fRemoveOld = false) {
 		}
     }
 
-    filesystem::create_directory(directory);
+    filesystem::create_directories(directory);
     printf("Opening LevelDB in %s\n", directory.string().c_str());
     leveldb::Status status = leveldb::DB::Open(options, directory.string(), &txdb);
     if (!status.ok()) {
