@@ -312,6 +312,12 @@ public:
 };
 
 
+
+
+
+
+
+
 /** Access to the (IP) address database (peers.dat) */
 class CAddrDB
 {

@@ -4876,7 +4876,7 @@ void MagiMiner(CWallet *pwallet, bool fProofOfStake)
         while (vNodes.empty() || IsInitialBlockDownload() || pwallet->IsLocked())
         {
             nLastCoinStakeSearchInterval = 0;
-            Sleep(1000);
+            MilliSleep(1000);
             if (fShutdown)
                 return;
             if (!fGenerateMagi && !fProofOfStake)
@@ -4911,7 +4911,7 @@ void MagiMiner(CWallet *pwallet, bool fProofOfStake)
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
             }
-            Sleep(500);
+            MilliSleep(500);
             continue;
         }
 
@@ -5069,7 +5069,7 @@ void GenerateMagi(bool fGenerate, CWallet* pwallet)
         {
             if (!NewThread(ThreadMagiMiner, pwallet))
                 printf("Error: NewThread(ThreadMagiMiner) failed\n");
-            Sleep(10);
+            MilliSleep(10);
         }
     }
 }
