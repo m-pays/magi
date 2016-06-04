@@ -2969,7 +2969,6 @@ bool CBlock::CheckBlockSignature() const
 
     vector<valtype> vSolutions;
     txnouttype whichType;
-    const CTxOut& txout = IsProofOfStake()? vtx[1].vout[1] : vtx[0].vout[0];
 
     if(IsProofOfStake())
     {
