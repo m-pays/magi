@@ -46,6 +46,9 @@ unsigned int nStakeMinAge = 60 * 60 * 2;	// minimum age for coin age: 2 hr
 unsigned int nStakeMaxAge = 60 * 60 * 24 * 30;	// stake age of full weight: 30 days
 unsigned int nStakeTargetSpacing = 90;		// 90 sec PoS block spacing
 
+int64 nStakeSplitThreshold = 500; // PoS stake splitting threshold
+int64 nStakeCombineThreshold = nStakeSplitThreshold / 2; // PoS stake combining threshold
+
 static const int64 nTargetTimespan = 60 * 30;	// 30 min
 static const int64 nTargetSpacingWork = 2 * nStakeTargetSpacing; // 3 min PoW block spacing
 

@@ -118,6 +118,8 @@ extern std::set<std::pair<COutPoint, unsigned int> > setStakeSeen;
 extern uint256 hashGenesisBlock;
 extern CBlockIndex* pindexGenesisBlock;
 extern unsigned int nStakeMinAge;
+extern int64 nStakeSplitThreshold;
+extern int64 nStakeCombineThreshold;
 extern int nCoinbaseMaturity;
 //extern int64 nLastPrevMoneySupply;
 extern int nBestHeight;
@@ -141,7 +143,6 @@ extern std::map<uint256, CBlock*> mapOrphanBlocks;
 // Settings
 extern int64 nTransactionFee;
 extern int64 nMinimumInputValue;
-extern bool fUseFastIndex;
 
 // Minimum disk space required - used in CheckDiskSpace()
 static const uint64 nMinDiskSpace = 52428800;

@@ -18,8 +18,7 @@
 using namespace std;
 extern unsigned int nStakeMaxAge;
 
-unsigned int nStakeSplitAge = 60 * 60 * 24 * 30;
-int64 nStakeCombineThreshold = 1000 * COIN;
+unsigned int nStakeSplitAgeThreshold = 60 * 60 * 24 * 30;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1493,11 +1492,11 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
         static int nMaxStakeSearchInterval = 60;
 
-	CTransaction txPrev=*pcoin.first;
-	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
-			    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval)) : 
-			    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval));
+    	CTransaction txPrev=*pcoin.first;
+    	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
+    	int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+    			    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval)) : 
+    			    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval));
 
 		if (fDebugMagi && (pindexBest->nHeight%10 == 0)) printf(">* CreateCoinStake : block.GetBlockTime() = %"PRI64d", nStakeMinAge = %d, txNew.nTime = %d, nTimeWeight = %"PRI64d" \n", block.GetBlockTime(), nStakeMinAge, txNew.nTime, nTimeWeight);
         if (nTimeWeight < nStakeMinAge)
@@ -1512,7 +1511,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             uint256 hashProofOfStake = 0;
             COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
             if (CheckStakeKernelHash(pindexBest, nBits, block, txindex.pos.nTxPos - txindex.pos.nBlockPos, *pcoin.first, prevoutStake, txNew.nTime - n, hashProofOfStake))
-	    {
+	       {
+                int64 nCoinStakeValue = pcoin.first->vout[pcoin.second].nValue;
                // Found a kernel
                 if (fDebug && GetBoolArg("-printcoinstake"))
                     printf("CreateCoinStake : kernel found\n");
@@ -1551,21 +1551,23 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
                 txNew.nTime -= n;
                 txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
-                nCredit += pcoin.first->vout[pcoin.second].nValue;
+                nCredit += nCoinStakeValue;
 
 //			if (fDebugMagi) printf(">* CreateCoinStake : nCredit = %"PRI64d"\n", nCredit);
 
                 vwtxPrev.push_back(pcoin.first);
-                txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
+                txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); // stake
 
-		CTransaction txPrev=*pcoin.first;
-		COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-		int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
-				    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime) : 
-				    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime);
+        		CTransaction txPrev=*pcoin.first;
+        		COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
+        		int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+        				    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime) : 
+        				    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)txNew.nTime);
 
-		if ((unsigned int)nTimeWeight < nStakeSplitAge)
-                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
+                // To do: nStakeSplitAgeThreshold to be done in a better way
+        		if ( ((unsigned int)nTimeWeight < nStakeSplitAgeThreshold) && 
+                    (nCoinStakeValue > nStakeSplitThreshold * COIN) )
+                        txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); // add another tx for split stake
 
                 if (fDebug && GetBoolArg("-printcoinstake"))
                     printf("CreateCoinStake : added kernel type=%d\n", whichType);
@@ -1582,36 +1584,52 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         return false;
 	}
 
-    BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
+    // Attempt to add more inputs
+    // vout other than 2 due to splitting
+    if (txNew.vout.size() == 2)
     {
-        // Attempt to add more inputs
-        // Only add coins of the same key/address as kernel
-        if (txNew.vout.size() == 2 && ((pcoin.first->vout[pcoin.second].scriptPubKey == scriptPubKeyKernel || pcoin.first->vout[pcoin.second].scriptPubKey == txNew.vout[1].scriptPubKey))
-            && pcoin.first->GetHash() != txNew.vin[0].prevout.hash)
+        BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
         {
-            // Stop adding more inputs if already too many inputs
-            if (txNew.vin.size() >= 100)
-                break;
-            // Stop adding more inputs if value is already pretty significant
-            if (nCredit > nStakeCombineThreshold)
-                break;
-            // Stop adding inputs if reached reserve limit
-            if (nCredit + pcoin.first->vout[pcoin.second].nValue > nBalance - nReserveBalance)
-                break;
-            // Do not add additional significant input
-            if (pcoin.first->vout[pcoin.second].nValue > nStakeCombineThreshold)
-                continue;
-	    // Do not add input that is still too young
-	    CTransaction txPrev=*pcoin.first;
-	    COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	    int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
-				GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime) : 
-				GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
-            if (nTimeWeight < nStakeMinAge)
-                continue;
-            txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
-            nCredit += pcoin.first->vout[pcoin.second].nValue;
-            vwtxPrev.push_back(pcoin.first);
+            // Only add coins of the same key/address as kernel
+            if (pcoin.first->vout[pcoin.second].scriptPubKey == scriptPubKeyKernel || pcoin.first->vout[pcoin.second].scriptPubKey == txNew.vout[1].scriptPubKey)
+                // The original design prevents stakes having the same parent transaction from combining
+                // which somehow reads as encouraging splitting (improve security);
+                // This mechanism is to be disabled in Magi since combining won't cause security concern 
+//                && (pcoin.first->GetHash() != txNew.vin[0].prevout.hash)
+            {
+                // Stop adding more inputs if already too many inputs
+                if (txNew.vin.size() >= 100)
+                    break;
+                // Stop adding more inputs if value is already pretty significant;
+                /* Splitting is only enforced at wallet, not by PoS protocol as well as consensus over network.
+                 * Original PPCoin design encourages splitting as per "Lower coinstake combine threshold to
+                 * improve security", which can be understood by the fact that in general PoS, with a large
+                 * number of coins in stake comes greater chance of (PoS) mining blocks. This is not going to 
+                 * happen in Magi. Also, hardening nStakeCombineThreshold is impractical since an advanced user 
+                 * can easilly make a change to that and rebuild a wallet. The change to nStakeCombineThreshold 
+                 * should be available externally, e.g., RPC command, magi.conf configuration file. 
+                 ** Magi, for optimum staking, nStakeCombineThreshold should be used in combination with nStakeSplitThreshold.*/
+                if (nCredit > nStakeCombineThreshold * COIN)
+                    break;
+                int64 nCoinStakeValue = pcoin.first->vout[pcoin.second].nValue;
+                // Stop adding inputs if reached reserve limit
+                if (nCredit + nCoinStakeValue > nBalance - nReserveBalance)
+                    break;
+                // Do not add single input which is already greater than nStakeCombineThreshold
+                if (nCoinStakeValue > nStakeCombineThreshold * COIN)
+                    continue;
+        	    // Do not add input that is still too young
+        	    CTransaction txPrev=*pcoin.first;
+        	    COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
+        	    int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+        				GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime) : 
+        				GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
+                if (nTimeWeight < nStakeMinAge)
+                    continue;
+                txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
+                nCredit += nCoinStakeValue;
+                vwtxPrev.push_back(pcoin.first);
+            }
         }
     }
 

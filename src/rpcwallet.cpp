@@ -1789,3 +1789,49 @@ Value makekeypair(const Array& params, bool fHelp)
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey().Raw())));
     return result;
 }
+
+Value setstakecombinethreshold(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "setstakecombinethreshold <n>\n"
+            "Set a threshold (XMG) below which PoS stake combines various small inputs.");
+    nStakeCombineThreshold = (int64) params[0].get_int();
+    Object result;
+    result.push_back(Pair("PoS stake combining threshold is set to (< XMG) ", (boost::int64_t)nStakeCombineThreshold));
+    return result;
+}
+
+Value setstakesplitthreshold(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "setstakesplitthreshold <n>\n"
+            "Set a threshold value (XMG) above which PoS stake splits into two.");
+    nStakeSplitThreshold = (int64) params[0].get_int();
+    Object result;
+    result.push_back(Pair("PoS stake splitting threshold is set to (> XMG) ", (boost::int64_t)nStakeSplitThreshold));
+    return result;
+}
+
+Value getstakecombinethreshold(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getstakecombinethreshold\n"
+            "Returns a threshold value (XMG) of PoS stake combining.");
+    Object result;
+    result.push_back(Pair("PoS stake combining threshold (< XMG): ", (boost::int64_t)nStakeCombineThreshold));
+    return result;
+}
+
+Value getstakesplitthreshold(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getstakesplitthreshold\n"
+            "Returns a threshold value (XMG) of PoS stake splitting.");
+    Object result;
+    result.push_back(Pair("PoS stake splitting threshold (> XMG): ", (boost::int64_t)nStakeSplitThreshold));
+    return result;
+}

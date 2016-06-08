@@ -27,6 +27,8 @@ CWallet* pwalletMain;
 CClientUIInterface uiInterface;
 
 bool fUseFastIndex;
+extern int64 nStakeSplitThreshold;
+extern int64 nStakeCombineThreshold;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -252,6 +254,8 @@ std::string HelpMessage()
         "  -bantime=<n>           " + _("Number of seconds to keep misbehaving peers from reconnecting (default: 86400)") + "\n" +
         "  -maxreceivebuffer=<n>  " + _("Maximum per-connection receive buffer, <n>*1000 bytes (default: 5000)") + "\n" +
         "  -maxsendbuffer=<n>     " + _("Maximum per-connection send buffer, <n>*1000 bytes (default: 1000)") + "\n" +
+        "  -stakecombinethreshold=<n>     " + _("Threshold for PoS stake combining various small inputs (default: < 250 XMG)") + "\n" +
+        "  -stakesplitthreshold=<n>     " + _("Threshold for PoS stake splitting into two (default: > 500 XMG)") + "\n" +
 #ifdef USE_UPNP
 #if USE_UPNP
         "  -upnp                  " + _("Use UPnP to map the listening port (default: 1 when listening)") + "\n" +
@@ -393,6 +397,9 @@ bool AppInit2()
         // Rewrite just private keys: rescan to find transactions
         SoftSetBoolArg("-rescan", true);
     }
+
+    nStakeSplitThreshold = GetArg("-stakesplitthreshold", nStakeSplitThreshold);
+    nStakeCombineThreshold = GetArg("-stakecombinethreshold", nStakeCombineThreshold);
 
     // ********************************************************* Step 3: parameter-to-internal-flags
 
