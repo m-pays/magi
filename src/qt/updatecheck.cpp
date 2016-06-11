@@ -3,7 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "updatecheck.h"
- 
+//#include <iostream>
+
 UpdateCheck::UpdateCheck(QUrl updateUrl, QObject *parent) :
  QObject(parent)
 {
@@ -32,6 +33,11 @@ std::vector<std::string> UpdateCheck::splitString(std::string input, std::string
     std::vector<std::string> output;
     size_t start = 0;
     size_t end = 0;
+
+    //DEBUG: In order to ensure we aren't having errors receiving the version info,
+    //       print the string that we read in the console.
+    //       This should *not* be enabled in the released wallet
+    //std::cout << "Version String Received: " << input << std::endl;
 
     // Until we hit the end of the string, push string chunks
     // into the return array
