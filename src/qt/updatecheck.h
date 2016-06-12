@@ -15,7 +15,7 @@
 
 /** \def _UPDATE_INTERVAL Frequency of update checks (units: hours)
  */
-#define _UPDATE_INTERVAL 12
+#define _UPDATE_INTERVAL 2
 
 /** \def _UPDATE_MS_TO_HOURS Conversion factor from milliseconds to hours
  */
@@ -41,7 +41,11 @@
  *  to escape them for use with QString
  */
 #define _UPDATE_DOWNLOAD_URL "http://coinmagi.org/bin/"
- 
+
+// url (temporary) for checking price
+#define BTC_PRICE_URL "https://api.coinmarketcap.com/v1/ticker/bitcoin/"
+#define MAGI_TO_USD_PRICE_URL "https://api.coinmarketcap.com/v1/ticker/magi/"
+
 class UpdateCheck : public QObject
 {
     Q_OBJECT

@@ -2,6 +2,8 @@
 #define OVERVIEWPAGE_H
 
 #include <QWidget>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -32,9 +34,11 @@ public:
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
     void setNumTransactions(int count);
+    void updateValues();
 
 signals:
     void transactionClicked(const QModelIndex &index);
+    void valueChanged();
 
 private:
     Ui::OverviewPage *ui;
@@ -43,6 +47,7 @@ private:
     qint64 currentStake;
     qint64 currentUnconfirmedBalance;
     qint64 currentImmatureBalance;
+    qint64 currentTotalBalance;
 
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
@@ -50,11 +55,18 @@ private:
     UpdateCheck *m_pUpdCtrl;
     QTimer *updateTimer;
 
+    double rPriceInBTC;
+    double rPriceInUSD;
+    QNetworkAccessManager mUSDPriceCheck;
+    QNetworkAccessManager mBTCPriceCheck;
+
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
     void timerUpdate();
     void checkForUpdates();
+    void updateValueInUSD(QNetworkReply* resp);
+    void updateValueInBTC(QNetworkReply* resp);
 };
 
 #endif // OVERVIEWPAGE_H

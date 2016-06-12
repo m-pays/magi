@@ -6,6 +6,7 @@
 #include "optionsmodel.h"
 #include "transactiontablemodel.h"
 #include "transactionfilterproxy.h"
+#include "util.h"
 #include "guiutil.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
@@ -19,6 +20,10 @@
 #include <QDesktopServices>  //Added for openURL()
 #include <QTimer>            //Added for update timer
 #include <QUrl>
+
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
@@ -141,6 +146,11 @@ OverviewPage::OverviewPage(QWidget *parent) :
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
     updateTimer->start(_UPDATE_INTERVAL*_UPDATE_MS_TO_HOURS);
 
+    // check price
+    connect(&mUSDPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInUSD(QNetworkReply*)));
+    connect(&mBTCPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInBTC(QNetworkReply*)));
+    connect(this, SIGNAL(valueChanged()), this, SLOT(updateValues()));
+
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
 
@@ -166,17 +176,21 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
     currentStake = stake;
     currentUnconfirmedBalance = unconfirmedBalance;
     currentImmatureBalance = immatureBalance;
+    currentTotalBalance = balance + stake + unconfirmedBalance;
     ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balance));
     ui->labelStake->setText(BitcoinUnits::formatWithUnit(unit, stake));
     ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance));
     ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance));
-    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, (balance + stake + unconfirmedBalance)));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, currentTotalBalance));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
     bool showImmature = immatureBalance != 0;
     ui->labelImmature->setVisible(showImmature);
     ui->labelImmatureText->setVisible(showImmature);
+
+    // emit a value-change signal per balance updating
+    emit valueChanged();
 }
 
 void OverviewPage::setNumTransactions(int count)
@@ -247,11 +261,49 @@ void OverviewPage::showUpdateLayout(bool fShow)
 
 void OverviewPage::timerUpdate()
 {
-    // Create a connection to the website to check for updates
+    // create a connection to the website to check for updates
     QUrl updateUrl(_UPDATE_VERSION_URL);
     m_pUpdCtrl = new UpdateCheck(updateUrl, this);
     
     connect(m_pUpdCtrl, SIGNAL (downloaded()), this, SLOT (checkForUpdates()));
+
+    // check price
+//    QUrl priceUrl(MAGI_TO_USD_PRICE_URL);
+//    QUrl priceUSDUrl(MAGI_TO_USD_PRICE_URL);
+//    QNetworkRequest request(QUrl(MAGI_TO_USD_PRICE_URL));
+    mUSDPriceCheck.get(QNetworkRequest(QUrl(MAGI_TO_USD_PRICE_URL)));
+    MilliSleep(10000);
+    mBTCPriceCheck.get(QNetworkRequest(QUrl(BTC_PRICE_URL)));
+}
+
+void OverviewPage::updateValueInUSD(QNetworkReply* resp)
+{
+    
+    QByteArray bResp = resp->readAll();
+    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
+    QJsonArray jArray = jResp.array();
+    rPriceInUSD = (jArray[0].toObject())["price_usd"].toDouble();
+    emit valueChanged();
+}
+
+void OverviewPage::updateValueInBTC(QNetworkReply* resp)
+{
+    
+    QByteArray bResp = resp->readAll();
+    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
+    QJsonArray jArray = jResp.array();
+    rPriceInBTC = rPriceInUSD / (jArray[0].toObject())["price_usd"].toDouble();
+    emit valueChanged();
+}
+
+void OverviewPage::updateValues()
+{
+    qint64 valueInBTC = currentTotalBalance * rPriceInBTC;
+    qint64 valueInUSD = currentTotalBalance * rPriceInUSD;
+    ui->labelValueInBTC->setText(BitcoinUnits::format(0, valueInBTC, false) + QString(" BTC"));
+    ui->labelValueInUSD->setText(BitcoinUnits::format(0, valueInUSD, false) + QString(" USD"));
+    ui->labelPriceInBTC->setText(BitcoinUnits::format(0, rPriceInBTC*100000000, false) + QString(" BTC/XMG"));
+    ui->labelPriceInUSD->setText(BitcoinUnits::format(0, rPriceInUSD*100000000, false) + QString(" USD/XMG"));
 }
 
 void OverviewPage::checkForUpdates()
