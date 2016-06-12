@@ -15,7 +15,7 @@
 
 /** \def _UPDATE_INTERVAL Frequency of update checks (units: hours)
  */
-#define _UPDATE_INTERVAL 24
+#define _UPDATE_INTERVAL 12
 
 /** \def _UPDATE_MS_TO_HOURS Conversion factor from milliseconds to hours
  */
