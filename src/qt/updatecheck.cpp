@@ -41,10 +41,21 @@ unsigned int UpdateCheck::parseClientVersion(const std::string &s, char delim)
     for (unsigned int i = 0; std::getline(ss, seg, delim); i += 2) {
         boost::trim(seg);
         try {
-        nVersion +=10000000 / pow(10., i) * boost::lexical_cast<int>(seg);
+            nVersion +=10000000 / pow(10., i) * boost::lexical_cast<int>(seg);
         } catch (const boost::bad_lexical_cast &) {
-            if (seg.find("rc") == 0) // rc version
-                nVersion += 1;
+            unsigned nPos = 1;
+            if (seg.find("a") == 0) // release a1~a3
+                nVersion -= 9;
+            else if (seg.find("b") == 0) // release b1~b3
+                nVersion -= 6;
+            else if (seg.find("rc") == 0) { // rc1~rc3
+                nVersion -= 3;
+                ++nPos;
+            }
+            try {
+                nVersion += boost::lexical_cast<int>(seg[nPos]);
+            } catch (const boost::bad_lexical_cast &) {
+            }
             break;
         }
 
