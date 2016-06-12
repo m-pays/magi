@@ -49,8 +49,8 @@ class UpdateCheck : public QObject
         explicit UpdateCheck(QUrl updateUrl, QObject *parent = 0);
         virtual ~UpdateCheck();
         QByteArray downloadedData() const;
-        std::vector<std::string> splitString(std::string input, std::string delimiter);
- 
+        unsigned int parseClientVersion(const std::string &s, char delim);
+
     signals:
         void downloaded();
  

@@ -2,6 +2,11 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <string>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include "updatecheck.h"
 //#include <iostream>
 
@@ -28,37 +33,21 @@ QByteArray UpdateCheck::downloadedData() const {
     return m_DownloadedData;
 }
 
-std::vector<std::string> UpdateCheck::splitString(std::string input, std::string delimiter)
+unsigned int UpdateCheck::parseClientVersion(const std::string &s, char delim)
 {
-    std::vector<std::string> output;
-    size_t start = 0;
-    size_t end = 0;
-
-    //DEBUG: In order to ensure we aren't having errors receiving the version info,
-    //       print the string that we read in the console.
-    //       This should *not* be enabled in the released wallet
-    //std::cout << "Version String Received: " << input << std::endl;
-
-    // Until we hit the end of the string, push string chunks
-    // into the return array
-    while (start != std::string::npos && end != std::string::npos)
-    {
-        start = input.find_first_not_of(delimiter, end);
-
-        if (start != std::string::npos)
-        {
-            end = input.find_first_of(delimiter, start);
-
-            if (end != std::string::npos)
-            {
-                output.push_back(input.substr(start, end - start));
-            }
-            else
-            {
-                output.push_back(input.substr(start));
-            }
+    std::stringstream ss(s);
+    std::string seg;
+    unsigned int nVersion = 0;
+    for (unsigned int i = 0; std::getline(ss, seg, delim); i += 2) {
+        boost::trim(seg);
+        try {
+        nVersion +=10000000 / pow(10., i) * boost::lexical_cast<int>(seg);
+        } catch (const boost::bad_lexical_cast &) {
+            if (seg.find("rc") == 0) // rc version
+                nVersion += 1;
+            break;
         }
-    }
 
-    return output;
+    }
+    return nVersion;
 }
