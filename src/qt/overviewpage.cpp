@@ -281,7 +281,7 @@ void OverviewPage::checkForUpdates()
         showUpdateLayout(false);
     } else {
         report = QString(_UPDATE_DOWNLOAD_URL);
-        report = QString("<a href=\"" + report + "\">Wallet version " + siteVersion + " available!</a>");
+        report = QString("<a href=\"" + report + "\">v" + siteVersion + " available</a>");
         showUpdateLayout(true);
     }
 
