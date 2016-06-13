@@ -147,6 +147,8 @@ OverviewPage::OverviewPage(QWidget *parent) :
     updateTimer->start(_UPDATE_INTERVAL*_UPDATE_MS_TO_HOURS);
 
     // check price
+    rPriceInBTC = 0.;
+    rPriceInUSD = 0.;
     connect(&mUSDPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInUSD(QNetworkReply*)));
     connect(&mBTCPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInBTC(QNetworkReply*)));
     connect(this, SIGNAL(valueChanged()), this, SLOT(updateValues()));
@@ -268,9 +270,6 @@ void OverviewPage::timerUpdate()
     connect(m_pUpdCtrl, SIGNAL (downloaded()), this, SLOT (checkForUpdates()));
 
     // check price
-//    QUrl priceUrl(MAGI_TO_USD_PRICE_URL);
-//    QUrl priceUSDUrl(MAGI_TO_USD_PRICE_URL);
-//    QNetworkRequest request(QUrl(MAGI_TO_USD_PRICE_URL));
     mUSDPriceCheck.get(QNetworkRequest(QUrl(MAGI_TO_USD_PRICE_URL)));
     MilliSleep(10000);
     mBTCPriceCheck.get(QNetworkRequest(QUrl(BTC_PRICE_URL)));
@@ -292,8 +291,11 @@ void OverviewPage::updateValueInBTC(QNetworkReply* resp)
     QByteArray bResp = resp->readAll();
     QJsonDocument jResp = QJsonDocument::fromJson(bResp);
     QJsonArray jArray = jResp.array();
-    rPriceInBTC = rPriceInUSD / (jArray[0].toObject())["price_usd"].toDouble();
-    emit valueChanged();
+    rPriceInBTC = (jArray[0].toObject())["price_usd"].toDouble();
+    if (rPriceInBTC > MINFINITESIMAL) {
+        rPriceInBTC = rPriceInUSD / rPriceInBTC;
+        emit valueChanged();
+    }
 }
 
 void OverviewPage::updateValues()

@@ -9,6 +9,8 @@
 #include "version.h"
 #include "ui_interface.h"
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Work around clang compilation problem in Boost 1.46:
 // /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
@@ -1405,4 +1407,16 @@ bool NewThread(void(*pfn)(void*), void* parg)
         return false;
     }
     return true;
+}
+
+bool StringToDouble(const std::string &s, double &val)
+{
+    std::string str(s);
+    boost::trim(str);
+    try {
+        val = boost::lexical_cast<double>(str);
+        return true;
+    } catch (const boost::bad_lexical_cast &) {
+        return false;
+    }
 }
