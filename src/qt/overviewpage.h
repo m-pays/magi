@@ -1,9 +1,10 @@
 #ifndef OVERVIEWPAGE_H
 #define OVERVIEWPAGE_H
 
+#include "guiutil.h"
+
+#include <QLabel>
 #include <QWidget>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -52,21 +53,23 @@ private:
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
+    void setupClientUpdateCheck();
+    QLabel *labelUpdateStatic;
+    QLabel *labelUpdateStatus;
     UpdateCheck *m_pUpdCtrl;
     QTimer *updateTimer;
 
-    double rPriceInBTC;
-    double rPriceInUSD;
-    QNetworkAccessManager mUSDPriceCheck;
-    QNetworkAccessManager mBTCPriceCheck;
+    void setupPriceUpdateCheck();
+    GUIUtil::QCLabel *labelPriceInBTC;
+    GUIUtil::QCLabel *labelPriceInUSD;
+    GUIUtil::QPriceInfo *priceInfo;
 
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
     void timerUpdate();
     void checkForUpdates();
-    void updateValueInUSD(QNetworkReply* resp);
-    void updateValueInBTC(QNetworkReply* resp);
+    void checkPrice();
 };
 
 #endif // OVERVIEWPAGE_H

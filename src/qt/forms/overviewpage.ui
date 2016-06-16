@@ -24,6 +24,12 @@
        <property name="styleSheet">
         <string notr="true">#frame { background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(70,71,71,15), stop:1.0 rgba(70,71,71,0)); }</string>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -37,10 +43,10 @@
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
-             <string>Wallet</string>
+             <string>Balance</string>
             </property>
            </widget>
           </item>
@@ -80,6 +86,9 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
+          <property name="labelAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
           <property name="horizontalSpacing">
            <number>12</number>
           </property>
@@ -89,10 +98,10 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
-             <string>Balance:</string>
+             <string>Available:                         </string>
             </property>
            </widget>
           </item>
@@ -111,7 +120,7 @@
              <string>Your current balance</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string notr="true">0 XMG</string>
@@ -124,7 +133,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_6">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Stake:</string>
@@ -146,7 +155,7 @@
              <string>Total of coins that was staked, and do not yet count toward the current balance</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string notr="true">0 XMG</string>
@@ -159,7 +168,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_3">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Unconfirmed:</string>
@@ -181,7 +190,7 @@
              <string>Total of transactions that have yet to be confirmed, and do not yet count toward the current balance</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string notr="true">0 XMG</string>
@@ -194,7 +203,7 @@
           <item row="3" column="0">
            <widget class="QLabel" name="labelImmatureText">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Immature:</string>
@@ -213,7 +222,7 @@
              <string>Generated balance that has not yet matured</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string notr="true">0 XMG</string>
@@ -226,7 +235,7 @@
           <item row="4" column="0">
            <widget class="QLabel" name="labelTotalText">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Total balance:</string>
@@ -245,7 +254,7 @@
              <string>Total includes: balance, stake and unconfirmed values</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>0 XMG</string>
@@ -268,7 +277,7 @@
              <string>Values in BTC</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>0 BTC</string>
@@ -290,146 +299,13 @@
              <string>Values in USD</string>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>0 USD</string>
             </property>
             <property name="textInteractionFlags">
              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string>Number of transactions:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QLabel" name="labelNumTransactions">
-            <property name="toolTip">
-             <string>Total number of transactions in wallet</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string notr="true">0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="labelPriceText_2">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string>Price:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="1">
-           <widget class="QLabel" name="labelPriceInBTC">
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Price in BTC</string>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string>0 BTC/XMG</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QLabel" name="labelPriceInUSD">
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Price in USD</string>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string>0 USD/XMG</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="labelUpdateStatic">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-              <underline>false</underline>
-              <strikeout>false</strikeout>
-              <kerning>true</kerning>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
-            </property>
-            <property name="text">
-             <string>New version available:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QLabel" name="labelUpdateStatus">
-            <property name="toolTip">
-             <string>A new client version has been released!</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLabel { color: red; }</string>
-            </property>
-            <property name="text">
-             <string notr="true">(checking)</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -460,13 +336,19 @@
        <property name="styleSheet">
         <string notr="true">#frame_2 { background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(70,71,71,10), stop:1.0 rgba(70,71,71,0)); }</string>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="label_4">
             <property name="styleSheet">
-             <string notr="true">color: #464747;</string>
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>&lt;b&gt;Recent transactions&lt;/b&gt;</string>

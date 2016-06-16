@@ -4,6 +4,9 @@
 #include <QString>
 #include <QObject>
 #include <QMessageBox>
+#include <QLabel>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 QT_BEGIN_NAMESPACE
 class QFont;
@@ -113,6 +116,55 @@ namespace GUIUtil
         QString header;
         QString coreOptions;
         QString uiOptions;
+    };
+
+    class QCLabel : public QLabel
+    {
+        Q_OBJECT
+
+    public:
+        QCLabel(const QString& text="", QWidget* parent=0);
+        ~QCLabel(){};
+
+    signals:
+        void clicked();
+
+    protected:
+        void mouseReleaseEvent(QMouseEvent* event);
+    };
+
+
+    class QPriceInfo : public QObject
+    {
+        Q_OBJECT
+
+    public:
+        QPriceInfo();
+        ~QPriceInfo(){};
+        void checkPrice();
+        double getPriceInBTC()
+        {
+            return rPriceInBTC;
+        }
+
+        double getPriceInUSD()
+        {
+            return rPriceInUSD;
+        }
+
+    signals:
+        void finished();
+
+    private:
+        QUrl BTCPriceCheckURL;
+        QUrl MagiToUSDPriceCheckURL;
+        double rPriceInBTC;
+        double rPriceInUSD;
+        QNetworkAccessManager mCheckUSDPrice;
+        QNetworkAccessManager mCheckBTCPrice;
+    private slots:
+        void updatePriceInUSD(QNetworkReply* resp);
+        void updatePriceInBTC(QNetworkReply* resp);
     };
 
 } // namespace GUIUtil

@@ -22,6 +22,10 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QThread>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QMessageBox>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -470,6 +474,55 @@ void HelpMessageBox::showOrPrint()
         // On other operating systems, print help text to console
         printToConsole();
 #endif
+}
+
+QCLabel::QCLabel(const QString& text, QWidget* parent)
+:QLabel(parent)
+{
+    setText(text);
+}
+
+void QCLabel::mouseReleaseEvent ( QMouseEvent * event )
+{
+    emit clicked();
+}
+
+QPriceInfo::QPriceInfo()
+{
+    rPriceInBTC = 0.;
+    rPriceInUSD = 0.;
+    // url (temporary) for checking price
+    BTCPriceCheckURL = QUrl("https://api.coinmarketcap.com/v1/ticker/bitcoin/");
+    MagiToUSDPriceCheckURL = QUrl("https://api.coinmarketcap.com/v1/ticker/magi/");
+
+    connect(&mCheckUSDPrice, SIGNAL (finished(QNetworkReply*)), this, SLOT (updatePriceInUSD(QNetworkReply*)));
+    connect(&mCheckBTCPrice, SIGNAL (finished(QNetworkReply*)), this, SLOT (updatePriceInBTC(QNetworkReply*)));
+}
+
+void QPriceInfo::checkPrice()
+{
+    mCheckUSDPrice.get(QNetworkRequest(MagiToUSDPriceCheckURL));
+}
+
+void QPriceInfo::updatePriceInUSD(QNetworkReply* resp)
+{
+    QByteArray bResp = resp->readAll();
+    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
+    QJsonArray jArray = jResp.array();
+    rPriceInUSD = (jArray[0].toObject())["price_usd"].toDouble();
+    mCheckBTCPrice.get(QNetworkRequest(BTCPriceCheckURL));
+}
+
+void QPriceInfo::updatePriceInBTC(QNetworkReply* resp)
+{
+    QByteArray bResp = resp->readAll();
+    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
+    QJsonArray jArray = jResp.array();
+    rPriceInBTC = (jArray[0].toObject())["price_usd"].toDouble();
+    if (rPriceInBTC > MINFINITESIMAL) {
+        rPriceInBTC = rPriceInUSD / rPriceInBTC;
+    }
+    emit finished();
 }
 
 } // namespace GUIUtil

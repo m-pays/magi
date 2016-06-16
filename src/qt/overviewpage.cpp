@@ -7,7 +7,6 @@
 #include "transactiontablemodel.h"
 #include "transactionfilterproxy.h"
 #include "util.h"
-#include "guiutil.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
 #include "updatecheck.h"
@@ -20,10 +19,6 @@
 #include <QDesktopServices>  //Added for openURL()
 #include <QTimer>            //Added for update timer
 #include <QUrl>
-
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
@@ -132,26 +127,22 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // init "out of sync" warning labels
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
     ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
-    ui->labelUpdateStatus->setText("(" + tr("checking for updates") + ")");
-    ui->labelUpdateStatus->setTextFormat(Qt::RichText);
-    ui->labelUpdateStatus->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    ui->labelUpdateStatus->setOpenExternalLinks(true);
 
     // Setup a timer to regularly check for updates to the wallet
     // Have it trigger once, immediately, then set it to check once ever 24 hours
     // The update timer conversion factor (_UPDATE_MS_TO_HOURS) is located in
     // updatecheck.h
+    setupClientUpdateCheck();
     timerUpdate();
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
     updateTimer->start(_UPDATE_INTERVAL*_UPDATE_MS_TO_HOURS);
 
     // check price
-    rPriceInBTC = 0.;
-    rPriceInUSD = 0.;
-    connect(&mUSDPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInUSD(QNetworkReply*)));
-    connect(&mBTCPriceCheck, SIGNAL (finished(QNetworkReply*)), this, SLOT (updateValueInBTC(QNetworkReply*)));
     connect(this, SIGNAL(valueChanged()), this, SLOT(updateValues()));
+    priceInfo = new GUIUtil::QPriceInfo();
+    setupPriceUpdateCheck();
+    checkPrice();
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
@@ -164,6 +155,80 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 {
     if(filter)
         emit transactionClicked(filter->mapToSource(index));
+}
+
+void OverviewPage::setupClientUpdateCheck()
+{
+    labelUpdateStatic = new QLabel(ui->frame);
+    labelUpdateStatic->setObjectName(QStringLiteral("labelUpdateStatic"));
+    QFont font5;
+    font5.setPointSize(10);
+    font5.setBold(true);
+    font5.setItalic(false);
+    font5.setUnderline(false);
+    font5.setWeight(75);
+    font5.setStrikeOut(false);
+    font5.setKerning(true);
+    labelUpdateStatic->setFont(font5);
+//    labelUpdateStatic->setStyleSheet(QStringLiteral("color: #1D62F0;"));
+    labelUpdateStatic->setText(QStringLiteral("New version available:"));
+    labelUpdateStatic->setText(QApplication::translate("OverviewPage", "New version available:", 0));
+
+    labelUpdateStatus = new QLabel(ui->frame);
+    labelUpdateStatus->setObjectName(QStringLiteral("labelUpdateStatus"));
+    labelUpdateStatus->setStyleSheet(QStringLiteral("QLabel { color: red; }"));
+    labelUpdateStatus->setText(QStringLiteral("(checking)"));
+    labelUpdateStatus->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+
+    labelUpdateStatus->setText("(" + tr("checking for updates") + ")");
+    labelUpdateStatus->setTextFormat(Qt::RichText);
+    labelUpdateStatus->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    labelUpdateStatus->setOpenExternalLinks(true);
+
+    ui->formLayout_2->setWidget(10, QFormLayout::LabelRole, labelUpdateStatic);
+    ui->formLayout_2->setWidget(10, QFormLayout::FieldRole, labelUpdateStatus);
+}
+void OverviewPage::setupPriceUpdateCheck()
+{
+    QLabel *labelPriceText = new QLabel(ui->frame);
+    labelPriceText->setObjectName(QStringLiteral("labelPriceText"));
+    QFont font1;
+    font1.setPointSize(10);
+    labelPriceText->setFont(font1);
+    labelPriceText->setStyleSheet(QStringLiteral("color: #464747;"));
+    labelPriceText->setText("Price:");
+
+    QFont font2;
+    font2.setPointSize(9);
+    font2.setBold(false);
+    font2.setWeight(50);
+    labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
+    labelPriceInBTC->setObjectName(QStringLiteral("labelPriceInBTC"));
+    labelPriceInBTC->setFont(font2);
+    labelPriceInBTC->setLayoutDirection(Qt::LeftToRight);
+//    labelPriceInBTC->setStyleSheet(QStringLiteral("color: #1D62F0;"));
+    labelPriceInBTC->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+    labelPriceInBTC->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+    labelPriceInBTC->setToolTip(QApplication::translate("OverviewPage", "Price in BTC; click to refresh.", 0));
+    labelPriceInBTC->setText(QApplication::translate("OverviewPage", "0 BTC/XMG", 0));
+
+    labelPriceInUSD = new GUIUtil::QCLabel("", ui->frame);
+    labelPriceInUSD->setObjectName(QStringLiteral("labelPriceInUSD"));
+    labelPriceInUSD->setFont(font2);
+    labelPriceInUSD->setLayoutDirection(Qt::LeftToRight);
+//    labelPriceInUSD->setStyleSheet(QStringLiteral("color: #1D62F0;"));
+    labelPriceInUSD->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+    labelPriceInUSD->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+    labelPriceInUSD->setToolTip(QApplication::translate("OverviewPage", "Price in USD; click to refresh.", 0));
+    labelPriceInUSD->setText(QApplication::translate("OverviewPage", "0 USD/XMG", 0));
+
+    ui->formLayout_2->setWidget(8, QFormLayout::LabelRole, labelPriceText);
+    ui->formLayout_2->setWidget(8, QFormLayout::FieldRole, labelPriceInBTC);
+    ui->formLayout_2->setWidget(9, QFormLayout::FieldRole, labelPriceInUSD);
+
+    connect(labelPriceInBTC, SIGNAL(clicked()), this, SLOT(checkPrice()));
+    connect(labelPriceInUSD, SIGNAL(clicked()), this, SLOT(checkPrice()));
+    connect(priceInfo, SIGNAL(finished()), this, SLOT(updateValues()));
 }
 
 OverviewPage::~OverviewPage()
@@ -197,7 +262,7 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
 
 void OverviewPage::setNumTransactions(int count)
 {
-    ui->labelNumTransactions->setText(QLocale::system().toString(count));
+//    ui->labelNumTransactions->setText(QLocale::system().toString(count));
 }
 
 void OverviewPage::setModel(WalletModel *model)
@@ -220,8 +285,8 @@ void OverviewPage::setModel(WalletModel *model)
         setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance());
         connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64)));
 
-        setNumTransactions(model->getNumTransactions());
-        connect(model, SIGNAL(numTransactionsChanged(int)), this, SLOT(setNumTransactions(int)));
+//        setNumTransactions(model->getNumTransactions());
+//        connect(model, SIGNAL(numTransactionsChanged(int)), this, SLOT(setNumTransactions(int)));
 
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
     }
@@ -252,13 +317,13 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 
 void OverviewPage::showUpdateWarning(bool fShow)
 {
-    ui->labelUpdateStatus->setVisible(fShow);
+    labelUpdateStatus->setVisible(fShow);
 }
 
 void OverviewPage::showUpdateLayout(bool fShow)
 {
-    ui->labelUpdateStatic->setVisible(fShow);
-    ui->labelUpdateStatus->setVisible(fShow);
+    labelUpdateStatic->setVisible(fShow);
+    labelUpdateStatus->setVisible(fShow);
 }
 
 void OverviewPage::timerUpdate()
@@ -266,66 +331,36 @@ void OverviewPage::timerUpdate()
     // create a connection to the website to check for updates
     QUrl updateUrl(_UPDATE_VERSION_URL);
     m_pUpdCtrl = new UpdateCheck(updateUrl, this);
-    
     connect(m_pUpdCtrl, SIGNAL (downloaded()), this, SLOT (checkForUpdates()));
-
-    // check price
-    mUSDPriceCheck.get(QNetworkRequest(QUrl(MAGI_TO_USD_PRICE_URL)));
-    MilliSleep(10000);
-    mBTCPriceCheck.get(QNetworkRequest(QUrl(BTC_PRICE_URL)));
 }
 
-void OverviewPage::updateValueInUSD(QNetworkReply* resp)
+void OverviewPage::checkPrice()
 {
-    
-    QByteArray bResp = resp->readAll();
-    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
-    QJsonArray jArray = jResp.array();
-    rPriceInUSD = (jArray[0].toObject())["price_usd"].toDouble();
-    emit valueChanged();
-}
-
-void OverviewPage::updateValueInBTC(QNetworkReply* resp)
-{
-    
-    QByteArray bResp = resp->readAll();
-    QJsonDocument jResp = QJsonDocument::fromJson(bResp);
-    QJsonArray jArray = jResp.array();
-    rPriceInBTC = (jArray[0].toObject())["price_usd"].toDouble();
-    if (rPriceInBTC > MINFINITESIMAL) {
-        rPriceInBTC = rPriceInUSD / rPriceInBTC;
-        emit valueChanged();
-    }
+    priceInfo->checkPrice();
 }
 
 void OverviewPage::updateValues()
 {
-    qint64 valueInBTC = currentTotalBalance * rPriceInBTC;
-    qint64 valueInUSD = currentTotalBalance * rPriceInUSD;
+    qint64 valueInBTC = currentTotalBalance * priceInfo->getPriceInBTC();
+    qint64 valueInUSD = currentTotalBalance * priceInfo->getPriceInUSD();
     ui->labelValueInBTC->setText(BitcoinUnits::format(0, valueInBTC, false) + QString(" BTC"));
     ui->labelValueInUSD->setText(BitcoinUnits::format(0, valueInUSD, false) + QString(" USD"));
-    ui->labelPriceInBTC->setText(BitcoinUnits::format(0, rPriceInBTC*100000000, false) + QString(" BTC/XMG"));
-    ui->labelPriceInUSD->setText(BitcoinUnits::format(0, rPriceInUSD*100000000, false) + QString(" USD/XMG"));
+    labelPriceInBTC->setText(BitcoinUnits::format(0, priceInfo->getPriceInBTC()*100000000, false) + QString(" BTC/XMG"));
+    labelPriceInUSD->setText(BitcoinUnits::format(0, priceInfo->getPriceInUSD()*100000000, false) + QString(" USD/XMG"));
 }
 
 void OverviewPage::checkForUpdates()
 {
     // Grab the internal wallet version and the online version string
-    QString siteVersion(m_pUpdCtrl->downloadedData());
-    QString internalVersion;
-    internalVersion = QString::number(DISPLAY_VERSION_MAJOR);
-    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_MINOR);
-    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_REVISION);
-    internalVersion = internalVersion + "." + QString::number(DISPLAY_VERSION_BUILD);
-
-    QString report = QString("The wallet is up to date");
+    QString qsCurrentClientVersion(m_pUpdCtrl->downloadedData());
+    QString report = QString("Client is up to date");
 
     // Split the online version string and compare it against the internal version
     // If at any point we find that the internal version is less than the online
     // version, exit without setting bool isUpToDate. If the internal version is
     // equal to or greater than the online version, set isUpToDate = true.
     bool isUpToDate = true;
-    unsigned int nVersion = m_pUpdCtrl->parseClientVersion(siteVersion.toStdString(), '.');
+    unsigned int nVersion = m_pUpdCtrl->parseClientVersion(qsCurrentClientVersion.toStdString(), '.');
     if (nVersion > CLIENT_VERSION * 10)
         isUpToDate = false;
 
@@ -335,10 +370,10 @@ void OverviewPage::checkForUpdates()
         showUpdateLayout(false);
     } else {
         report = QString(_UPDATE_DOWNLOAD_URL);
-        report = QString("<a href=\"" + report + "\">v" + siteVersion + " available</a>");
+        report = QString("<a href=\"" + report + "\">v" + qsCurrentClientVersion + " available</a>");
         showUpdateLayout(true);
     }
 
     // Set the update label text and exit
-    ui->labelUpdateStatus->setText(report);
+    labelUpdateStatus->setText(report);
 }
