@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>637</width>
-    <height>455</height>
+    <width>575</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,10 +22,10 @@
      <item>
       <widget class="QFrame" name="frame">
        <property name="styleSheet">
-        <string notr="true">#frame { background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(70,71,71,15), stop:1.0 rgba(70,71,71,0)); }</string>
+        <string notr="true"/>
        </property>
        <property name="frameShape">
-        <enum>QFrame::Box</enum>
+        <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
@@ -101,7 +101,7 @@
              <string notr="true"/>
             </property>
             <property name="text">
-             <string>Available:                         </string>
+             <string>Available:  </string>
             </property>
            </widget>
           </item>
@@ -334,10 +334,10 @@
      <item>
       <widget class="QFrame" name="frame_2">
        <property name="styleSheet">
-        <string notr="true">#frame_2 { background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(70,71,71,10), stop:1.0 rgba(70,71,71,0)); }</string>
+        <string notr="true"/>
        </property>
        <property name="frameShape">
-        <enum>QFrame::Box</enum>
+        <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
