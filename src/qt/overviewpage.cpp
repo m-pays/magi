@@ -1,6 +1,7 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
+#include "clientmodel.h"
 #include "walletmodel.h"
 #include "bitcoinunits.h"
 #include "optionsmodel.h"
@@ -21,7 +22,7 @@
 #include <QUrl>
 
 #define DECORATION_SIZE 64
-#define NUM_ITEMS 6
+#define NUM_ITEMS 4
 
 class TxViewDelegate : public QAbstractItemDelegate
 {
@@ -115,6 +116,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     filter(0)
 {
     ui->setupUi(this);
+    setBalanceLabel();
 
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
@@ -132,7 +134,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // Have it trigger once, immediately, then set it to check once ever 24 hours
     // The update timer conversion factor (_UPDATE_MS_TO_HOURS) is located in
     // updatecheck.h
-    setupClientUpdateCheck();
+    setClientUpdateCheck();
     timerUpdate();
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -141,7 +143,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // check price
     connect(this, SIGNAL(valueChanged()), this, SLOT(updateValues()));
     priceInfo = new GUIUtil::QPriceInfo();
-    setupPriceUpdateCheck();
+    setPriceUpdateCheck();
     checkPrice();
 
     // start with displaying the "out of sync" warnings
@@ -157,16 +159,29 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
         emit transactionClicked(filter->mapToSource(index));
 }
 
-void OverviewPage::setupClientUpdateCheck()
+void OverviewPage::setBalanceLabel()
+{
+    QFont font;
+    font.setPointSize(8);
+    font.setWeight(QFont::DemiBold);
+    ui->labelBalance->setFont(font);
+    ui->labelStake->setFont(font);
+    ui->labelUnconfirmed->setFont(font);
+    ui->labelImmature->setFont(font);
+    ui->labelTotal->setFont(font);
+    ui->labelTotalInUSD->setFont(font);
+}
+
+void OverviewPage::setClientUpdateCheck()
 {
     labelUpdateStatic = new QLabel(ui->frame);
     labelUpdateStatic->setObjectName(QStringLiteral("labelUpdateStatic"));
     QFont font5;
-    font5.setPointSize(10);
+    font5.setPointSize(8);
     font5.setBold(true);
     font5.setItalic(false);
     font5.setUnderline(false);
-    font5.setWeight(75);
+    font5.setWeight(QFont::DemiBold);
     font5.setStrikeOut(false);
     font5.setKerning(true);
     labelUpdateStatic->setFont(font5);
@@ -188,20 +203,23 @@ void OverviewPage::setupClientUpdateCheck()
     ui->formLayout_2->setWidget(10, QFormLayout::LabelRole, labelUpdateStatic);
     ui->formLayout_2->setWidget(10, QFormLayout::FieldRole, labelUpdateStatus);
 }
-void OverviewPage::setupPriceUpdateCheck()
+void OverviewPage::setPriceUpdateCheck()
 {
+    /*
     QLabel *labelPriceText = new QLabel(ui->frame);
     labelPriceText->setObjectName(QStringLiteral("labelPriceText"));
     QFont font1;
-    font1.setPointSize(10);
+    font1.setPointSize(9);
     labelPriceText->setFont(font1);
-    labelPriceText->setStyleSheet(QStringLiteral("color: #464747;"));
+//    labelPriceText->setStyleSheet(QStringLiteral("color: #464747;"));
     labelPriceText->setText("Price:");
+    ui->formLayout_3->setWidget(0, QFormLayout::LabelRole, labelPriceText);
+    */
 
     QFont font2;
-    font2.setPointSize(9);
+    font2.setPointSize(8);
     font2.setBold(false);
-    font2.setWeight(50);
+    font2.setWeight(QFont::Normal);
     labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
     labelPriceInBTC->setObjectName(QStringLiteral("labelPriceInBTC"));
     labelPriceInBTC->setFont(font2);
@@ -209,7 +227,7 @@ void OverviewPage::setupPriceUpdateCheck()
 //    labelPriceInBTC->setStyleSheet(QStringLiteral("color: #1D62F0;"));
     labelPriceInBTC->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
     labelPriceInBTC->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
-    labelPriceInBTC->setToolTip(QApplication::translate("OverviewPage", "Price in BTC; click to refresh.", 0));
+    labelPriceInBTC->setToolTip(QApplication::translate("OverviewPage", "Price in BTC, click to refresh", 0));
     labelPriceInBTC->setText(QApplication::translate("OverviewPage", "0 BTC/XMG", 0));
 
     labelPriceInUSD = new GUIUtil::QCLabel("", ui->frame);
@@ -219,12 +237,11 @@ void OverviewPage::setupPriceUpdateCheck()
 //    labelPriceInUSD->setStyleSheet(QStringLiteral("color: #1D62F0;"));
     labelPriceInUSD->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
     labelPriceInUSD->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
-    labelPriceInUSD->setToolTip(QApplication::translate("OverviewPage", "Price in USD; click to refresh.", 0));
+    labelPriceInUSD->setToolTip(QApplication::translate("OverviewPage", "Price in USD, click to refresh", 0));
     labelPriceInUSD->setText(QApplication::translate("OverviewPage", "0 USD/XMG", 0));
 
-    ui->formLayout_2->setWidget(8, QFormLayout::LabelRole, labelPriceText);
-    ui->formLayout_2->setWidget(8, QFormLayout::FieldRole, labelPriceInBTC);
-    ui->formLayout_2->setWidget(9, QFormLayout::FieldRole, labelPriceInUSD);
+    ui->formLayout_3->setWidget(0, QFormLayout::FieldRole, labelPriceInBTC);
+    ui->formLayout_3->setWidget(1, QFormLayout::FieldRole, labelPriceInUSD);
 
     connect(labelPriceInBTC, SIGNAL(clicked()), this, SLOT(checkPrice()));
     connect(labelPriceInUSD, SIGNAL(clicked()), this, SLOT(checkPrice()));
@@ -341,10 +358,10 @@ void OverviewPage::checkPrice()
 
 void OverviewPage::updateValues()
 {
-    qint64 valueInBTC = currentTotalBalance * priceInfo->getPriceInBTC();
+//    qint64 valueInBTC = currentTotalBalance * priceInfo->getPriceInBTC();
     qint64 valueInUSD = currentTotalBalance * priceInfo->getPriceInUSD();
-    ui->labelValueInBTC->setText(BitcoinUnits::format(0, valueInBTC, false) + QString(" BTC"));
-    ui->labelValueInUSD->setText(BitcoinUnits::format(0, valueInUSD, false) + QString(" USD"));
+//    ui->labelTotalInBTC->setText(BitcoinUnits::format(0, valueInBTC, false) + QString(" BTC"));
+    ui->labelTotalInUSD->setText(BitcoinUnits::format(0, valueInUSD, false) + QString(" USD"));
     labelPriceInBTC->setText(BitcoinUnits::format(0, priceInfo->getPriceInBTC()*100000000, false) + QString(" BTC/XMG"));
     labelPriceInUSD->setText(BitcoinUnits::format(0, priceInfo->getPriceInUSD()*100000000, false) + QString(" USD/XMG"));
 }

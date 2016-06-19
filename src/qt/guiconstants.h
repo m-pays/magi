@@ -1,6 +1,8 @@
 #ifndef GUICONSTANTS_H
 #define GUICONSTANTS_H
 
+#include <QSize>
+
 /* Milliseconds between model updates */
 static const int MODEL_UPDATE_DELAY = 500;
 
@@ -30,5 +32,26 @@ static const int MAX_URI_LENGTH = 255;
 
 /* QRCodeDialog -- size of exported QR Code image */
 #define EXPORT_IMAGE_SIZE 256
+
+const int CONSOLE_SCROLLBACK = 50;
+const int CONSOLE_HISTORY = 50;
+
+const QSize CONSOLE_ICON_SIZE(24, 24);
+
+const struct {
+    const char *url;
+    const char *source;
+} CONSOLE_ICON_MAPPING[] = {
+    {"cmd-request", ":/icons/tx_input"},
+    {"cmd-reply", ":/icons/tx_output"},
+    {"cmd-error", ":/icons/tx_output"},
+    {"misc", ":/icons/tx_inout"},
+    {NULL, NULL}
+};
+
+#define QAPP_ORG_NAME "CoinMagi"
+#define QAPP_ORG_DOMAIN "coinmagi.org"
+#define QAPP_APP_NAME_DEFAULT "Magi-Qt"
+#define QAPP_APP_NAME_TESTNET "Magi-Qt-testnet"
 
 #endif // GUICONSTANTS_H

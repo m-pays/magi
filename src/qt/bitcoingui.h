@@ -15,6 +15,7 @@ class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
 class Notificator;
+class Console;
 class RPCConsole;
 
 QT_BEGIN_NAMESPACE
@@ -49,6 +50,12 @@ public:
     */
     void setWalletModel(WalletModel *walletModel);
 
+    QAction * getOverviewAction() { return overviewAction; }
+    QAction * getHistoryAction() { return historyAction; }
+    QAction * getAddressBookAction() { return addressBookAction; }
+    QAction * getReceiveCoinsAction() { return receiveCoinsAction; }
+    QAction * getSendCoinsAction() { return sendCoinsAction; }
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
@@ -67,6 +74,7 @@ private:
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
+    Console *consolePage;
 
     QLabel *labelEncryptionIcon;
     QLabel *labelMintingIcon;
@@ -93,6 +101,7 @@ private:
     QAction *changePassphraseAction;
     QAction *lockWalletToggleAction;
     QAction *aboutQtAction;
+    QAction *consoleAction;
     QAction *openRPCConsoleAction;
 
     QSystemTrayIcon *trayIcon;
@@ -106,6 +115,11 @@ private:
     uint64 nWeight;
     uint64 nNetworkWeight;
 
+    unsigned currentToolbarTab;
+    unsigned prevToolbarTab;
+    void setIcons(unsigned nth, bool fUnChecked=true);
+    void setIconsChecked();
+
     /** Create the main UI actions. */
     void createActions();
     /** Create the menu bar and sub-menus. */
@@ -114,6 +128,10 @@ private:
     void createToolBars();
     /** Create system tray (notification) icon */
     void createTrayIcon();
+    /** Save window size and position */
+    void saveWindowGeometry();
+    /** Restore window size and position */
+    void restoreWindowGeometry();
 
 public slots:
     /** Set number of connections shown in the UI */
@@ -150,6 +168,8 @@ private slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+    /** Switch to console page */
+    void gotoConsolePage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

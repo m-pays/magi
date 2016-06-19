@@ -1,10 +1,13 @@
 *.tar.gz
-*.ext
+
+*.exe
 src/*.exe
 src/magi
 src/magid
 src/test_magi
+src/qt/test/test_magi-qt
 src/makefile-static.unix
+
 .*.swp
 *.*~*
 *.bak
@@ -18,9 +21,14 @@ src/makefile-static.unix
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
+m-wallet
+magi
 magi-qt
 magi-qt_*
+m-wallet.app
+Magi.app
 Magi-Qt.app
+m-wallet*
 qt-builds/version-og/Makefile
 qt-builds/version-og/magi-qt
 qt-builds/version-og/magi-qt_*
@@ -42,7 +50,7 @@ qt-builds/version-og/qrc_*.cpp
 build
 qt-builds/version-og/build
 
-# some other builds
+# Other builds
 qt-builds/*
 qt-builds
 src/qt-og/*

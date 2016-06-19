@@ -123,7 +123,22 @@ int main(int argc, char *argv[])
 #endif
 
     Q_INIT_RESOURCE(bitcoin);
+    
     QApplication app(argc, argv);
+#if QT_VERSION > 0x050100
+    // Generate high-dpi pixmaps
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+#ifdef Q_OS_MAC
+    QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+#endif
+#if QT_VERSION >= 0x050500
+    // Because of the POODLE attack it is recommended to disable SSLv3 (https://disablessl3.com/),
+    // so set SSL protocols to TLS1.0+.
+    QSslConfiguration sslconf = QSslConfiguration::defaultConfiguration();
+    sslconf.setProtocol(QSsl::TlsV1_0OrLater);
+    QSslConfiguration::setDefaultConfiguration(sslconf);
+#endif
 
     // Install global event filter that makes sure that long tooltips can be word-wrapped
     app.installEventFilter(new GUIUtil::ToolTipToRichTextFilter(TOOLTIP_WRAP_THRESHOLD, &app));
@@ -144,12 +159,11 @@ int main(int argc, char *argv[])
 
     // Application identification (must be set before OptionsModel is initialized,
     // as it is used to locate QSettings)
-    app.setOrganizationName("Magi");
-    app.setOrganizationDomain("Magi.su");
+    QApplication::setOrganizationName("QAPP_ORG_NAME");
+    QApplication::setOrganizationDomain("QAPP_ORG_DOMAIN");
+    QApplication::setApplicationName(QAPP_APP_NAME_DEFAULT);
     if(GetBoolArg("-testnet")) // Separate UI settings for testnet
-        app.setApplicationName("Magi-Qt-testnet");
-    else
-        app.setApplicationName("Magi-Qt");
+        QApplication::setApplicationName(QAPP_APP_NAME_TESTNET);
 
     // ... then GUI settings:
     OptionsModel optionsModel;

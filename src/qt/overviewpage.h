@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 namespace Ui {
     class OverviewPage;
 }
+class ClientModel;
 class WalletModel;
 class TxViewDelegate;
 class TransactionFilterProxy;
@@ -53,13 +54,15 @@ private:
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
-    void setupClientUpdateCheck();
+    void setBalanceLabel();
+
+    void setClientUpdateCheck();
     QLabel *labelUpdateStatic;
     QLabel *labelUpdateStatus;
     UpdateCheck *m_pUpdCtrl;
     QTimer *updateTimer;
 
-    void setupPriceUpdateCheck();
+    void setPriceUpdateCheck();
     GUIUtil::QCLabel *labelPriceInBTC;
     GUIUtil::QCLabel *labelPriceInUSD;
     GUIUtil::QPriceInfo *priceInfo;
