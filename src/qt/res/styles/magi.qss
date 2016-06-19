@@ -1,5 +1,5 @@
 QMainWindow {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #eeeeee, stop:1.0 #fefefe); 
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #E8E8E8, stop:1.0 #FFFFF0); 
     border-left: 2px solid #1D62F0; 
     border-right: 2px solid #1D62F0;}
 

@@ -24,6 +24,7 @@
 #include "askpassphrasedialog.h"
 #include "notificator.h"
 #include "guiutil.h"
+#include "console.h"
 #include "rpcconsole.h"
 #include "wallet.h"
 #include "bitcoinrpc.h"
@@ -1010,7 +1011,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
-        lockWalletToggleAction->setText(tr("&Unlock Wallet..."));
+        lockWalletToggleAction->setText(tr("&Unlock Wallet for Minting"));
         lockWalletToggleAction->setToolTip(tr("Unlock wallet"));
         break;
     }
