@@ -47,8 +47,11 @@ qt-builds/version-og/qrc_*.cpp
 
 # Mac specific
 .DS_Store
-build
 qt-builds/version-og/build
+
+build*
+builds
+build/*
 
 # Other builds
 qt-builds/*
