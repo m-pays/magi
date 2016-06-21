@@ -11,7 +11,8 @@
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
 #include "updatecheck.h"
-#include "../version.h"
+#include "version.h"
+#include "clientversion.h"
 #include <vector>
 
 #include <QAbstractItemDelegate>
@@ -163,7 +164,12 @@ void OverviewPage::setBalanceLabel()
 {
     QFont font;
     font.setPointSize(8);
-    font.setWeight(QFont::DemiBold);
+    font.setBold(true);
+    font.setItalic(false);
+    font.setUnderline(false);
+    font.setWeight(QFont::Bold);
+    font.setStrikeOut(false);
+    font.setKerning(true);
     ui->labelBalance->setFont(font);
     ui->labelStake->setFont(font);
     ui->labelUnconfirmed->setFont(font);
@@ -181,7 +187,7 @@ void OverviewPage::setClientUpdateCheck()
     font5.setBold(true);
     font5.setItalic(false);
     font5.setUnderline(false);
-    font5.setWeight(QFont::DemiBold);
+    font5.setWeight(QFont::Bold);
     font5.setStrikeOut(false);
     font5.setKerning(true);
     labelUpdateStatic->setFont(font5);
@@ -200,8 +206,8 @@ void OverviewPage::setClientUpdateCheck()
     labelUpdateStatus->setTextInteractionFlags(Qt::TextBrowserInteraction);
     labelUpdateStatus->setOpenExternalLinks(true);
 
-    ui->formLayout_2->setWidget(10, QFormLayout::LabelRole, labelUpdateStatic);
-    ui->formLayout_2->setWidget(10, QFormLayout::FieldRole, labelUpdateStatus);
+    ui->formLayout_3->setWidget(2, QFormLayout::LabelRole, labelUpdateStatic);
+    ui->formLayout_3->setWidget(2, QFormLayout::FieldRole, labelUpdateStatus);
 }
 void OverviewPage::setPriceUpdateCheck()
 {
@@ -378,7 +384,7 @@ void OverviewPage::checkForUpdates()
     // equal to or greater than the online version, set isUpToDate = true.
     bool isUpToDate = true;
     unsigned int nVersion = m_pUpdCtrl->parseClientVersion(qsCurrentClientVersion.toStdString(), '.');
-    if (nVersion > CLIENT_VERSION * 10)
+    if (nVersion > GetClientVersion(CLIENT_VERSION, CLIENT_VERSION_RELEASE_CANDIDATE))
         isUpToDate = false;
 
     // If versions are the same, remove the update section, otherwise make sure

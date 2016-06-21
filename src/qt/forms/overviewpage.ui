@@ -32,6 +32,9 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
+         <property name="lineWidth">
+          <number>2</number>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -111,6 +114,7 @@
              <widget class="QLabel" name="labelBalance">
               <property name="font">
                <font>
+                <pointsize>10</pointsize>
                 <weight>75</weight>
                 <bold>true</bold>
                </font>
@@ -173,7 +177,7 @@
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>Unconfirmed:</string>
+               <string>Unconfirmed:    </string>
               </property>
              </widget>
             </item>
@@ -304,6 +308,9 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
+         <property name="lineWidth">
+          <number>2</number>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <layout class="QFormLayout" name="formLayout_3">
@@ -325,7 +332,7 @@
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>Price:            </string>
+               <string>Price:                 </string>
               </property>
              </widget>
             </item>

@@ -480,11 +480,17 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         connect(walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
     
         // Client stylesheet
+    #if QT_VERSION < 0x050300
+        QFile qfStyleSheet(":/styles/magi-qt5.2.qss");
+        qfStyleSheet.open(QFile::ReadOnly);
+        QString qsStyleSheet = QLatin1String(qfStyleSheet.readAll());
+        setStyleSheet(qsStyleSheet);
+    #else
         QFile qfStyleSheet(":/styles/magi.qss");
         qfStyleSheet.open(QFile::ReadOnly);
         QString qsStyleSheet = QLatin1String(qfStyleSheet.readAll());
         setStyleSheet(qsStyleSheet);
-
+    #endif
         // Application fonts
         QFont newFont(":/fonts/Roboto-Regular", 10, true);
         setFont(newFont);

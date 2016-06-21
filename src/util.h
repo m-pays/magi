@@ -253,7 +253,7 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
 void AddTimeData(const CNetAddr& ip, int64 nTime);
 void runCommand(std::string strCommand);
 bool StringToDouble(const std::string &s, double &val);
-
+unsigned int GetClientVersion(int nClientVersion, std::string str);
 
 
 

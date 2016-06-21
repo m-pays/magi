@@ -15,6 +15,10 @@
 #define CLIENT_VERSION_IS_RELEASE  false
 #define CLIENT_VERSION_IS_TEST     false
 
+// Version before stable release: ALPHA1 ~ ALPHA3, BETA1 ~ BETA3, RC1 ~ RC3
+// Set to "STABLE" for stable release
+#define CLIENT_VERSION_RELEASE_CANDIDATE "RC1"
+
 // Converts the parameter X to a string after macro replacement on X has been performed.
 // Don't merge these into one macro!
 #define STRINGIZE(X) DO_STRINGIZE(X)

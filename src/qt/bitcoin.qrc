@@ -145,5 +145,6 @@
     </qresource>
     <qresource prefix="/styles">
         <file alias="magi.qss">res/styles/magi.qss</file>
+        <file alias="magi-qt5.2.qss">res/styles/magi-qt5.2.qss</file>
     </qresource>
 </RCC>

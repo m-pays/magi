@@ -25,7 +25,7 @@ QToolBar > QToolButton {
     margin-left: 2px;
     margin-right: 2px;
     height: 15px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 1250;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -50,7 +50,6 @@ QToolBar > QToolButton:hover {
     background-color: #3A3A3A; }
 
 QLabel {
-    color: #2B2B2B;
     background-color: transparent; }
 
 QCheckBox {

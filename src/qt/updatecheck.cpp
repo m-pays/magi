@@ -43,14 +43,18 @@ unsigned int UpdateCheck::parseClientVersion(const std::string &s, char delim)
         try {
             nVersion +=10000000 / pow(10., i) * boost::lexical_cast<int>(seg);
         } catch (const boost::bad_lexical_cast &) {
-            unsigned nPos = 1;
-            if (seg.find("a") == 0) // release a1~a3
-                nVersion -= 9;
-            else if (seg.find("b") == 0) // release b1~b3
-                nVersion -= 6;
-            else if (seg.find("rc") == 0) { // rc1~rc3
-                nVersion -= 3;
-                ++nPos;
+            unsigned nPos;
+            if (seg.find("alpha") == 0) { // release alpha1 ~ alpha3
+                nVersion -= 10;
+                nPos = 5;
+            }
+            else if (seg.find("beta") == 0) { // release beta1 ~ beta3
+                nVersion -= 7;
+                nPos = 4;
+            }
+            else if (seg.find("rc") == 0) { // rc1 ~ rc3
+                nVersion -= 4;
+                nPos = 2;
             }
             try {
                 nVersion += boost::lexical_cast<int>(seg[nPos]);
