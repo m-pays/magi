@@ -59,3 +59,5 @@ qt-builds
 src/qt-og/*
 src/qt-og
 magi-qt-unix*
+magi-qt-linux*
+magi-qt-static*
