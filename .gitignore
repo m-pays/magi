@@ -43,7 +43,7 @@ qrc_*.cpp
 qt-builds/version-og/qrc_*.cpp
 
 # Qt creator
-*.pro.user
+*.pro.user*
 
 # Mac specific
 .DS_Store
