@@ -509,7 +509,12 @@ void QPriceInfo::updatePriceInUSD(QNetworkReply* resp)
     QByteArray bResp = resp->readAll();
     QJsonDocument jResp = QJsonDocument::fromJson(bResp);
     QJsonArray jArray = jResp.array();
-    rPriceInUSD = (jArray[0].toObject())["price_usd"].toDouble();
+    rPriceInUSD = (jArray[0].toObject())["price_usd"].toString().toDouble();
+    /*
+    QJsonDocument jTest( jValue.toObject() );
+    QString qstrshow( jTest.toJson()  );
+    QMessageBox::warning(0, "Magi", qstrshow  );
+    */
     mCheckBTCPrice.get(QNetworkRequest(BTCPriceCheckURL));
 }
 
@@ -517,8 +522,9 @@ void QPriceInfo::updatePriceInBTC(QNetworkReply* resp)
 {
     QByteArray bResp = resp->readAll();
     QJsonDocument jResp = QJsonDocument::fromJson(bResp);
+    QJsonObject jObject = jResp.object();
     QJsonArray jArray = jResp.array();
-    rPriceInBTC = (jArray[0].toObject())["price_usd"].toDouble();
+    rPriceInBTC = (jArray[0].toObject())["price_usd"].toString().toDouble();
     if (rPriceInBTC > MINFINITESIMAL) {
         rPriceInBTC = rPriceInUSD / rPriceInBTC;
     }
