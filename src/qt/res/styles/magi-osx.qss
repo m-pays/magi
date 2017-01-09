@@ -24,7 +24,7 @@ QToolBar > QToolButton {
     margin-bottom: 10px;
     margin-left: 2px;
     margin-right: 2px;
-    height: 15px;
+    height: 13px;
     font-size: 11px;
     font-weight: 1250;
     padding-top: 5px;

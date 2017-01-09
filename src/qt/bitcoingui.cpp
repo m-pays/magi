@@ -68,6 +68,12 @@
 #include <QFont>
 #include <QStyleFactory>
 
+#if __MACH__
+#define STATUSBAR_FONT_SIZE 12
+#else
+#define STATUSBAR_FONT_SIZE 8
+#endif
+
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
@@ -208,7 +214,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     progressBar->setProperty("class", "statusBarStyle");
 
     QFont font_;
-    font_.setPointSize(8);
+    font_.setPointSize(STATUSBAR_FONT_SIZE);
     progressBarLabel->setFont(font_);
     progressBar->setFont(font_);
     statusBar()->setFont(font_);
@@ -491,7 +497,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         connect(walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
     
         // Client stylesheet
-    #if Q_OS_MACOS
+    #if __MACH__
         QFile qfStyleSheet(":/styles/magi-osx.qss");
     #else
     #if QT_VERSION < 0x050300

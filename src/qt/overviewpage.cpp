@@ -25,6 +25,12 @@
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 4
 
+#if __MACH__
+#define OVERVIEW_FONT_SIZE 12
+#else
+#define OVERVIEW_FONT_SIZE 8
+#endif
+
 class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
@@ -163,7 +169,7 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 void OverviewPage::setBalanceLabel()
 {
     QFont font;
-    font.setPointSize(8);
+    font.setPointSize(OVERVIEW_FONT_SIZE);
     font.setBold(true);
     font.setItalic(false);
     font.setUnderline(false);
@@ -183,7 +189,7 @@ void OverviewPage::setClientUpdateCheck()
     labelUpdateStatic = new QLabel(ui->frame);
     labelUpdateStatic->setObjectName(QStringLiteral("labelUpdateStatic"));
     QFont font5;
-    font5.setPointSize(8);
+    font5.setPointSize(OVERVIEW_FONT_SIZE);
     font5.setBold(true);
     font5.setItalic(false);
     font5.setUnderline(false);
@@ -223,7 +229,7 @@ void OverviewPage::setPriceUpdateCheck()
     */
 
     QFont font2;
-    font2.setPointSize(8);
+    font2.setPointSize(OVERVIEW_FONT_SIZE);
     font2.setBold(false);
     font2.setWeight(QFont::Normal);
     labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
