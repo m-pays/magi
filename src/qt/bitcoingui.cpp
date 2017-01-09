@@ -86,7 +86,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     restoreWindowGeometry();
-    setWindowTitle(tr("Coin Magi") + " - " + tr("Wallet"));
+    setWindowTitle(tr("Coin Magi") + "  -  " + tr("m-wallet"));
     setStyle(QStyleFactory::create("cleanlooks"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/magi"));
@@ -151,9 +151,12 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
     frameBlocks->setContentsMargins(0,0,0,0);
-    frameBlocks->setMinimumWidth(56);
-    frameBlocks->setMaximumWidth(56);
+    frameBlocks->setMinimumWidth(60);
+    frameBlocks->setMaximumWidth(60);
 //    frameBlocks->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    frameBlocks->setFrameShape(QFrame::NoFrame);
+    frameBlocks->setFrameShadow(QFrame::Plain);
+
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
@@ -199,9 +202,17 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     progressBarLabel->setVisible(false);
     progressBarLabel->setProperty("class", "progressBarLabel");
     progressBar = new QProgressBar();
+//    progressBar->setMinimumWidth(300);
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
     progressBar->setProperty("class", "statusBarStyle");
+
+    QFont font_;
+    font_.setPointSize(8);
+    progressBarLabel->setFont(font_);
+    progressBar->setFont(font_);
+    statusBar()->setFont(font_);
+    statusBar()->setMaximumHeight(25);
 
     // Override style sheet for progress bar for styles that have a segmented progress bar,
     // as they make the text unreadable (workaround for issue #1071)
