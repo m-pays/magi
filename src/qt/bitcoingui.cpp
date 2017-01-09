@@ -86,7 +86,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     restoreWindowGeometry();
-    setWindowTitle(tr("Coin Magi") + "  -  " + tr("m-wallet"));
+    setWindowTitle(tr("Coin Magi") + " - " + tr("Wallet"));
     setStyle(QStyleFactory::create("cleanlooks"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/magi"));
@@ -491,17 +491,18 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         connect(walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
     
         // Client stylesheet
+    #if Q_OS_MACOS
+        QFile qfStyleSheet(":/styles/magi-osx.qss");
+    #else
     #if QT_VERSION < 0x050300
         QFile qfStyleSheet(":/styles/magi-qt5.2.qss");
-        qfStyleSheet.open(QFile::ReadOnly);
-        QString qsStyleSheet = QLatin1String(qfStyleSheet.readAll());
-        setStyleSheet(qsStyleSheet);
     #else
         QFile qfStyleSheet(":/styles/magi.qss");
+    #endif
+    #endif
         qfStyleSheet.open(QFile::ReadOnly);
         QString qsStyleSheet = QLatin1String(qfStyleSheet.readAll());
         setStyleSheet(qsStyleSheet);
-    #endif
         // Application fonts
         QFont newFont(":/fonts/Roboto-Regular", 10, true);
         setFont(newFont);
