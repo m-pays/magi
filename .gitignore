@@ -60,4 +60,5 @@ src/qt-og/*
 src/qt-og
 magi-qt-unix*
 magi-qt-linux*
+magi-qt-osx*
 magi-qt-static*
