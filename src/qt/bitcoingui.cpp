@@ -303,12 +303,16 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
-    consoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Console"), this);
+    consoleAction = new QAction(QIcon(":/icons/console"), tr("&Console"), this);
     consoleAction->setStatusTip(tr("Open console"));
     consoleAction->setToolTip(consoleAction->statusTip());
     consoleAction->setCheckable(true);
     consoleAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(consoleAction);
+
+    QList<QWidget*> widgets = tabGroup->findChildren<QWidget*>();
+    foreach (QWidget* widget, widgets)
+        widget->installEventFilter(this);
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
@@ -390,9 +394,11 @@ void BitcoinGUI::createMenuBar()
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     settings->addAction(encryptWalletAction);
     settings->addAction(changePassphraseAction);
-    settings->addAction(lockWalletToggleAction);
     settings->addSeparator();
     settings->addAction(optionsAction);
+
+    QMenu *mint = appMenuBar->addMenu(tr("&Mint"));
+    mint->addAction(lockWalletToggleAction);
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
@@ -635,8 +641,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
     {
         int nRemainingBlocks = nTotalBlocks - count;
         float nPercentageDone = count / (nTotalBlocks * 0.01f);
-
-        if (strStatusBarWarnings.isEmpty())
+        if (strStatusBarWarnings.isEmpty() && statusBar()->currentMessage() == "")
         {
             progressBarLabel->setText(tr("Synchronizing with network..."));
             progressBarLabel->setVisible(true);
