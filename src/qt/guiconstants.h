@@ -49,9 +49,12 @@ const struct {
     {NULL, NULL}
 };
 
+/* Number of frames in spinner animation */
+#define SPINNER_FRAMES 36
+
 #define QAPP_ORG_NAME "CoinMagi"
 #define QAPP_ORG_DOMAIN "coinmagi.org"
-#define QAPP_APP_NAME_DEFAULT "Magi-Qt"
-#define QAPP_APP_NAME_TESTNET "Magi-Qt-testnet"
+#define QAPP_APP_NAME_DEFAULT "m-wallet"
+#define QAPP_APP_NAME_TESTNET "m-wallet-testnet"
 
 #endif // GUICONSTANTS_H

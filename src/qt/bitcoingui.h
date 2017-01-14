@@ -120,6 +120,8 @@ private:
     void setIcons(unsigned nth, bool fUnChecked=true);
     void setIconsChecked();
 
+    int spinnerFrame;
+
     /** Create the main UI actions. */
     void createActions();
     /** Create the menu bar and sub-menus. */
