@@ -617,7 +617,7 @@ void BitcoinGUI::aboutClicked()
 void BitcoinGUI::mintMessageClicked()
 {
     QMessageBox msgMint;
-    msgMint.setText("Click Settings->Encrypt Wallet... to configure encryption, and then come back to Mint menu to enable mPoS Mint.");
+    msgMint.setText("Click Settings->Encrypt Wallet... to configure encryption, and then come back to Mint menu to Enable mPoS Minting.");
     msgMint.exec();
 }
 
@@ -1048,8 +1048,8 @@ void BitcoinGUI::setEncryptionStatus(int status)
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_closed"));
-        lockWalletToggleAction->setText(tr("&Lock Wallet"));
-        lockWalletToggleAction->setToolTip(tr("Lock wallet"));
+        lockWalletToggleAction->setText(tr("&Disable mPoS Minting"));
+        lockWalletToggleAction->setToolTip(tr("Disable mPoS Minting"));
         mPoSMintMessageToggleAction->setVisible(false);
         break;
     case WalletModel::Locked:
@@ -1061,8 +1061,8 @@ void BitcoinGUI::setEncryptionStatus(int status)
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
-        lockWalletToggleAction->setText(tr("&Unlock Wallet for mPoS Minting"));
-        lockWalletToggleAction->setToolTip(tr("Unlock wallet"));
+        lockWalletToggleAction->setText(tr("&Enable mPoS Minting"));
+        lockWalletToggleAction->setToolTip(tr("Unlock Wallet for mPoS Minting"));
         mPoSMintMessageToggleAction->setVisible(false);
         break;
     }
