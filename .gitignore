@@ -6,7 +6,11 @@ src/magi
 src/magid
 src/test_magi
 src/qt/test/test_magi-qt
+src/Makefile.Debug
 src/makefile-static.unix
+src/makefile-static.linux
+src/makefile-static.osx
+src/makefile-static.mingw
 
 .*.swp
 *.*~*
@@ -65,4 +69,5 @@ magi-qt-static*
 m-wallet-unix*
 m-wallet-linux*
 m-wallet-osx*
+m-wallet-win*
 m-wallet-static*
