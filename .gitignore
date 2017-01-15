@@ -62,3 +62,7 @@ magi-qt-unix*
 magi-qt-linux*
 magi-qt-osx*
 magi-qt-static*
+m-wallet-unix*
+m-wallet-linux*
+m-wallet-osx*
+m-wallet-static*
