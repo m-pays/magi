@@ -1,5 +1,6 @@
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
+#include "transactionrecord.h"
 
 #include <QDateTime>
 
@@ -41,7 +42,9 @@ bool TransactionFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &
     if(abs_amount < minAmount)
         return false;
 
-    totalAmount += amount;
+    TransactionRecord *rec = static_cast<TransactionRecord*>(index.internalPointer());
+    if ( (rec->status.maturity != TransactionStatus::NotAccepted) )
+        totalAmount += amount;
 
     return true;
 }
