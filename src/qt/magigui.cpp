@@ -353,6 +353,7 @@ void BitcoinGUI::createActions()
     changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase..."), this);
     changePassphraseAction->setToolTip(tr("Change the passphrase used for wallet encryption"));
     lockWalletToggleAction = new QAction(this);
+    mPoSMintMessageToggleAction = new QAction(this);
     signMessageAction = new QAction(QIcon(":/icons/edit"), tr("Sign &message..."), this);
     verifyMessageAction = new QAction(QIcon(":/icons/transaction_0"), tr("&Verify message..."), this);
 
@@ -371,6 +372,7 @@ void BitcoinGUI::createActions()
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(lockWalletToggleAction, SIGNAL(triggered()), this, SLOT(lockWalletToggle()));
+    connect(mPoSMintMessageToggleAction, SIGNAL(triggered()), this, SLOT(mintMessageClicked()));
     connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
     connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
 }
@@ -402,6 +404,7 @@ void BitcoinGUI::createMenuBar()
 
     QMenu *mint = appMenuBar->addMenu(tr("&Mint"));
     mint->addAction(lockWalletToggleAction);
+    mint->addAction(mPoSMintMessageToggleAction);
 
     QMenu *about = appMenuBar->addMenu(tr("&About"));
     about->addAction(openRPCConsoleAction);
@@ -609,6 +612,13 @@ void BitcoinGUI::aboutClicked()
     AboutDialog dlg;
     dlg.setModel(clientModel);
     dlg.exec();
+}
+
+void BitcoinGUI::mintMessageClicked()
+{
+    QMessageBox msgMint;
+    msgMint.setText("Click Settings->Encrypt Wallet... to configure encryption, and then come back to Mint menu to enable mPoS Mint.");
+    msgMint.exec();
 }
 
 void BitcoinGUI::setNumConnections(int count)
@@ -1024,6 +1034,10 @@ void BitcoinGUI::setEncryptionStatus(int status)
         encryptWalletAction->setEnabled(true);
         changePassphraseAction->setEnabled(false);
         lockWalletToggleAction->setVisible(false);
+        mPoSMintMessageToggleAction->setVisible(true);
+        mPoSMintMessageToggleAction->setIcon(QIcon(":/icons/information"));
+        mPoSMintMessageToggleAction->setText(tr("&Enable Encryption to Mint"));
+        mPoSMintMessageToggleAction->setToolTip(tr("Enable Encryption to Mint"));
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
@@ -1036,6 +1050,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_closed"));
         lockWalletToggleAction->setText(tr("&Lock Wallet"));
         lockWalletToggleAction->setToolTip(tr("Lock wallet"));
+        mPoSMintMessageToggleAction->setVisible(false);
         break;
     case WalletModel::Locked:
         labelEncryptionIcon->show();
@@ -1046,8 +1061,9 @@ void BitcoinGUI::setEncryptionStatus(int status)
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
-        lockWalletToggleAction->setText(tr("&Unlock Wallet for Minting"));
+        lockWalletToggleAction->setText(tr("&Unlock Wallet for mPoS Minting"));
         lockWalletToggleAction->setToolTip(tr("Unlock wallet"));
+        mPoSMintMessageToggleAction->setVisible(false);
         break;
     }
 }

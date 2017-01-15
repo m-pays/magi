@@ -100,6 +100,7 @@ private:
     QAction *backupWalletAction;
     QAction *changePassphraseAction;
     QAction *lockWalletToggleAction;
+    QAction *mPoSMintMessageToggleAction;
     QAction *aboutQtAction;
     QAction *consoleAction;
     QAction *openRPCConsoleAction;
@@ -182,6 +183,8 @@ private slots:
     void optionsClicked();
     /** Show about dialog */
     void aboutClicked();
+    /** Show mint message dialog */
+    void mintMessageClicked();
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -200,7 +203,7 @@ private slots:
     /** Toggle unlocking wallet temporarily */
     void lockWalletToggle();
 
- void unlockWallet();
+    void unlockWallet();
 
     /** Show window if hidden, unminimize when minimized, rise when obscured or show if hidden and fToggleHidden is true */
     void showNormalIfMinimized(bool fToggleHidden = false);
