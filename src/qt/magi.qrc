@@ -50,6 +50,7 @@
         <file alias="toolbar_testnet">res/icons/magi-testnet-toolbar.png</file>
         <file alias="about">res/icons/about.png</file>
         <file alias="about_qt">res/icons/about_qt.png</file>
+        <file alias="information">res/icons/information.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>

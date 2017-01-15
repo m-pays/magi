@@ -358,7 +358,7 @@ void BitcoinGUI::createActions()
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
 
-    openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
+    openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("&Information"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -402,11 +402,11 @@ void BitcoinGUI::createMenuBar()
     QMenu *mint = appMenuBar->addMenu(tr("&Mint"));
     mint->addAction(lockWalletToggleAction);
 
-    QMenu *help = appMenuBar->addMenu(tr("&About"));
-    help->addAction(openRPCConsoleAction);
-    help->addSeparator();
-    help->addAction(aboutAction);
-    help->addAction(aboutQtAction);
+    QMenu *about = appMenuBar->addMenu(tr("&About"));
+    about->addAction(openRPCConsoleAction);
+    about->addSeparator();
+    about->addAction(aboutAction);
+    about->addAction(aboutQtAction);
 
     // QString ss("QMenuBar::item { background-color: #effbef; color: black }"); 
     // appMenuBar->setStyleSheet(ss);
