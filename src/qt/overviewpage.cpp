@@ -236,9 +236,9 @@ void OverviewPage::setPriceUpdateCheck()
     font2.setPointSize(OVERVIEW_FONT_SIZE);
     font2.setBold(false);
     font2.setWeight(QFont::Normal);
-//    labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
-//    sizePolicy.setHeightForWidth(labelPriceInBTC->sizePolicy().hasHeightForWidth());
-//    labelPriceInBTC->setSizePolicy(sizePolicy);
+    labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
+    sizePolicy.setHeightForWidth(labelPriceInBTC->sizePolicy().hasHeightForWidth());
+    labelPriceInBTC->setSizePolicy(sizePolicy);
 
     labelPriceInBTC->setObjectName(QStringLiteral("labelPriceInBTC"));
     labelPriceInBTC->setFont(font2);
@@ -249,9 +249,9 @@ void OverviewPage::setPriceUpdateCheck()
     labelPriceInBTC->setToolTip(QApplication::translate("OverviewPage", "Price in BTC, click to refresh", 0));
     labelPriceInBTC->setText(QApplication::translate("OverviewPage", "0 BTC/XMG", 0));
 
-//    labelPriceInUSD = new GUIUtil::QCLabel("", ui->frame);
-//    sizePolicy.setHeightForWidth(labelPriceInUSD->sizePolicy().hasHeightForWidth());
-//    labelPriceInUSD->setSizePolicy(sizePolicy);
+    labelPriceInUSD = new GUIUtil::QCLabel("", ui->frame);
+    sizePolicy.setHeightForWidth(labelPriceInUSD->sizePolicy().hasHeightForWidth());
+    labelPriceInUSD->setSizePolicy(sizePolicy);
 
     labelPriceInUSD->setObjectName(QStringLiteral("labelPriceInUSD"));
     labelPriceInUSD->setFont(font2);
