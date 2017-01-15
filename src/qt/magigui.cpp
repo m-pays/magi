@@ -402,7 +402,7 @@ void BitcoinGUI::createMenuBar()
     QMenu *mint = appMenuBar->addMenu(tr("&Mint"));
     mint->addAction(lockWalletToggleAction);
 
-    QMenu *help = appMenuBar->addMenu(tr("&Help"));
+    QMenu *help = appMenuBar->addMenu(tr("&About"));
     help->addAction(openRPCConsoleAction);
     help->addSeparator();
     help->addAction(aboutAction);
