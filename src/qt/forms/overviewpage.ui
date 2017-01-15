@@ -112,6 +112,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QLabel" name="labelBalance">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
@@ -148,6 +154,12 @@
             </item>
             <item row="1" column="1">
              <widget class="QLabel" name="labelStake">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -183,6 +195,12 @@
             </item>
             <item row="2" column="1">
              <widget class="QLabel" name="labelUnconfirmed">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -218,6 +236,12 @@
             </item>
             <item row="3" column="1">
              <widget class="QLabel" name="labelImmature">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -250,6 +274,12 @@
             </item>
             <item row="4" column="1">
              <widget class="QLabel" name="labelTotal">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -272,6 +302,12 @@
             </item>
             <item row="5" column="1">
              <widget class="QLabel" name="labelTotalInUSD">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
