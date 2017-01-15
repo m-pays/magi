@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>593</width>
-    <height>331</height>
+    <width>650</width>
+    <height>320</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>About Magi</string>
@@ -57,7 +63,7 @@
           <cursorShape>IBeamCursor</cursorShape>
          </property>
          <property name="text">
-          <string>&lt;b&gt;CoinMagi&lt;/b&gt; Core version</string>
+          <string>&lt;b&gt;Magi&lt;/b&gt; Core version</string>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -110,17 +116,12 @@ Copyright © 2014-2017 Magi Developers
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="aboutMessage">
        <property name="cursor">
         <cursorShape>IBeamCursor</cursorShape>
        </property>
        <property name="text">
-        <string>
-This is experimental software. If you don't treat it as such, you're likely to put an eye out!
-
-Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

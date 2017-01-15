@@ -2,6 +2,9 @@
 #define ABOUTDIALOG_H
 
 #include <QDialog>
+#include <QRegExp>
+
+#include "guiconstants.h"
 
 namespace Ui {
     class AboutDialog;

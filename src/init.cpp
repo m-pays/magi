@@ -310,6 +310,26 @@ std::string HelpMessage()
     return strUsage;
 }
 
+std::string LicenseInfo()
+{
+    const std::string URL_SOURCE_CODE = "<https://github.com/magi-project/magi>";
+    const std::string URL_WEBSITE = "<http://coinmagi.org>";
+    const std::string APP_NAME = "Magi";
+
+    return (
+           strprintf(_("Please contribute if you find %s useful. Visit %s for further information about the software. "),
+               APP_NAME.c_str(), URL_WEBSITE.c_str()) +
+           strprintf(_("The source code is available from %s."), URL_SOURCE_CODE.c_str()) +
+           "\n" +
+           "\n" +
+           _("This is experimental software.") + "\n" +
+           strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s"), "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" +
+           "\n" +
+           strprintf(_("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard."), "<https://www.openssl.org>") +
+           "\n"
+           );
+}
+
 /** Initialize bitcoin.
  *  @pre Parameters should be parsed and config file should be read.
  */

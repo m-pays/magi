@@ -13,5 +13,6 @@ void StartShutdown();
 void Shutdown(void* parg);
 bool AppInit2();
 std::string HelpMessage();
+std::string LicenseInfo();
 
 #endif
