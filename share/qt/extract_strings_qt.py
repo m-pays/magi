@@ -62,9 +62,9 @@ f.write("""#include <QtGlobal>
 #define UNUSED
 #endif
 """)
-f.write('static const char UNUSED *bitcoin_strings[] = {')
+f.write('static const char UNUSED *magi_strings[] = {')
 for (msgid, msgstr) in messages:
     if msgid != EMPTY:
-        f.write('QT_TRANSLATE_NOOP("bitcoin-core", %s),\n' % ('\n'.join(msgid)))
+        f.write('QT_TRANSLATE_NOOP("m-core", %s),\n' % ('\n'.join(msgid)))
 f.write('};')
 f.close()

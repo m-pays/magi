@@ -3,7 +3,7 @@
 
 #include "clientmodel.h"
 #include "walletmodel.h"
-#include "bitcoinunits.h"
+#include "magiunits.h"
 #include "optionsmodel.h"
 #include "transactiontablemodel.h"
 #include "transactionfilterproxy.h"
@@ -389,90 +389,9 @@ void OverviewPage::checkForUpdates()
     // version, exit without setting bool isUpToDate. If the internal version is
     // equal to or greater than the online version, set isUpToDate = true.
     bool isUpToDate = true;
-<<<<<<< HEAD
     unsigned int nVersion = m_pUpdCtrl->parseClientVersion(qsCurrentClientVersion.toStdString(), '.');
     if (nVersion > GetClientVersion(CLIENT_VERSION, CLIENT_VERSION_RELEASE_CANDIDATE))
         isUpToDate = false;
-=======
-    int value = 0;
-    std::vector<std::string> v_siteString = m_pUpdCtrl->splitString(siteVersion.toStdString(), ".");
-    if (v_siteString.size() != (size_t) 4)
-    {
-        report = QString("Malformed wallet version retrieved");
-    }
-
-    // Here, we need to check version very thoroughly, otherwise the version numbers of
-    // higher significance (Major, Minor, Revision) can be ignored if the lower
-    // significance numbers are higher
-    else
-    {
-        value = atoi(v_siteString.at(0).c_str());
-        if (value > DISPLAY_VERSION_MAJOR)
-        {
-            isUpToDate = false;
-        }
-        else
-        {
-            value = atoi(v_siteString.at(1).c_str());
-            if (value > DISPLAY_VERSION_MINOR)
-            {
-                // Check to make sure major version is also greater than or equal to
-                // the current version
-                value = atoi(v_siteString.at(0).c_str());
-                if (value >= DISPLAY_VERSION_MAJOR)
-                {
-                    isUpToDate = false;
-                }
-            }
-            else
-            {
-                value = atoi(v_siteString.at(2).c_str());
-                if (value > DISPLAY_VERSION_REVISION)
-                {
-                    // Check to make sure minor version is also greater than or equal
-                    // to the current version
-                    value = atoi(v_siteString.at(1).c_str());
-                    if (value >= DISPLAY_VERSION_MINOR)
-                    {
-                        // Check to make sure major version is also greater than or
-                        // equal to the current version
-                        value = atoi(v_siteString.at(0).c_str());
-                        if (value >= DISPLAY_VERSION_MAJOR)
-                        {
-                            isUpToDate = false;
-                        }
-                    }
-                }
-                else
-                {
-                    value = atoi(v_siteString.at(3).c_str());
-                    if (value > DISPLAY_VERSION_BUILD)
-                    {
-                        // Check to make sure revision number is also greater than or
-                        // equal to the current revision
-                        value = atoi(v_siteString.at(2).c_str());
-                        if (value >= DISPLAY_VERSION_REVISION)
-                         {
-                            // Check to make sure minor version is also greater than or
-                            // equal to the current version
-                            value = atoi(v_siteString.at(1).c_str());
-                            if (value >= DISPLAY_VERSION_MINOR)
-                            {
-                                // Check to make sure major version is also greater than
-                                // or equal to the current version
-                                value = atoi(v_siteString.at(0).c_str());
-                                if (value >= DISPLAY_VERSION_MAJOR)
-                                {
-                                    isUpToDate = false;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
->>>>>>> f6f7bd4ad51cfb0f67d2dce2360d91b435348610
 
     // If versions are the same, remove the update section, otherwise make sure
     // it is visible and show a link to the wallet download site
@@ -485,10 +404,5 @@ void OverviewPage::checkForUpdates()
     }
 
     // Set the update label text and exit
-<<<<<<< HEAD
     labelUpdateStatus->setText(report);
 }
-=======
-    ui->labelUpdateStatus->setText(report);
-}
->>>>>>> f6f7bd4ad51cfb0f67d2dce2360d91b435348610

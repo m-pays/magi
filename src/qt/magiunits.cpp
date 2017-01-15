@@ -1,4 +1,4 @@
-#include "bitcoinunits.h"
+#include "magiunits.h"
 
 #include <QStringList>
 

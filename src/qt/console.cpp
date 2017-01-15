@@ -3,7 +3,7 @@
 #include "ui_console.h"
 
 #include "clientmodel.h"
-#include "bitcoinrpc.h"
+#include "magirpc.h"
 #include "guiutil.h"
 #include "guiconstants.h"
 

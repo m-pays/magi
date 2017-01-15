@@ -2902,7 +2902,7 @@
     </message>
 </context>
 <context>
-    <name>bitcoin-core</name>
+    <name>m-core</name>
     <message>
         <source>Options:</source>
         <translation>选项：
