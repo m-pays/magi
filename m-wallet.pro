@@ -364,7 +364,7 @@ SOURCES += src/qt/test/test_main.cpp \
 HEADERS += src/qt/test/uritests.h
 DEPENDPATH += src/qt/test
 QT += testlib
-TARGET = magi-qt_test
+TARGET = m-wallet_test
 DEFINES += BITCOIN_QT_TEST
 }
 
