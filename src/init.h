@@ -7,12 +7,14 @@
 
 #include "wallet.h"
 
+#define PACKAGE_NAME "Magi"
+
 extern CWallet* pwalletMain;
 
 void StartShutdown();
 void Shutdown(void* parg);
 bool AppInit2();
 std::string HelpMessage();
-std::string LicenseInfo();
+std::string LicenseInfo(bool f1=true, bool f2=true);
 
 #endif

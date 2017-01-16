@@ -10,7 +10,7 @@
 #include "sendcoinsdialog.h"
 #include "signverifymessagedialog.h"
 #include "optionsdialog.h"
-#include "aboutdialog.h"
+#include "utilitydialog.h"
 #include "clientmodel.h"
 #include "walletmodel.h"
 #include "editaddressdialog.h"
@@ -335,9 +335,17 @@ void BitcoinGUI::createActions()
     quitAction->setToolTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(QIcon(":/icons/about"), tr("&About Magi"), this);
+
+    aboutAction = new QAction(QIcon(":/icons/about"), tr("Coin &Magi"), this);
     aboutAction->setToolTip(tr("Show information about Magi"));
     aboutAction->setMenuRole(QAction::AboutRole);
+    aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("mPo&W Mining"), this);
+    aboutmPoWAction->setToolTip(tr("Show information about mPoW"));
+    aboutmPoWAction->setMenuRole(QAction::AboutRole);
+    aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("mPo&S Minting"), this);
+    aboutmPoSAction->setToolTip(tr("Show information about mPoS"));
+    aboutmPoSAction->setMenuRole(QAction::AboutRole);
+
     aboutQtAction = new QAction(QIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
@@ -360,11 +368,13 @@ void BitcoinGUI::createActions()
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
 
-    openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("&Information"), this);
+    openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("Wallet &Info"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
+    connect(aboutmPoWAction, SIGNAL(triggered()), this, SLOT(aboutmPoW()));
+    connect(aboutmPoSAction, SIGNAL(triggered()), this, SLOT(aboutmPoS()));
     connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
@@ -410,6 +420,9 @@ void BitcoinGUI::createMenuBar()
     about->addAction(openRPCConsoleAction);
     about->addSeparator();
     about->addAction(aboutAction);
+    about->addAction(aboutmPoWAction);
+    about->addAction(aboutmPoSAction);
+    about->addSeparator();
     about->addAction(aboutQtAction);
 
     // QString ss("QMenuBar::item { background-color: #effbef; color: black }"); 
@@ -609,8 +622,28 @@ void BitcoinGUI::optionsClicked()
 
 void BitcoinGUI::aboutClicked()
 {
-    AboutDialog dlg;
-    dlg.setModel(clientModel);
+    if(!clientModel)
+        return;
+
+    HelpMessageDialog dlg(this, 1);
+    dlg.exec();
+}
+
+void BitcoinGUI::aboutmPoW()
+{
+    if(!clientModel)
+        return;
+
+    HelpMessageDialog dlg(this, 2);
+    dlg.exec();
+}
+
+void BitcoinGUI::aboutmPoS()
+{
+    if(!clientModel)
+        return;
+
+    HelpMessageDialog dlg(this, 3);
     dlg.exec();
 }
 

@@ -123,7 +123,9 @@ SOURCES += src/txdb.cpp \
     src/qt/magigui.cpp \
     src/qt/magistrings.cpp \
     src/qt/magiunits.cpp \
-    src/magirpc.cpp
+    src/magirpc.cpp \
+    src/clientversion.cpp \
+    src/qt/utilitydialog.cpp
 !win32 {
     # we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
     genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a
@@ -181,7 +183,6 @@ HEADERS += \
     src/qt/sendcoinsdialog.h \
     src/qt/addressbookpage.h \
     src/qt/signverifymessagedialog.h \
-    src/qt/aboutdialog.h \
     src/qt/editaddressdialog.h \
     src/alert.h \
     src/addrman.h \
@@ -262,7 +263,8 @@ HEADERS += \
     src/qt/magiamountfield.h \
     src/qt/magigui.h \
     src/qt/magiunits.h \
-    src/magirpc.h
+    src/magirpc.h \
+    src/qt/utilitydialog.h
 
 SOURCES += \
     src/qt/transactiontablemodel.cpp \
@@ -273,10 +275,8 @@ SOURCES += \
     src/qt/coincontroltreewidget.cpp \
     src/qt/addressbookpage.cpp \
     src/qt/signverifymessagedialog.cpp \
-    src/qt/aboutdialog.cpp \
     src/qt/editaddressdialog.cpp \
     src/alert.cpp \
-    src/version.cpp \
     src/sync.cpp \
     src/util.cpp \
     src/hash.cpp \
@@ -342,7 +342,6 @@ FORMS += \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/signverifymessagedialog.ui \
-    src/qt/forms/aboutdialog.ui \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
@@ -350,7 +349,8 @@ FORMS += \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
     src/qt/forms/optionsdialog.ui \
-    src/qt/forms/console.ui
+    src/qt/forms/console.ui \
+    src/qt/forms/helpmessagedialog.ui
 
 contains(USE_QRCODE, 1) {
 HEADERS += src/qt/qrcodedialog.h

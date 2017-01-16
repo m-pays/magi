@@ -310,26 +310,6 @@ std::string HelpMessage()
     return strUsage;
 }
 
-std::string LicenseInfo()
-{
-    const std::string URL_SOURCE_CODE = "<https://github.com/magi-project/magi>";
-    const std::string URL_WEBSITE = "<http://coinmagi.org>";
-    const std::string APP_NAME = "Magi";
-
-    return (
-           strprintf(_("Please contribute if you find %s useful. Visit %s for further information about the software. "),
-               APP_NAME.c_str(), URL_WEBSITE.c_str()) +
-           strprintf(_("The source code is available from %s."), URL_SOURCE_CODE.c_str()) +
-           "\n" +
-           "\n" +
-           _("This is experimental software.") + "\n" +
-           strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s"), "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" +
-           "\n" +
-           strprintf(_("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard."), "<https://www.openssl.org>") +
-           "\n"
-           );
-}
-
 /** Initialize bitcoin.
  *  @pre Parameters should be parsed and config file should be read.
  */
@@ -919,4 +899,23 @@ bool AppInit2()
 #endif
 
     return true;
+}
+
+
+std::string LicenseInfo(bool f1, bool f2)
+{
+    const std::string URL_SOURCE_CODE = "<https://github.com/magi-project/magi>";
+    const std::string URL_WEBSITE = "<http://coinmagi.org>";
+    const std::string additionalInfo = "Magi (XMG) is an online payment system, enabling instant payments to anyone in the world without using an intermediary. Magi coins can be minted by computational devices including personal computers and portable devices through mPoW and mPoS. Magi aims at fairness, cost effective and energy efficiency during coin minting.";
+
+    return ( (f1 ? (std::string(BTC_COPYRIGHT_STR) + "\n" + std::string(PPC_COPYRIGHT_STR) + "\n") : "") + 
+        CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2014, COPYRIGHT_YEAR) + " ") + "\n" +
+        "\n" +
+        (f2 ? additionalInfo + "\n" : "") + "\n" + 
+        strprintf(_("Please contribute if you find %s useful. Visit %s for further information about the software. "), PACKAGE_NAME,URL_WEBSITE.c_str()) +
+        strprintf(_("The source code is available from %s."), URL_SOURCE_CODE.c_str()) +
+        "\n" + "\n" + _("This is experimental software.") + 
+        strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s"), "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" + "\n" +
+        strprintf(_("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard."), "<https://www.openssl.org>") +
+        "\n" );
 }

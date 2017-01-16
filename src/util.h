@@ -2,8 +2,8 @@
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef BITCOIN_UTIL_H
-#define BITCOIN_UTIL_H
+#ifndef MAGI_UTIL_H
+#define MAGI_UTIL_H
 
 #include "uint256.h"
 
@@ -149,12 +149,8 @@ inline void MilliSleep(int64 n)
 #define ATTR_WARN_PRINTF(X,Y)
 #endif
 
-
-
-
-
-
-
+#define BTC_COPYRIGHT_STR "Copyright (C) 2009-2012 The Bitcoin Core Developers"
+#define PPC_COPYRIGHT_STR "Copyright (C) 2012-2014 The PPCoin Developers"
 
 extern std::map<std::string, std::string> mapArgs;
 extern std::map<std::string, std::vector<std::string> > mapMultiArgs;
@@ -249,15 +245,10 @@ void SetMockTime(int64 nMockTimeIn);
 int64 GetAdjustedTime();
 int64_t GetTimeOffset();
 long hex2long(const char* hexString);
-std::string FormatFullVersion();
-std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments);
 void AddTimeData(const CNetAddr& ip, int64 nTime);
 void runCommand(std::string strCommand);
 bool StringToDouble(const std::string &s, double &val);
 unsigned int GetClientVersion(int nClientVersion, std::string str);
-
-
-
 
 inline std::string i64tostr(int64 n)
 {
@@ -557,5 +548,7 @@ inline uint32_t ByteReverse(uint32_t value)
     return (value<<16) | (value>>16);
 }
 
-#endif
+std::string CopyrightHolders(const std::string& strPrefix);
+
+#endif // MAGI_UTIL_H
 

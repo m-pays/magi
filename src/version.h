@@ -7,28 +7,14 @@
 #include "clientversion.h"
 #include <string>
 
-//
-// client versioning
-//
-
-static const int CLIENT_VERSION =
-                           1000000 * CLIENT_VERSION_MAJOR
-                         +   10000 * CLIENT_VERSION_MINOR
-                         +     100 * CLIENT_VERSION_REVISION
-                         +       1 * CLIENT_VERSION_BUILD;
-
-extern const std::string CLIENT_NAME;
-extern const std::string CLIENT_BUILD;
-extern const std::string CLIENT_DATE;
-
-//
-// database format versioning
-//
+/**
+ * database format versioning
+ */
 static const int DATABASE_VERSION = 72001;
 
-//
-// network protocol versioning
-//
+/**
+ * network protocol versioning
+ */
 
 static const int PROTOCOL_VERSION = 71051;
 
@@ -49,9 +35,9 @@ static const int BIP0031_VERSION = 60000;
 // "mempool" command, enhanced "getdata" behavior starts with this version:
 static const int MEMPOOL_GD_VERSION = 60002;
 
-#define DISPLAY_VERSION_MAJOR       1
-#define DISPLAY_VERSION_MINOR       3
-#define DISPLAY_VERSION_REVISION    0
-#define DISPLAY_VERSION_BUILD       0
+//#define DISPLAY_VERSION_MAJOR       1
+//#define DISPLAY_VERSION_MINOR       3
+//#define DISPLAY_VERSION_REVISION    0
+//#define DISPLAY_VERSION_BUILD       0
 
 #endif

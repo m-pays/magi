@@ -92,6 +92,8 @@ private:
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
+    QAction *aboutmPoWAction;
+    QAction *aboutmPoSAction;
     QAction *receiveCoinsAction;
     QAction *optionsAction;
     QAction *toggleHideAction;
@@ -183,6 +185,8 @@ private slots:
     void optionsClicked();
     /** Show about dialog */
     void aboutClicked();
+    void aboutmPoW();
+    void aboutmPoS();
     /** Show mint message dialog */
     void mintMessageClicked();
 #ifndef Q_OS_MAC
