@@ -22,13 +22,13 @@
 #include <QTimer>            //Added for update timer
 #include <QUrl>
 
-#define DECORATION_SIZE 64
-#define NUM_ITEMS 4
+#define DECORATION_SIZE 46
+#define NUM_ITEMS 5
 
 #if __MACH__
-#define OVERVIEW_FONT_SIZE 12
+#define BAL_FONT_SIZE 12
 #else
-#define OVERVIEW_FONT_SIZE 8
+#define BAL_FONT_SIZE 8
 #endif
 
 class TxViewDelegate : public QAbstractItemDelegate
@@ -112,6 +112,8 @@ public:
 };
 #include "overviewpage.moc"
 
+#define TRANS_FONT_SIZE 8
+
 OverviewPage::OverviewPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
@@ -128,8 +130,13 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
+    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE));
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    QFont fnt;
+    fnt.setPointSize(TRANS_FONT_SIZE);
+    fnt.setKerning(true);
+    ui->listTransactions->setFont(fnt);
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
 
@@ -169,13 +176,14 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 void OverviewPage::setBalanceLabel()
 {
     QFont font;
-    font.setPointSize(OVERVIEW_FONT_SIZE);
+    font.setPointSize(BAL_FONT_SIZE);
     font.setBold(true);
     font.setItalic(false);
     font.setUnderline(false);
     font.setWeight(QFont::Bold);
     font.setStrikeOut(false);
     font.setKerning(true);
+
     ui->labelBalance->setFont(font);
     ui->labelStake->setFont(font);
     ui->labelUnconfirmed->setFont(font);
@@ -186,10 +194,10 @@ void OverviewPage::setBalanceLabel()
 
 void OverviewPage::setClientUpdateCheck()
 {
-    labelUpdateStatic = new QLabel(ui->frame);
+    labelUpdateStatic = new QLabel(ui->frameBalance);
     labelUpdateStatic->setObjectName(QStringLiteral("labelUpdateStatic"));
     QFont font5;
-    font5.setPointSize(OVERVIEW_FONT_SIZE);
+    font5.setPointSize(BAL_FONT_SIZE);
     font5.setBold(true);
     font5.setItalic(false);
     font5.setUnderline(false);
@@ -201,7 +209,7 @@ void OverviewPage::setClientUpdateCheck()
     labelUpdateStatic->setText(QStringLiteral("New version available:"));
     labelUpdateStatic->setText(QApplication::translate("OverviewPage", "New version available:", 0));
 
-    labelUpdateStatus = new QLabel(ui->frame);
+    labelUpdateStatus = new QLabel(ui->frameBalance);
     labelUpdateStatus->setObjectName(QStringLiteral("labelUpdateStatus"));
     labelUpdateStatus->setStyleSheet(QStringLiteral("QLabel { color: red; }"));
     labelUpdateStatus->setText(QStringLiteral("(checking)"));
@@ -218,7 +226,7 @@ void OverviewPage::setClientUpdateCheck()
 void OverviewPage::setPriceUpdateCheck()
 {
     /*
-    QLabel *labelPriceText = new QLabel(ui->frame);
+    QLabel *labelPriceText = new QLabel(ui->frameBalance);
     labelPriceText->setObjectName(QStringLiteral("labelPriceText"));
     QFont font1;
     font1.setPointSize(9);
@@ -233,10 +241,10 @@ void OverviewPage::setPriceUpdateCheck()
     sizePolicy.setVerticalStretch(0);
 
     QFont font2;
-    font2.setPointSize(OVERVIEW_FONT_SIZE);
+    font2.setPointSize(BAL_FONT_SIZE);
     font2.setBold(false);
     font2.setWeight(QFont::Normal);
-    labelPriceInBTC = new GUIUtil::QCLabel("", ui->frame);
+    labelPriceInBTC = new GUIUtil::QCLabel("", ui->frameBalance);
     sizePolicy.setHeightForWidth(labelPriceInBTC->sizePolicy().hasHeightForWidth());
     labelPriceInBTC->setSizePolicy(sizePolicy);
 
@@ -249,7 +257,7 @@ void OverviewPage::setPriceUpdateCheck()
     labelPriceInBTC->setToolTip(QApplication::translate("OverviewPage", "Price in BTC, click to refresh", 0));
     labelPriceInBTC->setText(QApplication::translate("OverviewPage", "0 BTC/XMG", 0));
 
-    labelPriceInUSD = new GUIUtil::QCLabel("", ui->frame);
+    labelPriceInUSD = new GUIUtil::QCLabel("", ui->frameBalance);
     sizePolicy.setHeightForWidth(labelPriceInUSD->sizePolicy().hasHeightForWidth());
     labelPriceInUSD->setSizePolicy(sizePolicy);
 
