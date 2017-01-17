@@ -20,20 +20,32 @@
 #include <QTextCursor>
 #include <QVBoxLayout>
 
+#define HELPMESSAGE_ICONSIZE 92
+
 HelpMessageDialog::HelpMessageDialog(QWidget *parent, int n) :
     QDialog(parent),
+    nwhich(n),
     ui(new Ui::HelpMessageDialog)
 {
     ui->setupUi(this);
 	// this->setStyleSheet("background-color: #effbef;");
     GUIUtil::restoreWindowGeometry("nHelpMessageDialogWindow", this->size(), this);
 
-    startExecutor(n);
+    startExecutor();
 }
 
 HelpMessageDialog::~HelpMessageDialog()
 {
-    GUIUtil::saveWindowGeometry("nHelpMessageDialogWindow", this);
+    switch (nwhich)
+    {
+        case 1: // about coin magi
+            GUIUtil::saveWindowGeometry("nHelpMessageDialogWindow", this);
+            break;
+        case 2: // about mPoW
+            break;
+        case 3: // about mPoS
+            break;
+    }
     delete ui;
 }
 
@@ -42,17 +54,22 @@ void HelpMessageDialog::on_okButton_accepted()
     close();
 }
 
-void HelpMessageDialog::startExecutor(int n)
+void HelpMessageDialog::startExecutor()
 {
-    switch (n)
+    switch (nwhich)
     {
         case 1: // about coin magi
+            ui->aboutLogo->setPixmap(QIcon(":/images/about").pixmap(HELPMESSAGE_ICONSIZE,HELPMESSAGE_ICONSIZE));
             showAboutCoinMagi();
             break;
         case 2: // about mPoW
+            ui->aboutLogo->setPixmap(QIcon(":/icons/about_mpow").pixmap(HELPMESSAGE_ICONSIZE,HELPMESSAGE_ICONSIZE));
+            this->resize(600, 250);
             showAboutmPoW();
             break;
         case 3: // about mPoS
+            ui->aboutLogo->setPixmap(QIcon(":/icons/about_mpos").pixmap(HELPMESSAGE_ICONSIZE,HELPMESSAGE_ICONSIZE));
+            this->resize(600, 250);
             showAboutmPoS();
             break;
     }

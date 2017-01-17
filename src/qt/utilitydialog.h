@@ -26,11 +26,12 @@ public:
     void showAboutCoinMagi();
     void showAboutmPoW();
     void showAboutmPoS();
-    void startExecutor(int n);
+    void startExecutor();
 
 private:
     Ui::HelpMessageDialog *ui;
     QString text;
+    int nwhich;
 
 private Q_SLOTS:
     void on_okButton_accepted();

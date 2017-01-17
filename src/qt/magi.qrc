@@ -53,6 +53,8 @@
         <file alias="information">res/icons/information.png</file>
         <file alias="mpos">res/icons/mpos.png</file>
         <file alias="mpow">res/icons/mpow.png</file>
+        <file alias="about_mpow">res/icons/about_mpow.png</file>
+        <file alias="about_mpos">res/icons/about_mpos.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
