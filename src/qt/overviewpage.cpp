@@ -23,12 +23,14 @@
 #include <QUrl>
 
 #define DECORATION_SIZE 46
-#define NUM_ITEMS 5
-
-#if __MACH__
-#define BAL_FONT_SIZE 12
+#ifdef Q_OS_MAC
+#define NUM_ITEMS 6
+#define BAL_FONT_SIZE 11
+#define TRANS_FONT_SIZE 12
 #else
+#define NUM_ITEMS 5
 #define BAL_FONT_SIZE 8
+#define TRANS_FONT_SIZE 8
 #endif
 
 class TxViewDelegate : public QAbstractItemDelegate
@@ -112,8 +114,6 @@ public:
 };
 #include "overviewpage.moc"
 
-#define TRANS_FONT_SIZE 8
-
 OverviewPage::OverviewPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
@@ -130,7 +130,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE));
+    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE-1));
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     QFont fnt;

@@ -29,8 +29,8 @@ QToolBar > QToolButton {
     font-weight: 1250;
     padding-top: 5px;
     padding-bottom: 5px;
-    padding-left: 5px;
-    padding-right: 5px; }
+    padding-left: 2.5px;
+    padding-right: 2.5px; }
 
 QToolBar > QToolButton:checked {
     color: #1D77EF;

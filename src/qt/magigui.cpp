@@ -522,7 +522,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         connect(walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
     
         // Client stylesheet
-    #if __MACH__
+    #ifdef Q_OS_MAC
         QFile qfStyleSheet(":/styles/magi-osx.qss");
     #else
     #if QT_VERSION < 0x050300
