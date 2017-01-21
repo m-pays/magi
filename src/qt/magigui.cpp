@@ -143,13 +143,14 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole = new RPCConsole(this);
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
 
-    centralWidget = new QStackedWidget(this);
+    centralWidget = new GUIUtil::QRStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
     centralWidget->addWidget(consolePage);
+    setCentralWidgetSizePolicy();
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -265,6 +266,18 @@ BitcoinGUI::~BitcoinGUI()
 #ifdef Q_OS_MAC
     delete appMenuBar;
 #endif
+}
+
+void BitcoinGUI::setCentralWidgetSizePolicy()
+{
+    for (int i = 0; i < this->centralWidget->count(); ++i) 
+    { 
+        QSizePolicy::Policy policy = QSizePolicy::Ignored; 
+        if (i == this->centralWidget->currentIndex()) 
+            policy = QSizePolicy::Expanding;
+        QWidget* page = this->centralWidget->widget(i); 
+        page->setSizePolicy(policy, policy); 
+    } 
 }
 
 void BitcoinGUI::createActions()

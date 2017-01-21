@@ -562,5 +562,20 @@ void QPriceInfo::updatePriceInBTC(QNetworkReply* resp)
     emit finished();
 }
 
+void QRStackedWidget::addWidget(QWidget* pWidget)
+{
+   pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+   QStackedWidget::addWidget(pWidget);
+}
+
+void QRStackedWidget::onCurrentChanged(int index)
+{
+   QWidget* pWidget = widget(index);
+   Q_ASSERT(pWidget);
+   pWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+   pWidget->adjustSize();
+   adjustSize();
+}
+
 } // namespace GUIUtil
 

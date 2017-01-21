@@ -137,6 +137,8 @@ private:
     void saveWindowGeometry();
     /** Restore window size and position */
     void restoreWindowGeometry();
+    /** set size policy for central widget */
+    void setCentralWidgetSizePolicy();
 
 public slots:
     /** Set number of connections shown in the UI */

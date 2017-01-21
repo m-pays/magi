@@ -109,7 +109,7 @@ void HelpMessageDialog::showAboutCoinMagi()
 void HelpMessageDialog::showAboutmPoW()
 {
     /// HTML-format the license message from the core
-    QString info = "mPoW, a magi's proof-of-work (PoW) protocol, in addition to required computational works to be done to deter denial of service attacks, is also a network-dependent rewarding model system. The mPoW rewards participants who solve complicated cryptographical questions not only to validate transactions but also to create new blocks in order to generate coins. The coin minting via mPoW is adjusted and balanced by two primary mechanisms: 1) triggering network activities by issuing rewards, and 2) mitigating redundant mining sources by reducing rewards.";
+    QString info = "mPoW, the magi's proof-of-work (PoW) protocol, in addition to required computational works to be done to deter denial of service attacks, is also a network-dependent rewarding model system. The mPoW rewards participants who solve complicated cryptographical questions not only to validate transactions but also to create new blocks in order to generate coins. The coins mined via mPoW are adjusted and balanced by two primary mechanisms: 1) stimulating network activities by issuing rewards, and 2) mitigating redundant mining sources by reducing rewards.";
 
     QString infoHTML = info;
     // Make URLs clickable
@@ -130,7 +130,7 @@ void HelpMessageDialog::showAboutmPoW()
 void HelpMessageDialog::showAboutmPoS()
 {
     /// HTML-format the license message from the core
-    QString info = "mPoS, a magi's proof-of-stake (PoS) protocol, aims to achieve distributed consensus in addition to mPoW. mPoS is designed to reject potential attacks; those attacks typically take place through accumulating a large amount of coins or offline stake time. Magi hybridizes PoW with PoS, and integrate both consensus approaches in order to acquire benefits from the two mechanisms and create a more robust payment system.";
+    QString info = "mPoS, the magi's proof-of-stake (PoS) protocol, aims to achieve distributed consensus through operations in addition to mPoW. mPoS is designed such that it rejects potential attacks, for example, through accumulating a large amount of coins or offline stake time. Magi hybridizes PoW with PoS, and integrate both consensus approaches in order to acquire benefits from the two mechanisms and create a more robust payment system.";
 
     QString infoHTML = info;
     // Make URLs clickable

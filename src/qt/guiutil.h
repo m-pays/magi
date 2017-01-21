@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QStackedWidget>
 
 QT_BEGIN_NAMESPACE
 class QFont;
@@ -171,6 +172,17 @@ namespace GUIUtil
         void updatePriceInUSD(QNetworkReply* resp);
         void updatePriceInBTC(QNetworkReply* resp);
     };
+
+    class QRStackedWidget : public QStackedWidget
+    {
+        Q_OBJECT
+    public:
+        QRStackedWidget(QWidget *parent = 0) : QStackedWidget(parent) {};
+        ~QRStackedWidget(){};
+        void addWidget(QWidget* pWidget);
+        void onCurrentChanged(int index);
+    };
+
 
 } // namespace GUIUtil
 
