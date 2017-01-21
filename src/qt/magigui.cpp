@@ -349,13 +349,15 @@ void BitcoinGUI::createActions()
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
 
-    aboutAction = new QAction(QIcon(":/icons/about"), tr("Coin &Magi"), this);
+    aboutAction = new QAction(QIcon(":/icons/about"), tr("About &Magi"), this);
     aboutAction->setToolTip(tr("Show information about Magi"));
     aboutAction->setMenuRole(QAction::AboutRole);
-    aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("mPo&W Mining"), this);
+    aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("About mPo&W"), this);
     aboutmPoWAction->setToolTip(tr("Show information about mPoW"));
-    aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("mPo&S Minting"), this);
+    aboutmPoWAction->setMenuRole(QAction::NoRole);
+    aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("About mPo&S"), this);
     aboutmPoSAction->setToolTip(tr("Show information about mPoS"));
+    aboutmPoSAction->setMenuRole(QAction::NoRole);
 
     aboutQtAction = new QAction(QIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
@@ -566,8 +568,8 @@ void BitcoinGUI::createTrayIcon()
 #else
     // Note: On Mac, the dock icon is used to provide the tray's functionality.
     MacDockIconHandler *dockIconHandler = MacDockIconHandler::instance();
-    trayIconMenu = dockIconHandler->dockMenu();
     dockIconHandler->setMainWindow((QMainWindow*)this);
+    trayIconMenu = dockIconHandler->dockMenu();
 #endif
 
     // Configuration of the tray icon (or dock icon) icon menu
@@ -581,6 +583,8 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(aboutmPoWAction);
+    trayIconMenu->addAction(aboutmPoSAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
