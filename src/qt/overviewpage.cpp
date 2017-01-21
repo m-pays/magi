@@ -22,11 +22,11 @@
 #include <QTimer>            //Added for update timer
 #include <QUrl>
 
-#define DECORATION_SIZE 46
+#define DECORATION_SIZE 44
 #ifdef Q_OS_MAC
-#define NUM_ITEMS 6
+#define NUM_ITEMS 5
 #define BAL_FONT_SIZE 11
-#define TRANS_FONT_SIZE 12
+#define TRANS_FONT_SIZE 11
 #else
 #define NUM_ITEMS 5
 #define BAL_FONT_SIZE 8
