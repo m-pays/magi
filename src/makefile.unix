@@ -26,6 +26,7 @@ LMODE = dynamic
 LMODE2 = dynamic
 ifdef STATIC
 	LMODE = static
+    LIBPATHS += -L/opt/local/lib
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif
@@ -208,7 +209,7 @@ obj/%.o: hash/%.c
 	  rm -f $(@:%.o=%.d)
 
 magid: $(OBJS:obj/%=obj/%)
-	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
+	$(LINK) $(xCXXFLAGS) -o $@ $(LIBPATHS) $^ $(xLDFLAGS) $(LIBS)
 
 TESTOBJS := $(patsubst test/%.cpp,obj-test/%.o,$(wildcard test/*.cpp))
 
