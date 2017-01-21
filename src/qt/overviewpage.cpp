@@ -273,6 +273,11 @@ void OverviewPage::setPriceUpdateCheck()
     labelPriceInUSD->setToolTip(QApplication::translate("OverviewPage", "Price in USD, click to refresh", 0));
     labelPriceInUSD->setText(QApplication::translate("OverviewPage", "0 USD/XMG", 0));
 
+#ifdef Q_OS_MAC
+    ui->labelPriceText->setMinimumWidth(98);
+#else
+    ui->labelPriceText->setMinimumWidth(100);
+#endif
     ui->formLayout_3->setWidget(0, QFormLayout::FieldRole, labelPriceInBTC);
     ui->formLayout_3->setWidget(1, QFormLayout::FieldRole, labelPriceInUSD);
 
