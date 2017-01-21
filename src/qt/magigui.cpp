@@ -354,10 +354,8 @@ void BitcoinGUI::createActions()
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("mPo&W Mining"), this);
     aboutmPoWAction->setToolTip(tr("Show information about mPoW"));
-    aboutmPoWAction->setMenuRole(QAction::AboutRole);
     aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("mPo&S Minting"), this);
     aboutmPoSAction->setToolTip(tr("Show information about mPoS"));
-    aboutmPoSAction->setMenuRole(QAction::AboutRole);
 
     aboutQtAction = new QAction(QIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
@@ -382,7 +380,7 @@ void BitcoinGUI::createActions()
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
 
     openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("Wallet &Info"), this);
-    openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
+    openRPCConsoleAction->setToolTip(tr("Information about wallet"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
