@@ -1,10 +1,8 @@
-# -*- mode: Makefile; -*-
-# Copyright (c) 2011 Bitcoin Developers
+# Copyright (C) 2009-2012 The Bitcoin Core Developers
+# Copyright (C) 2012-2014 The PPCoin Developers
+# Copyright (C) 2014 The Magi Core Developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-# Mac OS X makefile for bitcoin
-# Originally by Laszlo Hanyecz (solar@heliacal.net)
 
 CXX=llvm-g++
 DEPSDIR=/opt/local
@@ -27,7 +25,7 @@ LIBS= -dead_strip
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
 ifdef STATIC
-# Build STATIC if you are redistributing the bitcoind binary
+# Build STATIC if you are redistributing the binary
 TESTLIBS += \
  $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
 LIBS += \
@@ -71,7 +69,7 @@ CFLAGS += -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
 
 OBJS= \
     obj/alert.o \
-    obj/version.o \
+    obj/clientversion.o \
     obj/checkpoints.o \
     obj/netbase.o \
     obj/addrman.o \
@@ -84,7 +82,7 @@ OBJS= \
     obj/main.o \
     obj/net.o \
     obj/protocol.o \
-    obj/bitcoinrpc.o \
+    obj/magirpc.o \
     obj/rpcdump.o \
     obj/rpcnet.o \
     obj/rpcmining.o \
@@ -134,7 +132,7 @@ test check: test_magi FORCE
 
 obj/build.h: FORCE
 	/bin/sh ../share/genbuild.sh obj/build.h
-version.cpp: obj/build.h
+clientversion.cpp: obj/build.h
 DEFS += -DHAVE_BUILD_INFO
 
 obj/%.o: %.cpp

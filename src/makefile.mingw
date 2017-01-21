@@ -1,4 +1,6 @@
-# Copyright (c) 2009-2010 Satoshi Nakamoto
+# Copyright (C) 2009-2012 The Bitcoin Core Developers
+# Copyright (C) 2012-2014 The PPCoin Developers
+# Copyright (C) 2014 The Magi Core Developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -63,7 +65,7 @@ HEADERS = $(wildcard *.h)
 
 OBJS= \
     obj/alert.o \
-    obj/version.o \
+    obj/clientversion.o \
     obj/checkpoints.o \
     obj/netbase.o \
     obj/addrman.o \
@@ -76,7 +78,7 @@ OBJS= \
     obj/main.o \
     obj/net.o \
     obj/protocol.o \
-    obj/bitcoinrpc.o \
+    obj/magirpc.o \
     obj/rpcdump.o \
     obj/rpcnet.o \
     obj/rpcmining.o \
