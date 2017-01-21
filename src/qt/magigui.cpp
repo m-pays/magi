@@ -68,7 +68,7 @@
 #include <QFont>
 #include <QStyleFactory>
 
-#if __MACH__
+#ifdef Q_OS_MAC
 #define STATUSBAR_FONT_SIZE 12
 #else
 #define STATUSBAR_FONT_SIZE 8

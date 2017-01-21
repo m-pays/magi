@@ -132,14 +132,17 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
     ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE-1));
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
-
     QFont fnt;
     fnt.setPointSize(TRANS_FONT_SIZE);
     fnt.setKerning(true);
     ui->listTransactions->setFont(fnt);
-
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
-
+#ifdef Q_OS_MAC
+    ui->frameBalance->setMinimumWidth(240);
+    ui->listTransactions->setMinimumWidth(260);
+#else
+    ui->listTransactions->setMinimumWidth(275);
+#endif
     // init "out of sync" warning labels
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
     ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
