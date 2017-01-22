@@ -17,22 +17,23 @@ LINK:=$(CXX)
 
 DEFS=-DBOOST_SPIRIT_THREADSAFE
 
-DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/hash $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH)) $(OPT_INCLUDE_PATHS)
-LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
-
-TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
-
 LMODE = dynamic
 LMODE2 = dynamic
 ifdef STATIC
 	LMODE = static
-    LIBPATHS += -L/opt/local/lib
+    OPT_LIB_PATHS += -L/opt/local/lib
+    OPT_INCLUDE_PATHS = -L/opt/local/include
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif
 else
 	TESTDEFS += -DBOOST_TEST_DYN_LINK
 endif
+
+DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/hash $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH)) $(OPT_INCLUDE_PATHS)
+LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
+
+TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
 # for boost 1.37, add -mt to the boost libraries
 LIBS += \
