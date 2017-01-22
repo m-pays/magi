@@ -20,8 +20,8 @@ QToolBar > QToolButton {
     border: 0px;
     background-color: #2B2B2B;
     color: #4CD964;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     margin-left: 0x;
     margin-right: 0px;
     height: 13px;
@@ -34,8 +34,8 @@ QToolBar > QToolButton {
 
 QToolBar > QToolButton:checked {
     color: #1D77EF;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     height: 15px;
     font-weight: 1000;
     padding-top: 5px;
