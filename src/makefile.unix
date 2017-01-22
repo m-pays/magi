@@ -22,7 +22,7 @@ LMODE2 = dynamic
 ifdef STATIC
 	LMODE = static
     OPT_LIB_PATHS += -L/opt/local/lib
-    OPT_INCLUDE_PATHS = -L/opt/local/include
+    OPT_INCLUDE_PATHS = -I/opt/local/include
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif
