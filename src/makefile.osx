@@ -5,7 +5,16 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 CXX=llvm-g++
-DEPSDIR=/opt/local
+DEPSDIR=/opt/crypt
+
+# :=0 --> UPnP support turned off by default at runtime
+# :=1 --> UPnP support turned on by default at runtime
+# :=- --> No UPnP support - miniupnp not required
+USE_UPNP:=0
+
+# :=1 --> Enable IPv6 support
+# :=0 --> Disable IPv6 support
+USE_IPV6:=1
 
 INCLUDEPATHS= \
  -I"$(CURDIR)" \
@@ -17,36 +26,36 @@ LIBPATHS= \
  -L"$(DEPSDIR)/lib" \
  -L"$(DEPSDIR)/lib/db48"
 
-USE_UPNP:=1
-USE_IPV6:=1
-
-LIBS= -dead_strip
+LIBS = -dead_strip
 
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
+BOOST_LIB_SUFFIX=-mt-s
 
 ifdef STATIC
 # Build STATIC if you are redistributing the binary
 TESTLIBS += \
  $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
 LIBS += \
- $(DEPSDIR)/lib/db48/libdb_cxx-4.8.a \
- $(DEPSDIR)/lib/libboost_system-mt.a \
- $(DEPSDIR)/lib/libboost_filesystem-mt.a \
- $(DEPSDIR)/lib/libboost_program_options-mt.a \
- $(DEPSDIR)/lib/libboost_thread-mt.a \
+ $(DEPSDIR)/lib/libdb_cxx-4.8.a \
+ $(DEPSDIR)/lib/libboost_system$(BOOST_LIB_SUFFIX).a \
+ $(DEPSDIR)/lib/libboost_filesystem$(BOOST_LIB_SUFFIX).a \
+ $(DEPSDIR)/lib/libboost_program_options$(BOOST_LIB_SUFFIX).a \
+ $(DEPSDIR)/lib/libboost_thread$(BOOST_LIB_SUFFIX).a \
  $(DEPSDIR)/lib/libssl.a \
+ $(DEPSDIR)/lib/libgmp.a \
  $(DEPSDIR)/lib/libcrypto.a \
  -lz
 else
 TESTLIBS += \
- -lboost_unit_test_framework-mt
+ -lboost_unit_test_framework$(BOOST_LIB_SUFFIX)
 LIBS += \
  -ldb_cxx-4.8 \
- -lboost_system-mt \
- -lboost_filesystem-mt \
- -lboost_program_options-mt \
- -lboost_thread-mt \
+ -lboost_system$(BOOST_LIB_SUFFIX) \
+ -lboost_filesystem$(BOOST_LIB_SUFFIX) \
+ -lboost_program_options$(BOOST_LIB_SUFFIX) \
+ -lboost_thread$(BOOST_LIB_SUFFIX) \
  -lssl \
+ -lgmp \
  -lcrypto \
  -lz
 TESTDEFS += -DBOOST_TEST_DYN_LINK
@@ -95,16 +104,20 @@ OBJS= \
     obj/wallet.o \
     obj/walletdb.o \
     obj/noui.o \
-    obj/pbkdf2.o \
     obj/kernel.o \
+    obj/pbkdf2.o \
     obj/keccak.o \
     obj/haval.o \
     obj/ripemd.o \
     obj/sha2.o \
     obj/sha2big.o \
     obj/tiger.o \
-    obj/whirlpool.o
+    obj/whirlpool.o \
+    obj/magimath.o
+    
+all: magid
 
+DEFS = 
 ifndef USE_UPNP
 	override USE_UPNP = -
 endif
@@ -126,6 +139,16 @@ all: magid
 test check: test_magi FORCE
 	./test_magi
 
+#
+# LevelDB support
+#
+LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
+DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
+OBJS += obj/txdb.o
+leveldb/libleveldb.a:
+	@echo "Building LevelDB ..." && cd leveldb && $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" libleveldb.a libmemenv.a && cd ..
+
 # auto-generated dependencies:
 -include obj/*.P
 -include obj-test/*.P
@@ -143,6 +166,13 @@ obj/%.o: %.cpp
 	  rm -f $(@:%.o=%.d)
 
 obj/%.o: %.c
+	$(CXX) -c $(CFLAGS) -fpermissive -MMD -MF $(@:%.o=%.d) -o $@ $<
+	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	  rm -f $(@:%.o=%.d)
+
+obj/%.o: hash/%.cpp
 	$(CXX) -c $(CFLAGS) -fpermissive -MMD -MF $(@:%.o=%.d) -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
@@ -178,5 +208,6 @@ clean:
 	-rm -f obj/*.P
 	-rm -f obj-test/*.P
 	-rm -f obj/build.h
+	-cd leveldb && $(MAKE) clean || true
 
 FORCE:
