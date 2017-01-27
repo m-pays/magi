@@ -6,6 +6,7 @@
 
 #include "clientversion.h"
 #include <string>
+#include <vector>
 
 /**
  * database format versioning
@@ -34,6 +35,13 @@ static const int BIP0031_VERSION = 60000;
 
 // "mempool" command, enhanced "getdata" behavior starts with this version:
 static const int MEMPOOL_GD_VERSION = 60002;
+
+extern const std::string CLIENT_NAME;
+extern const std::string CLIENT_BUILD;
+extern const std::string CLIENT_DATE;
+
+std::string FormatFullVersion();
+std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments);
 
 //#define DISPLAY_VERSION_MAJOR       1
 //#define DISPLAY_VERSION_MINOR       3
