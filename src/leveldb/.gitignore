@@ -11,3 +11,4 @@ Release
 Debug
 Benchmark
 vs2010.*
+build-leveldb-win.sh
