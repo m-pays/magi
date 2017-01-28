@@ -22,26 +22,28 @@ QToolBar > QToolButton {
     color: #4CD964;
     margin-top: 10px;
     margin-bottom: 10px;
-    margin-left: 2px;
-    margin-right: 2px;
-    height: 15px;
+    margin-left: 0px;
+    margin-right: 0px;
+    height: 14px;
     font-size: 11px;
     font-weight: 1250;
     padding-top: 5px;
     padding-bottom: 5px;
-    padding-left: 5px;
-    padding-right: 5px; }
+    padding-left: 3px;
+    padding-right: 3px; }
 
 QToolBar > QToolButton:checked {
     color: #1D77EF;
-    margin-top: 11px;
+    margin-top: 10px;
     margin-bottom: 10px;
-    height: 18px;
+    margin-left: 0px;
+    margin-right: 0px;
+    height: 16px;
     font-weight: 1250;
     padding-top: 5px;
     padding-bottom: 5px;
-    padding-left: 5px;
-    padding-right: 5px; }
+    padding-left: 3px;
+    padding-right: 3px; }
 
 QToolBar > QToolButton:checked:hover {
     background-color: #3A3A3A; }
