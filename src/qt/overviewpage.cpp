@@ -141,7 +141,13 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->frameBalance->setMinimumWidth(240);
     ui->listTransactions->setMinimumWidth(260);
 #else
+#ifdef Q_OS_WIN
+    ui->frameBalance->setMinimumWidth(240);
+    ui->labelTotalText->setMinimumWidth(90);
+    ui->listTransactions->setMinimumWidth(270);
+#else
     ui->listTransactions->setMinimumWidth(275);
+#endif
 #endif
     // init "out of sync" warning labels
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
@@ -276,7 +282,11 @@ void OverviewPage::setPriceUpdateCheck()
 #ifdef Q_OS_MAC
     ui->labelPriceText->setMinimumWidth(98);
 #else
+#ifdef Q_OS_WIN
+    ui->labelPriceText->setMinimumWidth(93);
+#else
     ui->labelPriceText->setMinimumWidth(100);
+#endif
 #endif
     ui->formLayout_3->setWidget(0, QFormLayout::FieldRole, labelPriceInBTC);
     ui->formLayout_3->setWidget(1, QFormLayout::FieldRole, labelPriceInUSD);
