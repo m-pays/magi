@@ -59,9 +59,13 @@ Setup
 If you are just starting to explore magi, or upgrading wallet from versions prior to v1.3.0, the following procedure is recommended:  
 
 1) Backup wallet.dat;
+
 2) Remove the block-chain data under the .magi (unix-like system) or Magi (OS X or Windows) folder, except for wallet.dat;
+
 3) Download latest block-chain data from here: http://coinmagi.org/bin/block-chain;
+
 4) Unzip all the contents under "m-blockchain" into the .magi or Magi folder;
+
 5) Launch the new wallet. 
 
 - Windows: double click to install, or unpack the files and run the wallet directly;
