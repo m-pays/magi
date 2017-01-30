@@ -7,11 +7,11 @@ src/magid
 src/test_magi
 src/qt/test/test_magi-qt
 src/Makefile.Debug
-src/makefile-static.unix
-src/makefile-static.bsd
-src/makefile-static.linux
-src/makefile-static.osx
-src/makefile-static.mingw
+src/makefile-static*.unix
+src/makefile-static*.bsd
+src/makefile-static*.linux
+src/makefile-static*.osx
+src/makefile-static*.mingw
 
 .*.swp
 *.*~*
