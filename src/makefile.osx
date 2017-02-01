@@ -5,7 +5,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 CXX=llvm-g++
-DEPSDIR=/opt/local
+#DEPSDIR=/opt/local
 
 # :=0 --> UPnP support turned off by default at runtime
 # :=1 --> UPnP support turned on by default at runtime
@@ -33,7 +33,7 @@ BOOST_LIB_SUFFIX=-mt-s
 
 ifdef STATIC
 # Build STATIC if you are redistributing the binary
-DEPSDIR=/opt/crypt
+#DEPSDIR=/opt/crypt
 TESTLIBS += \
  $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
 LIBS += \

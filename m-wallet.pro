@@ -19,21 +19,20 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 # when linking against a specific BerkelyDB version: BDB_LIB_SUFFIX=-4.8
 
 # Dependency library locations can be customized using following settings 
-# winbuild dependencies
-win32 {
-    BOOST_LIB_SUFFIX=-mgw49-mt-s-1_57
-    BOOST_INCLUDE_PATH=C:/deps/boost_1_57_0
-    BOOST_LIB_PATH=C:/deps/boost_1_57_0/stage/lib
-    BDB_INCLUDE_PATH=C:/deps/db-4.8.30.NC/build_unix
-    BDB_LIB_PATH=C:/deps/db-4.8.30.NC/build_unix
-    OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.1j/include
-    OPENSSL_LIB_PATH=C:/deps/openssl-1.0.1j
-    MINIUPNPC_INCLUDE_PATH=C:/deps/
-    MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
-    QRENCODE_INCLUDE_PATH=C:/deps/qrencode-3.4.4
-    QRENCODE_LIB_PATH=C:/deps/qrencode-3.4.4/.libs
-    GMP_INCLUDE_PATH=C:/deps/gmp-6.0.0
-    GMP_LIB_PATH=C:/deps/gmp-6.0.0/.libs
+# winbuild dependencieswin32 {
+#    BOOST_LIB_SUFFIX=-mgw49-mt-s-1_58
+    BOOST_INCLUDE_PATH=$$DEPSDIR/boost_1_58_0
+    BOOST_LIB_PATH=$$DEPSDIR/boost_1_58_0/stage/lib
+    BDB_INCLUDE_PATH=$$DEPSDIR/db-4.8.30.NC/build_unix
+    BDB_LIB_PATH=$$DEPSDIR/db-4.8.30.NC/build_unix
+    OPENSSL_INCLUDE_PATH=$$DEPSDIR/openssl-1.0.1j/include
+    OPENSSL_LIB_PATH=$$DEPSDIR/openssl-1.0.1j
+    MINIUPNPC_INCLUDE_PATH=$$DEPSDIR/miniupnpc
+    MINIUPNPC_LIB_PATH=$$DEPSDIR/miniupnpc
+    QRENCODE_INCLUDE_PATH=$$DEPSDIR/qrencode-3.4.4
+    QRENCODE_LIB_PATH=$$DEPSDIR/qrencode-3.4.4/.libs
+    GMP_INCLUDE_PATH=$$DEPSDIR/gmp-6.0.0
+    GMP_LIB_PATH=$$DEPSDIR/gmp-6.0.0/.libs
 }
 
 OBJECTS_DIR = build
@@ -399,8 +398,8 @@ OTHER_FILES += README.md \
 
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {
-    macx:BOOST_LIB_SUFFIX = -mt
-    windows:BOOST_LIB_SUFFIX = -mgw48-mt-s-1_55
+    macx:BOOST_LIB_SUFFIX = -mt-s
+    windows:BOOST_LIB_SUFFIX = -mgw49-mt-s-1_58
 }
 
 isEmpty(BOOST_THREAD_LIB_SUFFIX) {

@@ -20,9 +20,9 @@ DEFS=-DBOOST_SPIRIT_THREADSAFE
 LMODE = dynamic
 LMODE2 = dynamic
 ifdef STATIC
+#    OPT_LIB_PATHS += -L/opt/local/lib
+#    OPT_INCLUDE_PATHS = -I/opt/local/include
 	LMODE = static
-    OPT_LIB_PATHS += -L/opt/local/lib
-    OPT_INCLUDE_PATHS = -I/opt/local/include
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif

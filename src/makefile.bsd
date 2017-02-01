@@ -18,11 +18,11 @@ DEFS=-DBOOST_SPIRIT_THREADSAFE
 LMODE = dynamic
 LMODE2 = dynamic
 ifdef STATIC
-	CC=gcc48
-	CXX=g++48
+#	CC=gcc48
+#	CXX=g++48
+#    OPT_LIB_PATHS += -L/opt/local-gcc48/lib
+#    OPT_INCLUDE_PATHS = -I/opt/local-gcc48/include
 	LMODE = static
-	OPT_LIB_PATHS += -L/opt/local-gcc48/lib
-	OPT_INCLUDE_PATHS = -I/opt/local-gcc48/include
 	ifeq (${STATIC}, all)
 		LMODE2 = static
 	endif

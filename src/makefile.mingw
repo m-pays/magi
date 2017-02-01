@@ -9,39 +9,46 @@ CXX ?= g++
 USE_UPNP:=-
 USE_IPV6:=1
 
-DEPSDIR?=/usr/local
-BOOST_SUFFIX?=-mgw49-mt-s-1_57
+#DEPSDIR?=/usr/local
+#BOOST_SUFFIX?=-mgw49-mt-s-1_58
 
 INCLUDEPATHS= \
- -I"c:/deps/boost_1_57_0" \
- -I"c:/deps/db-4.8.30.NC/build_unix" \
- -I"c:/deps/miniupnpc" \
- -I"c:/deps/gmp-6.0.0" \
- -I"c:/deps/openssl-1.0.1j/include"
+ -I"$(CURDIR)" \
+ -I"$(DEPSDIR)/boost_1_58_0" \
+ -I"$(DEPSDIR)/db-4.8.30.NC/build_unix" \
+ -I"$(DEPSDIR)/miniupnpc" \
+ -I"$(DEPSDIR)/gmp-6.0.0" \
+ -I"$(DEPSDIR)/openssl-1.0.2j/include"
 
 LIBPATHS= \
- -L"c:/deps/boost_1_57_0/stage/lib" \
- -L"c:/deps/db-4.8.30.NC/build_unix" \
- -L"c:/deps/miniupnpc" \
- -L"c:/deps/gmp-6.0.0/.libs" \
- -L"c:/deps/openssl-1.0.1j"
+ -L"$(CURDIR)/leveldb" \
+ -L"$(DEPSDIR)/boost_1_58_0/stage/lib" \
+ -L"$(DEPSDIR)/db-4.8.30.NC/build_unix" \
+ -L"$(DEPSDIR)/miniupnpc" \
+ -L"$(DEPSDIR)/gmp-6.0.0/.libs" \
+ -L"$(DEPSDIR)/openssl-1.0.2j"
  
 LIBS= \
+ -l leveldb \
+ -l memenv \
  -l boost_system$(BOOST_SUFFIX) \
  -l boost_filesystem$(BOOST_SUFFIX) \
  -l boost_program_options$(BOOST_SUFFIX) \
  -l boost_thread$(BOOST_SUFFIX) \
+ -l boost_chrono$(BOOST_SUFFIX) \
  -l db_cxx \
  -l ssl \
  -l gmp \
  -l crypto
 
-DEFS=-DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE -D__NO_SYSTEM_INCLUDES
+
+DEFS=-D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE -D__NO_SYSTEM_INCLUDES
 DEBUGFLAGS=-g
 CFLAGS=-mthreads -O2 -msse2 -w -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
-FCFLAGS=-O2 -ffree-line-length-none
+#FCFLAGS=-O2 -ffree-line-length-none
 #LDFLAGS=-Wl,--dynamicbase -Wl,--nxcompat -Wl,--large-address-aware
 LDFLAGS=-Wl,--dynamicbase -Wl,--nxcompat -static
+
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
 ifndef USE_UPNP
@@ -58,7 +65,7 @@ ifneq (${USE_IPV6}, -)
 	DEFS += -DUSE_IPV6=$(USE_IPV6)
 endif
 
-LIBS += -l kernel32 -l user32 -l gdi32 -l comdlg32 -l winspool -l winmm -l shell32 -l comctl32 -l ole32 -l oleaut32 -l uuid -l rpcrt4 -l advapi32 -l ws2_32 -l mswsock -l shlwapi
+LIBS += -l mingwthrd -l kernel32 -l user32 -l gdi32 -l comdlg32 -l winspool -l winmm -l shell32 -l comctl32 -l ole32 -l oleaut32 -l uuid -l rpcrt4 -l advapi32 -l ws2_32 -l mswsock -l shlwapi
 
 # TODO: make the mingw builds smarter about dependencies, like the linux/osx builds are
 HEADERS = $(wildcard *.h)
@@ -100,12 +107,23 @@ OBJS= \
     obj/sha2big.o \
     obj/tiger.o \
     obj/whirlpool.o \
-    obj/magimath.o
+    obj/magimath.o \
+    obj/txdb.o
 
 all: magid.exe
 
-test check: test_magi.exe FORCE
-	test_magi.exe
+#test check: test_magi.exe FORCE
+#    test_magi.exe
+
+#
+# LevelDB support
+#
+#LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
+DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
+
+#leveldb/libleveldb.a:
+#    cd leveldb && $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" TARGET_OS=NATIVE_WINDOWS libleveldb.a libmemenv.a && cd ..
 
 obj/%.o: %.cpp $(HEADERS)
 	g++ -c $(CFLAGS) -o $@ $<
@@ -131,7 +149,7 @@ test_magi.exe: $(TESTOBJS) $(filter-out obj/init.o,$(OBJS:obj/%=obj/%))
 	g++ $(CFLAGS) $(LDFLAGS) -o $@ $(LIBPATHS) $^ -lboost_unit_test_framework $(LIBS)
 
 clean:
-	-del /Q magi test_magi
+	-del /Q magid.exe test_magi.exe
 	-del /Q obj\*
 	-del /Q obj-test\*
 
