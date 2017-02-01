@@ -25,12 +25,12 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     BOOST_LIB_PATH=$$DEPSDIR/boost_1_58_0/stage/lib
     BDB_INCLUDE_PATH=$$DEPSDIR/db-4.8.30.NC/build_unix
     BDB_LIB_PATH=$$DEPSDIR/db-4.8.30.NC/build_unix
-    OPENSSL_INCLUDE_PATH=$$DEPSDIR/openssl-1.0.1j/include
-    OPENSSL_LIB_PATH=$$DEPSDIR/openssl-1.0.1j
+    OPENSSL_INCLUDE_PATH=$$DEPSDIR/openssl-1.0.2j/include
+    OPENSSL_LIB_PATH=$$DEPSDIR/openssl-1.0.2j
     MINIUPNPC_INCLUDE_PATH=$$DEPSDIR/miniupnpc
     MINIUPNPC_LIB_PATH=$$DEPSDIR/miniupnpc
-    QRENCODE_INCLUDE_PATH=$$DEPSDIR/qrencode-3.4.4
-    QRENCODE_LIB_PATH=$$DEPSDIR/qrencode-3.4.4/.libs
+    QRENCODE_INCLUDE_PATH=$$DEPSDIR/qrencode-3.4.3
+    QRENCODE_LIB_PATH=$$DEPSDIR/qrencode-3.4.3/.libs
     GMP_INCLUDE_PATH=$$DEPSDIR/gmp-6.0.0
     GMP_LIB_PATH=$$DEPSDIR/gmp-6.0.0/.libs
 }
