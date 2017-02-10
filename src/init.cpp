@@ -913,8 +913,12 @@ std::string LicenseInfo(bool f1, bool f2)
         "\n" +
         (f2 ? additionalInfo + "\n" : "") + "\n" + 
         strprintf(_("Please contribute if you find %s useful. Visit %s for further information about the software. "), PACKAGE_NAME,URL_WEBSITE.c_str()) +
-        strprintf(_("The source code is available from %s."), URL_SOURCE_CODE.c_str()) +
-        "\n" + "\n" + _("This is experimental software.") + 
+        "\n\n" + 
+        strprintf(_("Source code: %s"), URL_SOURCE_CODE.c_str()) + "\n" + 
+        strprintf(_("Dowloand wallet: %s"), "<http://coinmagi.org/bin>") + "\n" + 
+        strprintf(_("Block-Chain: %s"), "<http://coinmagi.org/bin/block-chain>") + "\n" + 
+        "\n" + 
+        _("This is experimental software.") + 
         strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s"), "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" + "\n" +
         strprintf(_("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard."), "<https://www.openssl.org>") +
         "\n" );

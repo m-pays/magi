@@ -349,15 +349,23 @@ void BitcoinGUI::createActions()
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
 
-    aboutAction = new QAction(QIcon(":/icons/about"), tr("About &Magi"), this);
+    aboutAction = new QAction(QIcon(":/icons/about"), tr("Coin &Magi"), this);
     aboutAction->setToolTip(tr("Show information about Magi"));
     aboutAction->setMenuRole(QAction::AboutRole);
-    aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("About mPo&W"), this);
+    aboutmPoWAction = new QAction(QIcon(":/icons/mpow"), tr("mPo&W"), this);
     aboutmPoWAction->setToolTip(tr("Show information about mPoW"));
     aboutmPoWAction->setMenuRole(QAction::NoRole);
-    aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("About mPo&S"), this);
+    aboutmPoSAction = new QAction(QIcon(":/icons/mpos"), tr("mPo&S"), this);
     aboutmPoSAction->setToolTip(tr("Show information about mPoS"));
     aboutmPoSAction->setMenuRole(QAction::NoRole);
+
+    editConfigFileAction = new QAction(QIcon(":/icons/edit"), tr("Edit magi.conf"), this);
+    editConfigFileAction->setToolTip(tr("Edit configuration file"));
+    editConfigFileAction->setMenuRole(QAction::NoRole);
+
+    feedbackAction = new QAction(QIcon(":/icons/export"), tr("Submit Feedback..."), this);
+    feedbackAction->setToolTip(tr("Submit Feedback"));
+    feedbackAction->setMenuRole(QAction::NoRole);
 
     aboutQtAction = new QAction(QIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
@@ -381,7 +389,7 @@ void BitcoinGUI::createActions()
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
 
-    openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("Wallet &Info"), this);
+    openRPCConsoleAction = new QAction(QIcon(":/icons/information"), tr("m-core client"), this);
     openRPCConsoleAction->setToolTip(tr("Information about wallet"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -389,6 +397,10 @@ void BitcoinGUI::createActions()
     connect(aboutmPoWAction, SIGNAL(triggered()), this, SLOT(aboutmPoW()));
     connect(aboutmPoSAction, SIGNAL(triggered()), this, SLOT(aboutmPoS()));
     connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+    connect(editConfigFileAction, SIGNAL(triggered()), this, SLOT(openConfigfile()));
+    connect(feedbackAction, SIGNAL(triggered()), this, SLOT(feedbackClicked()));
+
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
@@ -430,13 +442,17 @@ void BitcoinGUI::createMenuBar()
     mint->addAction(mPoSMintMessageToggleAction);
 
     QMenu *about = appMenuBar->addMenu(tr("&About"));
-    about->addAction(openRPCConsoleAction);
-    about->addSeparator();
     about->addAction(aboutAction);
     about->addAction(aboutmPoWAction);
     about->addAction(aboutmPoSAction);
     about->addSeparator();
-    about->addAction(aboutQtAction);
+    about->addAction(openRPCConsoleAction);
+//    about->addSeparator();
+
+    QMenu *help = appMenuBar->addMenu(tr("&Help"));
+    help->addAction(editConfigFileAction);
+    help->addAction(feedbackAction);
+    help->addAction(aboutQtAction);
 
     // QString ss("QMenuBar::item { background-color: #effbef; color: black }"); 
     // appMenuBar->setStyleSheet(ss);
@@ -667,6 +683,16 @@ void BitcoinGUI::mintMessageClicked()
     QMessageBox msgMint;
     msgMint.setText("Click Settings->Encrypt Wallet... to configure encryption, and then come back to Mint menu to Enable mPoS Minting.");
     msgMint.exec();
+}
+
+void BitcoinGUI::openConfigfile()
+{
+    GUIUtil::openConfigfile();
+}
+
+void BitcoinGUI::feedbackClicked()
+{
+    QDesktopServices::openUrl(QUrl(feedbackUrl));
 }
 
 void BitcoinGUI::setNumConnections(int count)

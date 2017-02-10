@@ -85,6 +85,11 @@ CMedianFilter<int64> vTimeOffsets(200,0);
 bool fReopenDebugLog = false;
 bool fTestNetWeightV2 = false;
 
+#ifdef QT_GUI
+const char *websiteUrl = "http://www.coinmagi.org/";
+const char *feedbackUrl = "http://www.coinmagi.org/feedback";
+#endif
+
 // Init OpenSSL library multithreading support
 static CCriticalSection** ppmutexOpenSSL;
 void locking_callback(int mode, int i, const char* file, int line)

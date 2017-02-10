@@ -276,6 +276,21 @@ void openDebugLogfile()
         QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathDebug.string())));
 }
 
+void openConfigfile()
+{
+    boost::filesystem::path pathConfig = GetConfigFile();
+
+    /* Open magi.conf with the associated application */
+    if (! boost::filesystem::exists(pathConfig))
+    {
+        boost::filesystem::ofstream ofs(pathConfig);
+        ofs << "# example: http://coinmagi.org/bin/example-conf/magi.conf \n";
+        ofs << "# this configuration file allows a user to load runtime options when the program starts\n";
+    }
+    if (boost::filesystem::exists(pathConfig))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathConfig.string())));
+}
+
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int size_threshold, QObject *parent) :
     QObject(parent), size_threshold(size_threshold)
 {

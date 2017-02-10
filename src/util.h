@@ -250,6 +250,9 @@ void runCommand(std::string strCommand);
 bool StringToDouble(const std::string &s, double &val);
 unsigned int GetClientVersion(int nClientVersion, std::string str);
 
+extern const char *websiteUrl;
+extern const char *feedbackUrl;
+
 inline std::string i64tostr(int64 n)
 {
     return strprintf("%"PRI64d, n);

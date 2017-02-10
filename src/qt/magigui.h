@@ -94,6 +94,10 @@ private:
     QAction *aboutAction;
     QAction *aboutmPoWAction;
     QAction *aboutmPoSAction;
+
+    QAction *editConfigFileAction;
+    QAction *feedbackAction;
+
     QAction *receiveCoinsAction;
     QAction *optionsAction;
     QAction *toggleHideAction;
@@ -191,6 +195,9 @@ private slots:
     void aboutmPoS();
     /** Show mint message dialog */
     void mintMessageClicked();
+    /** Open config file */
+    void openConfigfile();
+    void feedbackClicked();
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
