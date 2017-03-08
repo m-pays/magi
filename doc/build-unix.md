@@ -8,7 +8,7 @@ software written by Thomas Bernard.
 UNIX BUILD NOTES
 ================
 
-It is recommeded to use Berkeley DB 4.8 for building Magi wallet (see the following instructions). 
+It is recommeded to use Berkeley DB 4.8 for building Magi wallet (see the following instructions) as well as OpenSSL 1.0.x. 
 
 Build magid
 ================
