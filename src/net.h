@@ -117,7 +117,9 @@ extern bool fDiscover;
 extern bool fUseUPnP;
 extern uint64 nLocalServices;
 extern uint64 nLocalHostNonce;
-extern CAddress addrSeenByPeer;
+extern CAddress addrSeenByPeerIp;
+extern CAddress addrSeenByPeerIpv4;
+extern CAddress addrSeenByPeerIpv6;
 extern boost::array<int, THREAD_MAX> vnThreadsRunning;
 extern CAddrMan addrman;
 
