@@ -1,82 +1,82 @@
-Coin Magi
-====================
+Bitcoin Core integration/staging tree
+=====================================
 
-Copyright (c) 2009-2012 The Bitcoin Core developers
+[![Build Status](https://travis-ci.org/bitcoin/bitcoin.svg?branch=master)](https://travis-ci.org/bitcoin/bitcoin)
 
-Copyright (c) 2012-2014 The PPCoin developers
+https://bitcoincore.org
 
-Copyright (c) 2014-2017 The Magi Core developers
+What is Bitcoin?
+----------------
 
-Coin Magi, derived from Bitcoin and PPCoin, is released under the terms of 
-the MIT license. See COPYING for more information or see 
-http://opensource.org/licenses/MIT.
+Bitcoin is an experimental digital currency that enables instant payments to
+anyone, anywhere in the world. Bitcoin uses peer-to-peer technology to operate
+with no central authority: managing transactions and issuing money are carried
+out collectively by the network. Bitcoin Core is the name of open source
+software which enables the use of this currency.
 
-Intro
----------------------
-Coin Magi (XMG) is an online payment system, enabling instant payments to anyone in the world without using an intermediary. Magi coins can be minted by computational devices including personal computers and portable devices through mPoW and mPoS. Magi aims at fairness, cost effective and energy efficiency during coin minting. Magi is a hybrid PoW/PoS-based cryptocurrency that integrates two mechanisms: proof-of-work (PoW) and proof-of-stake (PoS) protocols. Magi is a CPU coin. 
+For more information, as well as an immediately useable, binary version of
+the Bitcoin Core software, see https://bitcoin.org/en/download, or read the
+[original whitepaper](https://bitcoincore.org/bitcoin.pdf).
 
-Features
----------------------
-- mPoW, the magi's proof-of-work (PoW) protocol, in addition to required computational works to be done to deter denial of service attacks, is also a network-dependent rewarding model system. The mPoW rewards participants who solve complicated cryptographical questions not only to validate transactions but also to create new blocks in order to generate coins. The coins mined via mPoW are adjusted and balanced by two primary mechanisms: 1) stimulating network activities by issuing rewards, and 2) mitigating redundant mining sources by reducing rewards.
+License
+-------
 
-- The particular designed block reward system to remove the competitive nature of 
-mining and offer an even playing field for anyone looking to issue coins 
-without expensive equipment - offering features such as energy saving, proof of 
-mining.
+Bitcoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+information or see https://opensource.org/licenses/MIT.
 
-- mPoS, the magi's proof-of-stake (PoS) protocol, aims to achieve distributed consensus through operations in addition to mPoW. mPoS is designed such that it rejects potential attacks, for example, through accumulating a large amount of coins or offline stake time. Magi hybridizes PoW with PoS, and integrate both consensus approaches in order to acquire benefits from the two mechanisms and create a more robust payment system. mPoS particularly enhances the security of XMG's staking system that distinguishes itself from the original concept developed by PPCoin. 
+Development Process
+-------------------
 
-Development process
----------------------
+The `master` branch is regularly built and tested, but is not guaranteed to be
+completely stable. [Tags](https://github.com/bitcoin/bitcoin/tags) are created
+regularly to indicate new official, stable release versions of Bitcoin Core.
 
-Developers work in their own trees, then submit pull requests when
-they think their feature or bug fix is ready.
+The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The patch will be accepted if there is broad consensus that it is a
-good thing.  Developers should expect to rework and resubmit patches
-if they don't match the project's coding conventions (see coding.txt)
-or are controversial.
+The developer [mailing list](https://lists.linuxfoundation.org/mailman/listinfo/bitcoin-dev)
+should be used to discuss complicated or controversial changes before working
+on a patch set.
 
-The master branch is regularly built and tested, but is not guaranteed
-to be completely stable. Tags are regularly created to indicate new
-stable release versions of Magi.
+Developer IRC can be found on Freenode at #bitcoin-core-dev.
 
-Feature branches are created when there are major new features being
-worked on by several people.
+Testing
+-------
 
-From time to time a pull request will become outdated. If this occurs, and
-the pull is no longer automatically mergeable; a comment on the pull will
-be used to issue a warning of closure. The pull will be closed 15 days
-after the warning if action is not taken by the author. Pull requests closed
-in this manner will have their corresponding issue labeled 'stagnant'.
+Testing and code review is the bottleneck for development; we get more pull
+requests than we can review and test on short notice. Please be patient and help out by testing
+other people's pull requests, and remember this is a security-critical project where any mistake might cost people
+lots of money.
 
-Issues with no commits will be given a similar warning, and closed after
-15 days from their last activity. Issues closed in this manner will be 
-labeled 'stale'.
+### Automated Testing
 
-Setup
----------------------
-If you are just starting to explore magi, or upgrading wallet from versions prior to v1.3.0, the following procedure is recommended:  
+Developers are strongly encouraged to write [unit tests](src/test/README.md) for new code, and to
+submit new unit tests for old code. Unit tests can be compiled and run
+(assuming they weren't disabled in configure) with: `make check`. Further details on running
+and extending unit tests can be found in [/src/test/README.md](/src/test/README.md).
 
-1) Backup wallet.dat;
+There are also [regression and integration tests](/test), written
+in Python, that are run automatically on the build server.
+These tests can be run (if the [test dependencies](/test) are installed) with: `test/functional/test_runner.py`
 
-2) Remove the block-chain data under the .magi (unix-like system) or Magi (OS X or Windows) folder, except for wallet.dat;
+The Travis CI system makes sure that every pull request is built for Windows, Linux, and OS X, and that unit/sanity tests are run automatically.
 
-3) Download latest block-chain data from here: http://coinmagi.org/bin/block-chain;
+### Manual Quality Assurance (QA) Testing
 
-4) Unzip all the contents under "m-blockchain" into the .magi or Magi folder;
+Changes should be tested by somebody other than the developer who wrote the
+code. This is especially important for large or high-risk changes. It is useful
+to add a test plan to the pull request description if testing the changes is
+not straightforward.
 
-5) Launch the new wallet. 
+Translations
+------------
 
-- Windows: double click to install, or unpack the files and run the wallet directly;
+Changes to translations as well as new translations can be submitted to
+[Bitcoin Core's Transifex page](https://www.transifex.com/projects/p/bitcoin/).
 
-- Mac OS: unpack the files and copy to the Application folder, and then run the wallet directly;
+Translations are periodically pulled from Transifex and merged into the git repository. See the
+[translation process](doc/translation_process.md) for details on how this works.
 
-- Linux: unpack the files and run the wallet directly. 
+**Important**: We do not accept translation changes as GitHub pull requests because the next
+pull from Transifex would automatically overwrite them again.
 
-Info
----------------------
-- Website: http://www.coinmagi.org
-- Bitcointalk thread: https://bitcointalk.org/index.php?topic=735170.0
-- Forum: http://www.m-talk.org/
-- Freenode IRC: #magi
+Translators should also subscribe to the [mailing list](https://groups.google.com/forum/#!forum/bitcoin-translators).

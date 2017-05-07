@@ -1,75 +1,113 @@
 *.tar.gz
 
 *.exe
-src/*.exe
-src/magi
-src/magid
-src/test_magi
-src/qt/test/test_magi-qt
-src/Makefile.Debug
-src/makefile-static*.unix
-src/makefile-static*.bsd
-src/makefile-static*.linux
-src/makefile-static*.osx
-src/makefile-static*.mingw
+src/bitcoin
+src/bitcoind
+src/bitcoin-cli
+src/bitcoin-tx
+src/test/test_bitcoin
+src/test/test_bitcoin_fuzzy
+src/qt/test/test_bitcoin-qt
 
+# autoreconf
+Makefile.in
+aclocal.m4
+autom4te.cache/
+build-aux/config.guess
+build-aux/config.sub
+build-aux/depcomp
+build-aux/install-sh
+build-aux/ltmain.sh
+build-aux/m4/libtool.m4
+build-aux/m4/lt~obsolete.m4
+build-aux/m4/ltoptions.m4
+build-aux/m4/ltsugar.m4
+build-aux/m4/ltversion.m4
+build-aux/missing
+build-aux/compile
+build-aux/test-driver
+config.log
+config.status
+configure
+libtool
+src/config/bitcoin-config.h
+src/config/bitcoin-config.h.in
+src/config/stamp-h1
+share/setup.nsi
+share/qt/Info.plist
+
+src/univalue/gen
+
+src/qt/*.moc
+src/qt/moc_*.cpp
+src/qt/forms/ui_*.h
+
+src/qt/test/moc*.cpp
+
+.deps
+.dirstamp
+.libs
 .*.swp
 *.*~*
 *.bak
 *.rej
 *.orig
+*.pyc
 *.o
+*.o-*
 *.patch
-*.mod
-.magi
+*.a
+*.pb.cc
+*.pb.h
+
+*.log
+*.trs
+*.dmg
+
+*.json.h
+*.raw.h
+
+#libtool object files
+*.lo
+*.la
 
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-m-wallet
-magi
-magi-qt
-magi-qt_*
-m-wallet.app
-Magi.app
-Magi-Qt.app
-m-wallet*
-qt-builds/version-og/Makefile
-qt-builds/version-og/magi-qt
-qt-builds/version-og/magi-qt_*
-qt-builds/version-og/Magi-Qt.app
+bitcoin-qt
+Bitcoin-Qt.app
 
 # Unit-tests
 Makefile.test
-magi-qt_test
+bitcoin-qt_test
+src/test/buildenv.py
 
 # Resources cpp
 qrc_*.cpp
-qt-builds/version-og/qrc_*.cpp
-
-# Qt creator
-*.pro.user*
 
 # Mac specific
 .DS_Store
-qt-builds/version-og/build
+build
 
-build*
-builds
-build/*
+#lcov
+*.gcno
+*.gcda
+/*.info
+test_bitcoin.coverage/
+total.coverage/
+coverage_percent.txt
 
-# Other builds
-qt-builds/*
-qt-builds
-src/qt-og/*
-src/qt-og
-magi-qt-unix*
-magi-qt-linux*
-magi-qt-osx*
-magi-qt-static*
-m-wallet-unix*
-m-wallet-bsd*
-m-wallet-linux*
-m-wallet-osx*
-m-wallet-win*
-m-wallet-static*
+#build tests
+linux-coverage-build
+linux-build
+win32-build
+test/functional/config.ini
+test/util/buildenv.py
+test/cache/*
+
+!src/leveldb*/Makefile
+
+/doc/doxygen/
+
+libbitcoinconsensus.pc
+contrib/devtools/split-debug.sh

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>341</height>
+    <width>780</width>
+    <height>400</height>
    </rect>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -52,19 +52,13 @@
         </size>
        </property>
        <property name="pixmap">
-        <pixmap resource="../magi.qrc">:/images/about</pixmap>
+        <pixmap resource="../bitcoin.qrc">:/icons/bitcoin</pixmap>
        </property>
        <property name="scaledContents">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="alignment">
-        <set>Qt::AlignHCenter|Qt::AlignTop</set>
-       </property>
-       <property name="wordWrap">
-        <bool>false</bool>
-       </property>
-       <property name="openExternalLinks">
-        <bool>false</bool>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
       </widget>
      </item>
@@ -101,14 +95,6 @@
         <bool>true</bool>
        </property>
        <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>534</width>
-          <height>76</height>
-         </rect>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="aboutMessage">
@@ -164,7 +150,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../magi.qrc"/>
+  <include location="../bitcoin.qrc"/>
  </resources>
  <connections>
   <connection>

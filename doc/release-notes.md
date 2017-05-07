@@ -1,71 +1,91 @@
-1.2.1.3 
-=============
+(note: this is a temporary file, to be added-to by anybody, and moved to
+release-notes at release time)
 
-- Update check points;
-- Berkeley DB v4.8 will be used officially in all of wallets to be released; downloads: http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz;
-(May 18, 2015)
+Bitcoin Core version *version* is now available from:
 
-1.2.1.2
-=============
+  <https://bitcoin.org/bin/bitcoin-core-*version*/>
 
-Merge updates by feldenthorne for arm compilation.
+This is a new major version release, including new features, various bugfixes
+and performance improvements, as well as updated translations.
 
-(Mar 13, 2015)
- 
-1.2.1.1
-=============
+Please report bugs using the issue tracker at github:
 
-- Fix for macosx compiling;
-- Update getmininginfo;
-- Other miscellaneous updates.
+  <https://github.com/bitcoin/bitcoin/issues>
 
-(Jan. 8, 2015)
+To receive security and update notifications, please subscribe to:
 
-1.2.0.1
-=============
+  <https://bitcoincore.org/en/list/announcements/join/>
 
-- Hard fork: https://bitcointalk.org/index.php?topic=735170.msg9991269#msg9991269;
+Compatibility
+==============
 
-- MagiReward-V2: implement an algorithm to stabilizing the difficulty variation and the block rewards;
+Bitcoin Core is extensively tested on multiple operating systems using
+the Linux kernel, macOS 10.8+, and Windows Vista and later.
 
-- PoS-II-V2: adapt a close limitation on the PoS staking to improve the security;
+Microsoft ended support for Windows XP on [April 8th, 2014](https://www.microsoft.com/en-us/WindowsForBusiness/end-of-xp-support).
+No attempt is made to prevent installing or running the software on Windows XP, you
+can still do so at your own risk but be aware that there are known instabilities.
+Please do not report issues about Windows XP to the issue tracker.
 
-- Fix PoS status showing in Qt wallet;
+Bitcoin Core should also work on most other Unix-like systems but is not
+frequently tested on them.
 
-- Correct the money supply accessible to the API call - getinfo by deducting burned coins 720,000 XMG, see https://bitcointalk.org/index.php?topic=735170.msg9900074#msg9900074; 
+Notable changes
+===============
 
-- New API calls: getnetstakeweight, getmininginfo, getminingbykhps (mining calculator).
+Low-level RPC changes
+---------------------
 
-(Dec. 31, 2014)
+- Error codes have been updated to be more accurate for the following error cases:
+  - `getblock` now returns RPC_MISC_ERROR if the block can't be found on disk (for
+  example if the block has been pruned). Previously returned RPC_INTERNAL_ERROR.
+  - `pruneblockchain` now returns RPC_MISC_ERROR if the blocks cannot be pruned
+  because the node is not in pruned mode. Previously returned RPC_METHOD_NOT_FOUND.
+  - `pruneblockchain` now returns RPC_INVALID_PARAMETER if the blocks cannot be pruned
+  because the supplied timestamp is too late. Previously returned RPC_INTERNAL_ERROR.
+  - `pruneblockchain` now returns RPC_MISC_ERROR if the blocks cannot be pruned
+  because the blockchain is too short. Previously returned RPC_INTERNAL_ERROR.
+  - `setban` now returns RPC_CLIENT_INVALID_IP_OR_SUBNET if the supplied IP address
+  or subnet is invalid. Previously returned RPC_CLIENT_NODE_ALREADY_ADDED.
+  - `setban` now returns RPC_CLIENT_INVALID_IP_OR_SUBNET if the user tries to unban
+  a node that has not previously been banned. Previously returned RPC_MISC_ERROR.
+  - `removeprunedfunds` now returns RPC_WALLET_ERROR if bitcoind is unable to remove
+  the transaction. Previously returned RPC_INTERNAL_ERROR.
+  - `removeprunedfunds` now returns RPC_INVALID_PARAMETER if the transaction does not
+  exist in the wallet. Previously returned RPC_INTERNAL_ERROR.
+  - `fundrawtransaction` now returns RPC_INVALID_ADDRESS_OR_KEY if an invalid change
+  address is provided. Previously returned RPC_INVALID_PARAMETER.
+  - `fundrawtransaction` now returns RPC_WALLET_ERROR if bitcoind is unable to create
+  the transaction. The error message provides further details. Previously returned
+  RPC_INTERNAL_ERROR.
+  - `bumpfee` now returns RPC_INVALID_PARAMETER if the provided transaction has
+  descendants in the wallet. Previously returned RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_INVALID_PARAMETER if the provided transaction has
+  descendants in the mempool. Previously returned RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction has
+  has been mined or conflicts with a mined transaction. Previously returned
+  RPC_INVALID_ADDRESS_OR_KEY.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction is not
+  BIP 125 replaceable. Previously returned RPC_INVALID_ADDRESS_OR_KEY.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction has already
+  been bumped by a different transaction. Previously returned RPC_INVALID_REQUEST.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction contains
+  inputs which don't belong to this wallet. Previously returned RPC_INVALID_ADDRESS_OR_KEY.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction has multiple change
+  outputs. Previously returned RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the provided transaction has no change
+  output. Previously returned RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the fee is too high. Previously returned
+  RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the fee is too low. Previously returned
+  RPC_MISC_ERROR.
+  - `bumpfee` now returns RPC_WALLET_ERROR if the change output is too small to bump the
+  fee. Previously returned RPC_MISC_ERROR.
+
+Credits
+=======
+
+Thanks to everyone who directly contributed to this release:
 
 
-1.1.0.1
-=============
-
-- Hard fork: https://bitcointalk.org/index.php?topic=735170.msg9310611#msg9310611;
-
-- PoW algorithm switchover (M7M-v2) on Oct. 26, 2014 9:30:00 AM EST; details: https://bitcointalk.org/index.php?topic=735170.msg9230961#msg9230961.
-
-- Migrating the block rewarding system to adapt to the new algorithm; hard fork at block #32,750;
-
-- Difficulty adjustment method - Magi quantum wave (MQW) hard fork at block #33,500.
-
-(Oct. 24, 2014)
-
-1.0.0.2
-=============
-
-- Hard fork; mandatory wallet update needed before block #2700;
-- Block rewards to maximum 300 XMG/block with reduced optimum difficult;
-- Changing of PoS-II block starting at block 10080;
-- https://bitcointalk.org/index.php?topic=735170.msg8898198#msg8898198.
-
-(Sep. 20, 2014)
-
-1.0.0.1
-=============
-- Launch of Coin Magi (XMG) on Sep. 15, 2014 5:00 PM EST
-- https://bitcointalk.org/index.php?topic=735170.msg8834934#msg8834934
-- https://bitcointalk.org/index.php?topic=735170.msg8834974#msg8834974
-
-(Sep. 15, 2014)
+As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).

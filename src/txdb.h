@@ -1,197 +1,128 @@
-// Copyright (c) 2009-2012 The Bitcoin Developers.
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2009-2010 Satoshi Nakamoto
+// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef MAGI_TXDB_LEVELDB_H
-#define MAGI_TXDB_LEVELDB_H
+#ifndef BITCOIN_TXDB_H
+#define BITCOIN_TXDB_H
 
-#include "main.h"
+#include "coins.h"
+#include "dbwrapper.h"
+#include "chain.h"
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
+#include <boost/function.hpp>
 
-void init_blockindex(leveldb::Options& options, bool fRemoveOld);
+class CBlockIndex;
+class CCoinsViewDBCursor;
+class uint256;
 
-class CTxDB
+//! Compensate for extra memory peak (x1.5-x1.9) at flush time.
+static constexpr int DB_PEAK_USAGE_FACTOR = 2;
+//! No need to periodic flush if at least this much space still available.
+static constexpr int MAX_BLOCK_COINSDB_USAGE = 200 * DB_PEAK_USAGE_FACTOR;
+//! Always periodic flush if less than this much space still available.
+static constexpr int MIN_BLOCK_COINSDB_USAGE = 50 * DB_PEAK_USAGE_FACTOR;
+//! -dbcache default (MiB)
+static const int64_t nDefaultDbCache = 450;
+//! max. -dbcache (MiB)
+static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
+//! min. -dbcache (MiB)
+static const int64_t nMinDbCache = 4;
+//! Max memory allocated to block tree DB specific cache, if no -txindex (MiB)
+static const int64_t nMaxBlockDBCache = 2;
+//! Max memory allocated to block tree DB specific cache, if -txindex (MiB)
+// Unlike for the UTXO database, for the txindex scenario the leveldb cache make
+// a meaningful difference: https://github.com/bitcoin/bitcoin/pull/8273#issuecomment-229601991
+static const int64_t nMaxBlockDBAndTxIndexCache = 1024;
+//! Max memory allocated to coin DB specific cache (MiB)
+static const int64_t nMaxCoinsDBCache = 8;
+
+struct CDiskTxPos : public CDiskBlockPos
 {
-public:
-    CTxDB(const char* pszMode="r+");
-    ~CTxDB() {
-        // Note that this is not the same as Close() because it deletes only
-        // data scoped to this TxDB object.
-        delete activeBatch;
+    unsigned int nTxOffset; // after header
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(*(CDiskBlockPos*)this);
+        READWRITE(VARINT(nTxOffset));
     }
 
-    // Destroys the underlying shared global state accessed by this TxDB.
-    void Close();
-    // Destroys the underlying shared global state accessed by this TxDB, and the directory structure.
-    void Destroy();
-
-private:
-    leveldb::DB *pdb;  // Points to the global instance.
-
-    // A batch stores up writes and deletes for atomic application. When this
-    // field is non-NULL, writes/deletes go there instead of directly to disk.
-    leveldb::WriteBatch *activeBatch;
-    leveldb::Options options;
-    bool fReadOnly;
-    int nVersion;
-
-protected:
-    // Returns true and sets (value,false) if activeBatch contains the given key
-    // or leaves value alone and sets deleted = true if activeBatch contains a
-    // delete for it.
-    bool ScanBatch(const CDataStream &key, std::string *value, bool *deleted) const;
-
-    template<typename K, typename T>
-    bool Read(const K& key, T& value)
-    {
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.reserve(1000);
-        ssKey << key;
-        std::string strValue;
-
-        bool readFromDb = true;
-        if (activeBatch) {
-            // First we must search for it in the currently pending set of
-            // changes to the db. If not found in the batch, go on to read disk.
-            bool deleted = false;
-            readFromDb = ScanBatch(ssKey, &strValue, &deleted) == false;
-            if (deleted) {
-                return false;
-            }
-        }
-        if (readFromDb) {
-            leveldb::Status status = pdb->Get(leveldb::ReadOptions(),
-                                              ssKey.str(), &strValue);
-            if (!status.ok()) {
-                if (status.IsNotFound())
-                    return false;
-                // Some unexpected error.
-                printf("LevelDB read failure: %s\n", status.ToString().c_str());
-                return false;
-            }
-        }
-        // Unserialize value
-        try {
-            CDataStream ssValue(strValue.data(), strValue.data() + strValue.size(),
-                                SER_DISK, CLIENT_VERSION);
-            ssValue >> value;
-        }
-        catch (const std::exception&) {
-            return false;
-        }
-        return true;
+    CDiskTxPos(const CDiskBlockPos &blockIn, unsigned int nTxOffsetIn) : CDiskBlockPos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn) {
     }
 
-    template<typename K, typename T>
-    bool Write(const K& key, const T& value)
-    {
-        if (fReadOnly)
-            assert(!"Write called on database in read-only mode");
-
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.reserve(1000);
-        ssKey << key;
-        CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-        ssValue.reserve(10000);
-        ssValue << value;
-
-        if (activeBatch) {
-            activeBatch->Put(ssKey.str(), ssValue.str());
-            return true;
-        }
-        leveldb::Status status = pdb->Put(leveldb::WriteOptions(), ssKey.str(), ssValue.str());
-        if (!status.ok()) {
-            printf("LevelDB write failure: %s\n", status.ToString().c_str());
-            return false;
-        }
-        return true;
+    CDiskTxPos() {
+        SetNull();
     }
 
-    template<typename K>
-    bool Erase(const K& key)
-    {
-        if (!pdb)
-            return false;
-        if (fReadOnly)
-            assert(!"Erase called on database in read-only mode");
-
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.reserve(1000);
-        ssKey << key;
-        if (activeBatch) {
-            activeBatch->Delete(ssKey.str());
-            return true;
-        }
-        leveldb::Status status = pdb->Delete(leveldb::WriteOptions(), ssKey.str());
-        return (status.ok() || status.IsNotFound());
+    void SetNull() {
+        CDiskBlockPos::SetNull();
+        nTxOffset = 0;
     }
-
-    template<typename K>
-    bool Exists(const K& key)
-    {
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.reserve(1000);
-        ssKey << key;
-        std::string unused;
-
-        if (activeBatch) {
-            bool deleted;
-            if (ScanBatch(ssKey, &unused, &deleted) && !deleted) {
-                return true;
-            }
-        }
-
-
-        leveldb::Status status = pdb->Get(leveldb::ReadOptions(), ssKey.str(), &unused);
-        return status.IsNotFound() == false;
-    }
-
-
-public:
-    bool TxnBegin();
-    bool TxnCommit();
-    bool TxnAbort()
-    {
-        delete activeBatch;
-        activeBatch = NULL;
-        return true;
-    }
-
-    bool ReadVersion(int& nVersion)
-    {
-        nVersion = 0;
-        return Read(std::string("version"), nVersion);
-    }
-
-    bool WriteVersion(int nVersion)
-    {
-        return Write(std::string("version"), nVersion);
-    }
-
-    bool ReadTxIndex(uint256 hash, CTxIndex& txindex);
-    bool UpdateTxIndex(uint256 hash, const CTxIndex& txindex);
-    bool AddTxIndex(const CTransaction& tx, const CDiskTxPos& pos, int nHeight);
-    bool EraseTxIndex(const CTransaction& tx);
-    bool ContainsTx(uint256 hash);
-    bool ReadDiskTx(uint256 hash, CTransaction& tx, CTxIndex& txindex);
-    bool ReadDiskTx(uint256 hash, CTransaction& tx);
-    bool ReadDiskTx(COutPoint outpoint, CTransaction& tx, CTxIndex& txindex);
-    bool ReadDiskTx(COutPoint outpoint, CTransaction& tx);
-    bool WriteBlockIndex(const CDiskBlockIndex& blockindex);
-    bool ReadHashBestChain(uint256& hashBestChain);
-    bool WriteHashBestChain(uint256 hashBestChain);
-    bool ReadBestInvalidTrust(CBigNum& bnBestInvalidTrust);
-    bool WriteBestInvalidTrust(CBigNum bnBestInvalidTrust);
-    bool LoadBlockIndex();
-private:
-    bool LoadBlockIndexGuts();
 };
 
+/** CCoinsView backed by the coin database (chainstate/) */
+class CCoinsViewDB : public CCoinsView
+{
+protected:
+    CDBWrapper db;
+public:
+    CCoinsViewDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
-#endif // MAGI_TXDB_LEVELDB_H
+    bool GetCoins(const uint256 &txid, CCoins &coins) const;
+    bool HaveCoins(const uint256 &txid) const;
+    uint256 GetBestBlock() const;
+    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock);
+    CCoinsViewCursor *Cursor() const;
+};
+
+/** Specialization of CCoinsViewCursor to iterate over a CCoinsViewDB */
+class CCoinsViewDBCursor: public CCoinsViewCursor
+{
+public:
+    ~CCoinsViewDBCursor() {}
+
+    bool GetKey(uint256 &key) const;
+    bool GetValue(CCoins &coins) const;
+    unsigned int GetValueSize() const;
+
+    bool Valid() const;
+    void Next();
+
+private:
+    CCoinsViewDBCursor(CDBIterator* pcursorIn, const uint256 &hashBlockIn):
+        CCoinsViewCursor(hashBlockIn), pcursor(pcursorIn) {}
+    std::unique_ptr<CDBIterator> pcursor;
+    std::pair<char, uint256> keyTmp;
+
+    friend class CCoinsViewDB;
+};
+
+/** Access to the block database (blocks/index/) */
+class CBlockTreeDB : public CDBWrapper
+{
+public:
+    CBlockTreeDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+private:
+    CBlockTreeDB(const CBlockTreeDB&);
+    void operator=(const CBlockTreeDB&);
+public:
+    bool WriteBatchSync(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo, int nLastFile, const std::vector<const CBlockIndex*>& blockinfo);
+    bool ReadBlockFileInfo(int nFile, CBlockFileInfo &fileinfo);
+    bool ReadLastBlockFile(int &nFile);
+    bool WriteReindexing(bool fReindex);
+    bool ReadReindexing(bool &fReindex);
+    bool ReadTxIndex(const uint256 &txid, CDiskTxPos &pos);
+    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> > &list);
+    bool WriteFlag(const std::string &name, bool fValue);
+    bool ReadFlag(const std::string &name, bool &fValue);
+    bool LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256&)> insertBlockIndex);
+};
+
+#endif // BITCOIN_TXDB_H

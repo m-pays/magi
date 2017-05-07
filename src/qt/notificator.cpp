@@ -1,46 +1,55 @@
+// Copyright (c) 2011-2016 The Bitcoin Core developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "notificator.h"
 
-#include <QMetaType>
-#include <QVariant>
-#include <QIcon>
 #include <QApplication>
-#include <QStyle>
 #include <QByteArray>
-#include <QSystemTrayIcon>
-#include <QMessageBox>
-#include <QTemporaryFile>
+#include <QIcon>
 #include <QImageWriter>
-
+#include <QMessageBox>
+#include <QMetaType>
+#include <QStyle>
+#include <QSystemTrayIcon>
+#include <QTemporaryFile>
+#include <QVariant>
 #ifdef USE_DBUS
-#include <QtDBus>
 #include <stdint.h>
+#include <QtDBus>
 #endif
-
+// Include ApplicationServices.h after QtDbus to avoid redefinition of check().
+// This affects at least OSX 10.6. See /usr/include/AssertMacros.h for details.
+// Note: This could also be worked around using:
+// #define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
 #ifdef Q_OS_MAC
 #include <ApplicationServices/ApplicationServices.h>
 #include "macnotificationhandler.h"
 #endif
 
+
+#ifdef USE_DBUS
 // https://wiki.ubuntu.com/NotificationDevelopmentGuidelines recommends at least 128
 const int FREEDESKTOP_NOTIFICATION_ICON_SIZE = 128;
+#endif
 
-Notificator::Notificator(const QString &programName, QSystemTrayIcon *trayicon, QWidget *parent):
-    QObject(parent),
-    parent(parent),
-    programName(programName),
+Notificator::Notificator(const QString &_programName, QSystemTrayIcon *_trayIcon, QWidget *_parent) :
+    QObject(_parent),
+    parent(_parent),
+    programName(_programName),
     mode(None),
-    trayIcon(trayicon)
+    trayIcon(_trayIcon)
 #ifdef USE_DBUS
     ,interface(0)
 #endif
 {
-    if(trayicon && trayicon->supportsMessages())
+    if(_trayIcon && _trayIcon->supportsMessages())
     {
         mode = QSystemTray;
     }
 #ifdef USE_DBUS
     interface = new QDBusInterface("org.freedesktop.Notifications",
-          "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
+        "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
     if(interface->isValid())
     {
         mode = Freedesktop;
