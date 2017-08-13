@@ -332,7 +332,7 @@ Value getblockbynumber(const Array& params, bool fHelp)
 }
 
 int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
-double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
+//double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 Value getnewblockvaluebynumber(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
@@ -352,12 +352,12 @@ Value getnewblockvaluebynumber(const Array& params, bool fHelp)
     obj.push_back(Pair("flags", strprintf("%s", pblockindex->IsProofOfStake()? "proof-of-stake" : "proof-of-work")));
     if (pblockindex->IsProofOfStake()) {
 	obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
-	obj.push_back(Pair("difficulty-V2", 0));
-	obj.push_back(Pair("blockvalue", 0));
+	obj.push_back(Pair("difficulty for Blockvalue (PoW)", GetDifficultyFromBitsV2(pblockindex)));
+	obj.push_back(Pair("blockvalue (PoW)", ((double)GetProofOfWorkRewardV2(pblockindex, 0, false))/((double)COIN)));
     }
     else {
 	obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
-	obj.push_back(Pair("difficulty-V2", GetDifficultyFromBitsV2(pblockindex)));
+	obj.push_back(Pair("difficulty for Blockvalue", GetDifficultyFromBitsV2(pblockindex)));
 	obj.push_back(Pair("blockvalue", ((double)GetProofOfWorkRewardV2(pblockindex, 0, false))/((double)COIN)));
     }
     return obj;

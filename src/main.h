@@ -97,7 +97,6 @@ inline bool IsPoSIIProtocolV2(int nHeight)
     }
 }
 
-
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
 #else
@@ -186,9 +185,11 @@ const CBlockIndex* GetLastPoSBlockIndex(const CBlockIndex* pindex);
 const CBlockIndex* GetLastPoWBlockIndex(const CBlockIndex* pindex);
 void MagiMiner(CWallet *pwallet, bool fProofOfStake);
 void ResendWalletTransactions();
+double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo=false);
 double GetDifficultyFromBits(unsigned int nBits);
 double GetAnnualInterest_TestNet(int64 nNetWorkWeit, double rMaxAPR);
 double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
+bool IsChainInSwitch(const CBlockIndex* pindex_);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);

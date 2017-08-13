@@ -63,7 +63,7 @@ Value gethashespersec(const Array& params, bool fHelp)
 }
 
 int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
-double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
+//double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
 double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR);
 Value getmininginfo(const Array& params, bool fHelp)
@@ -300,7 +300,7 @@ Value getnetstakeweight(const Array& params, bool fHelp)
 }
 
 
-double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
+//double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 double GetDifficultyFromBitsAver(const CBlockIndex* pindex0, int nBlocksAver0);
 Value getminingbykhps(const Array& params, bool fHelp)
 {

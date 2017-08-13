@@ -969,7 +969,7 @@ double GetDifficultyFromBits(unsigned int nBits){
 #define BBLOCK 100
 #define BBLOCK_AVER 2000
 // diff data filter to stabilize the rewards
-double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
+double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo)
 {
     int64 nWeightTot, nActualBlockSpacing;
     double rDiffAverEMA, rDiffAver, rfw, rWeight;
@@ -978,15 +978,14 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
     // finding the average diff over up to 2000 backward blocks
     rDiffAver = GetDifficultyFromBits(pindexPrev->nBits);
     nWeightTot = 1;
-    for(int i = 1; i <= BBLOCK_AVER-1; i++)
-    {
-	pindexPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
-	if (!pindexPrev || pindexPrev->nHeight==0) {
-	    printf("WARNING: averaged over less than BBLOCK_AVER blocks --> GetDifficultyFromBitsV2\n");
-	    break;
-	}
-      	rDiffAver += GetDifficultyFromBits(pindexPrev->nBits);
-	nWeightTot++;
+    for(int i = 1; i <= BBLOCK_AVER-1; i++) {
+    	pindexPrev = GetLastPoWBlockIndex(pindexPrev->pprev);
+    	if (!pindexPrev || pindexPrev->nHeight==0) {
+    	    printf("WARNING: averaged over less than BBLOCK_AVER blocks --> GetDifficultyFromBitsV2\n");
+    	    break;
+        }
+        rDiffAver += GetDifficultyFromBits(pindexPrev->nBits);
+        ++nWeightTot;
     }
     rDiffAver /= double(nWeightTot);
 
@@ -1025,6 +1024,8 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
     // apply damping
     double deviation = rDiffAverEMA - rDiffAver;
     double damping;
+    if (fPrintInfo) printf( "@@GetDifficultyFromBitsV2 (rDiffAverEMA, rDiffAver, deviation) = (%f, %f, %f)\n", 
+      rDiffAverEMA, rDiffAver, deviation );
     if (deviation > 0.) {
 	damping = DAMPINGAMP * exp_n2(DAMPINGCU/DAMPINGRATE, deviation/DAMPINGRATE) + DAMPINMIN;
     }
@@ -1032,6 +1033,8 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0)
 	damping = DAMPINGAMP * exp_n2(1.5*DAMPINGCU/DAMPINGRATE, abs(deviation)/DAMPINGRATE) + DAMPINMIN;
     }
     rDiffAverEMA = deviation * damping  +  rDiffAver;
+    if (fPrintInfo) printf( "@@GetDifficultyFromBitsV2 OPM (rDiffAverEMA, damping) = (%f, %f)\n", 
+      rDiffAverEMA, damping );
     return rDiffAverEMA;
 }
 
@@ -1075,6 +1078,20 @@ int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
     return (int64)rSubsidy;
 }
 
+bool IsChainInSwitch(const CBlockIndex* pindex_)
+{
+    const CBlockIndex *pindex0 = pindex_;
+    int nHeightIncr = 0;
+    while (pindex0->nHeight >= 1443960) {
+        if (!pindex0) {
+            printf("ERROR: IsChainInSwitch() pindex0 null identified\n");
+            break;
+        }
+        if (pindex0->IsProofOfWork()) ++nHeightIncr;
+        pindex0 = pindex0->pprev;
+    }
+    return ( (pindex_->nHeight >= 1443960) && (nHeightIncr < 1000) );
+}
 
 int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock)
 {
@@ -1084,34 +1101,33 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
     
 //      double rDiff = GetDifficultyFromBitsV2(pindex0); 
 //      printf("@@BLKV2-test (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
-//	  nHeight, rDiff, double(nSubsidy)/double(COIN));
+//    nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
-	if (nHeight%2 == 0) {
-	    nSubsidy = 100 * COIN;
-	}
-	else {
-	    nSubsidy = GetProofOfWorkReward_OPM(pindex0);
-	}
-	return nSubsidy + nFees;
-    }
-
-    if (nHeight <= END_MAGI_POW_HEIGHT_V2) {	// difficulty dependent PoW-II mining
-	nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+    if (nHeight%2 == 0) {
+        nSubsidy = 100 * COIN;
     }
     else {
-	nSubsidy = MIN_TX_FEE;
+        nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+    }
+    return nSubsidy + nFees;
+    }
+
+    if (nHeight <= END_MAGI_POW_HEIGHT_V2) {    // difficulty dependent PoW-II mining
+       nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+    }
+    else {
+    nSubsidy = MIN_TX_FEE;
     }
 
     if (fDebugMagi) {
       double rDiff = GetDifficultyFromBitsV2(pindex0); 
       printf("@@PoWII-V2 (nHeight, rDiff, rSubsidy) = (%d, %f, %f)\n", 
-	  nHeight, rDiff, double(nSubsidy)/double(COIN));
+      nHeight, rDiff, double(nSubsidy)/double(COIN));
     }
-
+    if (IsChainInSwitch(pindex0)) nSubsidy = (double)nSubsidy / 25.;
     return nSubsidy + nFees;
 }
-
 
 #define M7Mv2_SCALE 2.545
 int64 GetProofOfWorkReward(int nBits, int nHeight, int64 nFees)
