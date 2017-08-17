@@ -1902,8 +1902,8 @@ void StartNode(void* parg)
 //        printf("Error: NewThread(ThreadStakeMiner) failed\n");
 
     // ppcoin: mint proof-of-stake blocks in the background
-    // default enabled; posii=0 set in conf to disable pos
-    if (GetBoolArg("-posii", true)) {
+    // default disabled; posii = 0 or 1 in conf to disable or enable PoS
+    if (GetBoolArg("-posii", false)) {
         printf("Stake minting enabled at startup.\n");
         if (!NewThread(ThreadStakeMiner, pwalletMain))
             printf("Error: NewThread(ThreadStakeMiner) failed\n");
