@@ -781,7 +781,7 @@ int CMerkleTx::GetHeightInMainChain(CBlockIndex* &pindexRet) const
 
 int GetCoinbaseMaturity(int nHeight)
 {
-    return ( (nHeight < 1467000) ? nCoinbaseMaturity : nCoinbaseMaturityADJ );
+    return ( (nHeight < 1446600) ? nCoinbaseMaturity : nCoinbaseMaturityADJ );
 }
 
 int CMerkleTx::GetBlocksToMaturity() const
