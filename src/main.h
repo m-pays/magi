@@ -53,6 +53,9 @@ static const int64 MAX_MONEY_STAKE_REF_V2 = 500000 * COIN;	// 0.5 mil
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
+static const int nCoinbaseMaturity = 100;            // 100 blocks
+static const int nCoinbaseMaturityADJ = 500;            // 500 blocks
+
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
@@ -110,7 +113,6 @@ static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
 
 extern CScript COINBASE_FLAGS;
 
-
 extern CCriticalSection cs_main;
 extern std::map<uint256, CBlockIndex*> mapBlockIndex;
 extern std::set<std::pair<COutPoint, unsigned int> > setStakeSeen;
@@ -119,7 +121,6 @@ extern CBlockIndex* pindexGenesisBlock;
 extern unsigned int nStakeMinAge;
 extern int64 nStakeSplitThreshold;
 extern int64 nStakeCombineThreshold;
-extern int nCoinbaseMaturity;
 //extern int64 nLastPrevMoneySupply;
 extern int nBestHeight;
 extern CBigNum bnBestChainTrust;
@@ -190,6 +191,7 @@ double GetDifficultyFromBits(unsigned int nBits);
 double GetAnnualInterest_TestNet(int64 nNetWorkWeit, double rMaxAPR);
 double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
 bool IsChainInSwitch(const CBlockIndex* pindex_);
+int GetCoinbaseMaturity(int nHeight);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
@@ -822,6 +824,8 @@ public:
     int SetMerkleBranch(const CBlock* pblock=NULL);
     int GetDepthInMainChain(CBlockIndex* &pindexRet) const;
     int GetDepthInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChain(pindexRet); }
+    int GetHeightInMainChain(CBlockIndex* &pindexRet) const;
+    int GetHeightInMainChain() const { CBlockIndex *pindexRet; return GetHeightInMainChain(pindexRet); }
     bool IsInMainChain() const { return GetDepthInMainChain() > 0; }
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs=true);

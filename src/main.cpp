@@ -53,7 +53,6 @@ static const int64 nTargetTimespan = 60 * 30;	// 30 min
 static const int64 nTargetSpacingWork = 2 * nStakeTargetSpacing; // 3 min PoW block spacing
 
 int64 nChainStartTime = 1407209706;
-int nCoinbaseMaturity = 100;			// 100 blocks
 CBlockIndex* pindexGenesisBlock = NULL;
 //int64 nLastPrevMoneySupply;
 int nBestHeight = -1;
@@ -775,14 +774,22 @@ int CMerkleTx::GetDepthInMainChain(CBlockIndex* &pindexRet) const
     return pindexBest->nHeight - pindex->nHeight + 1;
 }
 
+int CMerkleTx::GetHeightInMainChain(CBlockIndex* &pindexRet) const
+{
+    return GetDepthInMainChain(pindexRet) + pindexBest->nHeight - 1;
+}
+
+int GetCoinbaseMaturity(int nHeight)
+{
+    return ( (nHeight < 1467000) ? nCoinbaseMaturity : nCoinbaseMaturityADJ );
+}
 
 int CMerkleTx::GetBlocksToMaturity() const
 {
     if (!(IsCoinBase() || IsCoinStake()))
         return 0;
-    return max(0, (nCoinbaseMaturity+20) - GetDepthInMainChain());
+    return max(0, (GetCoinbaseMaturity(GetHeightInMainChain()) + 20) - GetDepthInMainChain());
 }
-
 
 bool CMerkleTx::AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs)
 {
@@ -1840,7 +1847,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs,
 
             // If prev is coinbase or coinstake, check that it's matured
             if (txPrev.IsCoinBase() || txPrev.IsCoinStake())
-                for (const CBlockIndex* pindex = pindexBlock; pindex && pindexBlock->nHeight - pindex->nHeight < nCoinbaseMaturity; pindex = pindex->pprev)
+                for (const CBlockIndex* pindex = pindexBlock; pindex && pindexBlock->nHeight - pindex->nHeight < GetCoinbaseMaturity(pindex->nHeight); pindex = pindex->pprev)
                     if (pindex->nBlockPos == txindex.pos.nBlockPos && pindex->nFile == txindex.pos.nFile)
                         return error("ConnectInputs() : tried to spend %s at depth %d", txPrev.IsCoinBase() ? "coinbase" : "coinstake", pindexBlock->nHeight - pindex->nHeight);
 
@@ -3119,7 +3126,7 @@ bool LoadBlockIndex(bool fAllowNew)
         nStakeMinAge = 60 * 10; 		// test net min age: 10 min
         nStakeMaxAge = 60 * 60 * 24 * 60;	// test net max age: 60 days
 
-        nCoinbaseMaturity = 10; 		// test maturity is 10 blocks
+//        nCoinbaseMaturity = 10; 		// test maturity is 10 blocks
     }
 
     //
