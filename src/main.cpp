@@ -2649,10 +2649,6 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
         for (unsigned int i = 2; i < vtx.size(); i++)
             if (vtx[i].IsCoinStake())
                 return DoS(100, error("CheckBlock() : more than one coinstake"));
-
-        // Check coinstake timestamp
-        if (!CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
-            return DoS(50, error("CheckBlock() : coinstake timestamp violation nTimeBlock=%"PRI64d" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
     }
 
     // Check transactions
@@ -2708,6 +2704,12 @@ bool CBlock::AcceptBlock()
     if (mapBlockIndex.count(hash))
         return error("AcceptBlock() : block already in mapBlockIndex");
 
+    // Check version
+    if (IsBlockVersion5(nHeight) && nVersion < 5)
+        return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
+    else if (!IsBlockVersion5(nHeight) && nVersion > 4)
+        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
+
     // Get prev block index
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashPrevBlock);
     if (mi == mapBlockIndex.end())
@@ -2723,6 +2725,9 @@ bool CBlock::AcceptBlock()
 
 //    if (IsProofOfStake() && !CheckMoneySupply(pindexPrev))
 //        return DoS(100, error("AcceptBlock() : Wrong Money Supply = %"PRI64d" at height %d", pindexPrev->nMoneySupply, nHeight-1));
+
+    if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
+        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))

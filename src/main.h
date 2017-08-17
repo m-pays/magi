@@ -100,6 +100,8 @@ inline bool IsPoSIIProtocolV2(int nHeight)
     }
 }
 
+inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446800; }
+
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
 #else
