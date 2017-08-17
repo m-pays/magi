@@ -2704,12 +2704,6 @@ bool CBlock::AcceptBlock()
     if (mapBlockIndex.count(hash))
         return error("AcceptBlock() : block already in mapBlockIndex");
 
-    // Check version
-    if (IsBlockVersion5(nHeight) && nVersion < 5)
-        return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
-    else if (!IsBlockVersion5(nHeight) && nVersion > 4)
-        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
-
     // Get prev block index
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashPrevBlock);
     if (mi == mapBlockIndex.end())
@@ -2717,6 +2711,12 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
+    // Check version
+    if (IsBlockVersion5(nHeight) && nVersion < 5)
+        return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
+    else if (!IsBlockVersion5(nHeight) && nVersion > 4)
+        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
+	
     if (IsProofOfWork() && !IsMiningProofOfWork(nHeight))
 	return DoS(100, error("AcceptBlock() : No proof-of-work allowed anymore (height = %d)", nHeight));
 
