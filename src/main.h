@@ -93,7 +93,7 @@ inline bool IsPoSIIProtocolV2(int nHeight)
     } else return (nHeight > 131300);
 }
 
-inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446800; }
+inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446791; }
 inline unsigned int GetStakeMinAge(unsigned int nTime0) { return ( (nTime0 > 1503248400) ? (60 * 60 * 8) : (60 * 60 * 2) ); }
 
 #ifdef USE_UPNP
