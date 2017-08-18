@@ -1498,8 +1498,8 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     			    GetMagiWeightV2(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval)) : 
     			    GetMagiWeight(txPrev.vout[prevout.n].nValue, block.GetBlockTime(), (int64)(txNew.nTime - nMaxStakeSearchInterval));
 
-		if (fDebugMagi && (pindexBest->nHeight%10 == 0)) printf(">* CreateCoinStake : block.GetBlockTime() = %"PRI64d", nStakeMinAge = %d, txNew.nTime = %d, nTimeWeight = %"PRI64d" \n", block.GetBlockTime(), nStakeMinAge, txNew.nTime, nTimeWeight);
-        if (nTimeWeight < nStakeMinAge)
+		if (fDebugMagi && (pindexBest->nHeight%10 == 0)) printf(">* CreateCoinStake : block.GetBlockTime() = %"PRI64d", nStakeMinAge = %d, txNew.nTime = %d, nTimeWeight = %"PRI64d" \n", block.GetBlockTime(), GetStakeMinAge((int64)(txNew.nTime - nMaxStakeSearchInterval)), txNew.nTime, nTimeWeight);
+        if (nTimeWeight < GetStakeMinAge((int64)(txNew.nTime - nMaxStakeSearchInterval)))
             continue; // only count coins meeting min age requirement
 
         bool fKernelFound = false;
@@ -1624,7 +1624,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         	    int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
         				GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime) : 
         				GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
-                if (nTimeWeight < nStakeMinAge)
+                if ( nTimeWeight < GetStakeMinAge((int64)txNew.nTime) )
                     continue;
                 txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
                 nCredit += nCoinStakeValue;

@@ -69,11 +69,8 @@ inline bool IsMiningProofOfWork(int nHeight)
 inline bool IsMiningProofOfStake(int nHeight ) 
 {
     if (fTestNet) return nHeight > 10;
-    if (nHeight <= BLOCK_REWARD_ADJT) {
-	return (nHeight > 6720); // two weeks
-    }
-    else
-	return (nHeight > 10080); // three weeks
+    if (nHeight <= BLOCK_REWARD_ADJT) return (nHeight > 6720); // two weeks
+    else return (nHeight > 10080); // three weeks
 }
 
 #define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
@@ -81,26 +78,23 @@ inline bool IsMiningProofOfStake(int nHeight )
 inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 {
     if (fTestNet) {
-	return (nTime0 > FORK_BLOCK_REWARDS_V2_TESNT);
-    }
-    else {
-	return (nTime0 > FORK_BLOCK_REWARDS_V2);
+	   return (nTime0 > FORK_BLOCK_REWARDS_V2_TESNT);
+    } else {
+	   return (nTime0 > FORK_BLOCK_REWARDS_V2);
     }
 }
 
 inline bool IsPoSIIProtocolV2(int nHeight)
 {
     if (fTestNet) {
-	if (nHeight > 40860) fTestNetWeightV2 = true;
-	else fTestNetWeightV2 = false;
-	return nHeight > 40780;
-    }
-    else {
-	return (nHeight > 131300);
-    }
+    	if (nHeight > 40860) fTestNetWeightV2 = true;
+	   else fTestNetWeightV2 = false;
+	   return nHeight > 40780;
+    } else return (nHeight > 131300);
 }
 
 inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446800; }
+inline unsigned int GetStakeMinAge(unsigned int nTime0) { return ( (nTime0 > 1503248400) ? (60 * 60 * 8) : (60 * 60 * 2) ); }
 
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;

@@ -114,7 +114,7 @@ int64 GetMagiWeight_TestNet(int64 nValueIn, int64 nIntervalBeginning, int64 nInt
 
     if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
     
-    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd))) / (24. * 60. * 60.);
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 480. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 480. / 8.177) ) * rStakeDays * 240.;
 
@@ -128,7 +128,7 @@ int64 GetMagiWeight_TestNetV2(int64 nValueIn, int64 nIntervalBeginning, int64 nI
 
     if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
     
-    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd))) / (24. * 60. * 60.);
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 480. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 480. / 8.177) ) * rStakeDays * 240.;
 
@@ -145,7 +145,7 @@ int64 GetMagiWeight(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalEnd
 
     if (nValueIn >= MAX_MONEY_STAKE_REF) return 0;
     
-    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd))) / (24. * 60. * 60.);
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
 
     if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
@@ -165,7 +165,7 @@ int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalE
 
     if (nValueIn >= MAX_MONEY_STAKE_REF_V2) return 0;
     
-    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - nStakeMinAge)) / (24. * 60. * 60.);
+    double rStakeDays = (double)(max((int64)0, nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd))) / (24. * 60. * 60.);
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfaV2(rMro)/wfbV2(rMro)/wfcV2(rMro));
 
     if (rMro/6 >= MAX_MAGI_BALANCE_in_STAKE) return 0;
@@ -186,7 +186,7 @@ int64 GetWeight(int64 nIntervalBeginning, int64 nIntervalEnd)
     // this change increases active coins participating the hash and helps
     // to secure the network when proof-of-stake difficulty is low
 
-    return min(nIntervalEnd - nIntervalBeginning - nStakeMinAge, (int64)nStakeMaxAge);
+    return min(nIntervalEnd - nIntervalBeginning - GetStakeMinAge(nIntervalEnd), (int64)nStakeMaxAge);
 }
 
 // Get the last stake modifier and its generation time from a given block
@@ -390,7 +390,7 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64& nStakeModifier
     {
         if (!pindex->pnext)
         {   // reached best block; may happen if node is behind on block chain
-            if (fPrintProofOfStake || (pindex->GetBlockTime() + nStakeMinAge - nStakeModifierSelectionInterval > GetAdjustedTime()))
+            if (fPrintProofOfStake || (pindex->GetBlockTime() + GetStakeMinAge(pindexFrom->GetBlockTime()) - nStakeModifierSelectionInterval > GetAdjustedTime()))
                 return error("GetKernelStakeModifier() : reached best block %s at height %d from block %s",
                     pindex->GetBlockHash().ToString().c_str(), pindex->nHeight, hashBlockFrom.ToString().c_str());
             else
@@ -441,7 +441,7 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
         return error("CheckStakeKernelHash() : nTime violation");
 
     unsigned int nTimeBlockFrom = blockFrom.GetBlockTime();
-    if (nTimeBlockFrom + nStakeMinAge > nTimeTx) // Min age requirement
+    if (nTimeBlockFrom + GetStakeMinAge(nTimeTx) > nTimeTx) // Min age requirement
         return error("CheckStakeKernelHash() : min age violation");
 
     if(!pindexPrev && fDebugMagi) printf("ERROR: CheckStakeKernelHash() - pindexPrev is null");

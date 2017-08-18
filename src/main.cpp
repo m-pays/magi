@@ -42,7 +42,7 @@ static CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 20);
 static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 20);
 
-unsigned int nStakeMinAge = 60 * 60 * 2;	// minimum age for coin age: 2 hr
+unsigned int nStakeMinAge = 60 * 60 * 2;	// minimum age for coin age: 8hr for block# > 1446800, or 2hr 
 unsigned int nStakeMaxAge = 60 * 60 * 24 * 30;	// stake age of full weight: 30 days
 unsigned int nStakeTargetSpacing = 90;		// 90 sec PoS block spacing
 
@@ -710,7 +710,6 @@ bool CTxMemPool::addUnchecked(const uint256& hash, CTransaction &tx)
     return true;
 }
 
-
 bool CTxMemPool::remove(CTransaction &tx)
 {
     // Remove transaction from memory pool
@@ -745,9 +744,6 @@ void CTxMemPool::queryHashes(std::vector<uint256>& vtxid)
     for (map<uint256, CTransaction>::iterator mi = mapTx.begin(); mi != mapTx.end(); ++mi)
         vtxid.push_back((*mi).first);
 }
-
-
-
 
 int CMerkleTx::GetDepthInMainChain(CBlockIndex* &pindexRet) const
 {
@@ -2440,7 +2436,7 @@ bool CTransaction::GetCoinAgeV2(CTxDB& txdb, uint64& nCoinAge) const
 
         nValueIn = txPrev.vout[txin.prevout.n].nValue;
         nTimeWeight = GetMagiWeightV2(nValueIn, block.GetBlockTime(), nTime);
-            if (nTimeWeight < nStakeMinAge)
+            if (nTimeWeight < GetStakeMinAge(nTime))
             continue; // only count coins meeting min age requirement
 
         nTimeWeight = GetMagiWeightV2(nValueIn, txPrev.nTime, nTime);
@@ -2489,7 +2485,7 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, uint64& nCoinAge) const
 
         nValueIn = txPrev.vout[txin.prevout.n].nValue;
         nTimeWeight = GetMagiWeight(nValueIn, block.GetBlockTime(), nTime);
-            if (nTimeWeight < nStakeMinAge)
+            if (nTimeWeight < GetStakeMinAge(nTime))
             continue; // only count coins meeting min age requirement
 
         nTimeWeight = GetMagiWeight(nValueIn, txPrev.nTime, nTime);
@@ -3816,7 +3812,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 printf("  getblocks stopping at %d %s\n", pindex->nHeight, pindex->GetBlockHash().ToString().substr(0,20).c_str());
                 // ppcoin: tell downloading node about the latest block if it's
                 // without risk being rejected due to stake connection check
-                if (hashStop != hashBestChain && pindex->GetBlockTime() + nStakeMinAge > pindexBest->GetBlockTime())
+                if (hashStop != hashBestChain && pindex->GetBlockTime() + GetStakeMinAge(pindexBest->GetBlockTime()) > pindexBest->GetBlockTime())
                     pfrom->PushInventory(CInv(MSG_BLOCK, hashBestChain));
                 break;
             }
