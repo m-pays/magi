@@ -1060,6 +1060,10 @@ double GetDifficultyFromBitsAver(const CBlockIndex* pindex0, int nBlocksAver0)
     return rDiffAver/double(nWeightTot);
 }
 
+bool IsMaintainence(const CBlockIndex* pindex_)
+{
+    return ( (pindex_->nHeight > 1451226) );
+}
 
 int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
 {
@@ -1074,6 +1078,7 @@ int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
     if (rDiff > rDiffcu && rSubsidy < 3.) {
 	rSubsidy = 6. * exp_n2( pow( abs( rDiff - (18.02428*exp_n(-M7Mv2_move/0.17628) + 6.58466*exp_n(-M7Mv2_move/0.71943) + 0.93489) )/(1./M7Mv2_move), 0.5 ), 0.);
     }
+    if (IsMaintainence) rSubsidy *= 0.3;
     rSubsidy *= double(COIN);
     if (rSubsidy > 50*COIN) { rSubsidy = 50*COIN; }
     else if (rSubsidy < MIN_TX_FEE) { rSubsidy = MIN_TX_FEE; }
@@ -1107,20 +1112,15 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 //    nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
-    if (nHeight%2 == 0) {
-        nSubsidy = 100 * COIN;
-    }
-    else {
-        nSubsidy = GetProofOfWorkReward_OPM(pindex0);
-    }
-    return nSubsidy + nFees;
+        if (nHeight%2 == 0) nSubsidy = 100 * COIN;
+        else nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+        return nSubsidy + nFees;
     }
 
     if (nHeight <= END_MAGI_POW_HEIGHT_V2) {    // difficulty dependent PoW-II mining
        nSubsidy = GetProofOfWorkReward_OPM(pindex0);
-    }
-    else {
-    nSubsidy = MIN_TX_FEE;
+    } else {
+        nSubsidy = MIN_TX_FEE;
     }
 
     if (fDebugMagi) {
@@ -1245,6 +1245,7 @@ double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
 //    if (fTestNet) return GetAnnualInterest_TestNet(nNetWorkWeit, rMaxAPR);
     rAPR = ( ( 2./( 1.+exp_n(1./(nNetWorkWeit/rWeit+1.)) ) - 0.53788 ) * rMaxAPR 
            / ( 2./( 1.+exp_n(1./(rWeit+1.)) ) - 0.53788 ) );
+    if (IsMaintainence) rAPR *= 1.2;
     if (fDebugMagiPoS) printf("@PoS-APRV2 rAPR = %f\n", rAPR);
     return rAPR;
 }
