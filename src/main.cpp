@@ -2705,6 +2705,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
 //}
 
 #define BLOCK_VALID_CHECK_INIT_HEIGHT 1451300
+/* two PoS blocks must be confirmed in-between PoW blocks */
 bool CBlock::IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev)
 {
     if (IsProofOfStake() || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
@@ -2715,6 +2716,7 @@ bool CBlock::IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexP
     return true;
 }
 
+/* within five blocks contain at least one PoW block */
 bool CBlock::IsProofOfStakeBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev)
 {
     if (!IsProofOfStake() || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
