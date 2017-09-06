@@ -2704,9 +2704,10 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
 //    return (pindexPrev->nMoneySupply) > (pindexPrev->pprev->nMoneySupply);
 //}
 
+#define BLOCK_VALID_CHECK_INIT_HEIGHT 1451300
 bool CBlock::IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev)
 {
-    if (IsProofOfStake() || nHeight0 < 1454100) return false;
+    if (IsProofOfStake() || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
     const CBlockIndex* pindexPrevPoW = GetLastBlockIndex(pindexPrev, false);
     if ( (nHeight0 - pindexPrevPoW->nHeight > 2) || 
         ( GetBlockTime() - pindexPrevPoW->GetBlockTime() > GetMaxPoWWaitingTime() ) )
@@ -2716,7 +2717,7 @@ bool CBlock::IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexP
 
 bool CBlock::IsProofOfStakeBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev)
 {
-    if (!IsProofOfStake() || nHeight0 < 1454100) return false;
+    if (!IsProofOfStake() || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
     const CBlockIndex* pindexPrevPoS = GetLastBlockIndex(pindexPrev, true);
     if ( GetBlockTime() - pindexPrevPoS->GetBlockTime() > GetMaxPoSWaitingTime() ) return false;
     bool f = false;
