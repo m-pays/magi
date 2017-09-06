@@ -12,8 +12,8 @@
 #define CLIENT_VERSION_BUILD       1
 
 // Set to true for release, false for prerelease or test build
-#define CLIENT_VERSION_IS_RELEASE  true
-#define CLIENT_VERSION_IS_TEST     false
+#define CLIENT_VERSION_IS_RELEASE  false
+#define CLIENT_VERSION_IS_TEST     true
 
 // Version before stable release: ALPHA1 ~ ALPHA3, BETA1 ~ BETA3, RC1 ~ RC3
 // Set to "STABLE" for stable release
