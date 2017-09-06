@@ -248,6 +248,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getrawmempool",          &getrawmempool,          true,   false },
     { "getblock",               &getblock,               false,  false },
     { "getblockbynumber",       &getblockbynumber,       false,  false },
+    { "getdebuginfo",           &getdebuginfo,           false,  false },
     { "getnewblockvaluebynumber",&getnewblockvaluebynumber,false,  false },
     { "getblockhash",           &getblockhash,           false,  false },
     { "gettransaction",         &gettransaction,         false,  false },
@@ -270,13 +271,16 @@ static const CRPCCommand vRPCCommands[] =
     { "decoderawtransaction",   &decoderawtransaction,   false,  false },
     { "signrawtransaction",     &signrawtransaction,     false,  false },
     { "sendrawtransaction",     &sendrawtransaction,     false,  false },
-    { "getcheckpoint",          &getcheckpoint,          true,   false },
-    { "reservebalance",         &reservebalance,         false,  true},
-    { "checkwallet",            &checkwallet,            false,  true},
-    { "repairwallet",           &repairwallet,           false,  true},
-    { "resendtx",               &resendtx,               false,  true},
-    { "makekeypair",            &makekeypair,            false,  true},
-    { "sendalert",              &sendalert,              true,  false},
+    { "getautocheckpoint",      &getautocheckpoint,      true,   false },
+    { "getsynccheckpoint",      &getsynccheckpoint,      true,   false },
+    { "sendcheckpoint",         &sendcheckpoint,         true,   false },
+    { "enforcecheckpoint",      &enforcecheckpoint,      true,   false },
+    { "reservebalance",         &reservebalance,         false,  true },
+    { "checkwallet",            &checkwallet,            false,  true },
+    { "repairwallet",           &repairwallet,           false,  true },
+    { "resendtx",               &resendtx,               false,  true },
+    { "makekeypair",            &makekeypair,            false,  true },
+    { "sendalert",              &sendalert,              true,   false },
 };
 
 CRPCTable::CRPCTable()
@@ -1177,6 +1181,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getblock"               && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getblockbynumber"       && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "getblockbynumber"       && n > 1) ConvertTo<bool>(params[1]);
+    if (strMethod == "getdebuginfo"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
+    if (strMethod == "getdebuginfo"           && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getnewblockvaluebynumber" && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "getblockhash"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "move"                   && n > 2) ConvertTo<double>(params[2]);

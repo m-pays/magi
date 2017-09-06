@@ -212,10 +212,14 @@ extern json_spirit::Value getblockhash(const json_spirit::Array& params, bool fH
 extern json_spirit::Value getblock(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getblockbynumber(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getnewblockvaluebynumber(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value getcheckpoint(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getautocheckpoint(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getsynccheckpoint(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendcheckpoint(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value enforcecheckpoint(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value setstakecombinethreshold(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value setstakesplitthreshold(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getstakecombinethreshold(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getstakesplitthreshold(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getdebuginfo(const json_spirit::Array& params, bool fHelp);
 
 #endif

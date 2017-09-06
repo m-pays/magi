@@ -96,6 +96,16 @@ inline bool IsPoSIIProtocolV2(int nHeight)
 inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446791; }
 inline unsigned int GetStakeMinAge(unsigned int nTime0) { return ( (nTime0 > 1503248400) ? (60 * 60 * 8) : (60 * 60 * 2) ); }
 
+inline int64 GetMaxPoWWaitingTime()
+{
+    return (15 * 60); // Maximum time for PoW on hold
+}
+
+inline int64 GetMaxPoSWaitingTime()
+{
+    return (15 * 60); // Maximum time for PoS on hold
+}
+
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
 #else
@@ -106,6 +116,15 @@ static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff3
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
 
 static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
+inline int64 PastDrift(int64 nTime)
+{
+    return ( nTime - 2 * 60 * 60 ); // up to two hours from the past
+}
+
+inline int64 FutureDrift(int64 nTime)
+{
+    return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
+}
 
 extern CScript COINBASE_FLAGS;
 
@@ -186,6 +205,7 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo=false
 double GetDifficultyFromBits(unsigned int nBits);
 double GetAnnualInterest_TestNet(int64 nNetWorkWeit, double rMaxAPR);
 double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
+double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR, CBlockIndex* pindex0 = NULL);
 bool IsChainInSwitch(const CBlockIndex* pindex_);
 int GetCoinbaseMaturity(int nHeight);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);
@@ -1165,7 +1185,6 @@ public:
         printf("\n");
     }
 
-
     bool DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex);
     bool ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck=false);
     bool ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions=true);
@@ -1176,6 +1195,8 @@ public:
     bool GetCoinAge(uint64& nCoinAge) const; // ppcoin: calculate total coin age spent in block
     bool SignBlock(const CKeyStore& keystore);
     bool CheckBlockSignature() const;
+    bool IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev);
+    bool IsProofOfStakeBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev);
 
 private:
     bool SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew);

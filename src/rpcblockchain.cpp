@@ -331,6 +331,69 @@ Value getblockbynumber(const Array& params, bool fHelp)
     return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
 
+unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake);
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
+Value getdebuginfo(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "getdebuginfobyheight <height>\n");
+
+    int nHeight = params[0].get_int();
+    if (nHeight < 1 || nHeight > nBestHeight)
+        throw runtime_error("Block number out of range.");
+
+    Object obj;
+
+    const CBlockIndex* pblockindex = FindBlockByHeight(nHeight);
+    obj.push_back(Pair("flags", strprintf("%s", pblockindex->IsProofOfStake()? "proof-of-stake" : "proof-of-work")));
+    obj.push_back(Pair("height", pblockindex->nHeight));
+    obj.push_back(Pair("hash", pblockindex->phashBlock->GetHex()));
+
+    const CBlockIndex* pblockindexprev = GetLastBlockIndex(pblockindex->pprev, pblockindex->IsProofOfStake());
+    obj.push_back(Pair("hashPrev", pblockindexprev->phashBlock->GetHex()));
+    obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
+
+    int bnBitsMQW = MagiQuantumWave(pblockindexprev, pblockindexprev->IsProofOfStake());
+    int bnBitsTarget = GetNextTargetRequired(pblockindexprev, pblockindexprev->IsProofOfStake());
+
+    obj.push_back(Pair("nBits", HexBits(pblockindex->nBits)));
+    obj.push_back(Pair("nBitsMQW", HexBits(bnBitsMQW)));
+    obj.push_back(Pair("nBitsTarget", HexBits(bnBitsTarget)));
+
+    obj.push_back(Pair("diff", GetDifficultyFromBits(pblockindex->nBits)));
+    obj.push_back(Pair("diffMQW", GetDifficultyFromBits(bnBitsMQW)));
+    obj.push_back(Pair("diffTarget", GetDifficultyFromBits(bnBitsTarget)));
+
+    CBlockIndex* pcheckpoint = Checkpoints::GetLastSyncCheckpoint();
+    int64 deltaTime = pblockindex->GetBlockTime() - pcheckpoint->nTime;
+
+    CBigNum bnNewBlock;
+    bnNewBlock.SetCompact(pblockindex->nBits);
+    CBigNum bnRequired;
+    unsigned int nRequired;
+
+    const CBlockIndex* pcheckpointLast;
+    if (pblockindex->IsProofOfStake()) {
+        bnRequired.SetCompact(ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblockindex->nTime));
+        nRequired = ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblockindex->nTime);
+        pcheckpointLast = GetLastBlockIndex(pcheckpoint, true);
+    } else {
+        bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
+        nRequired = ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime);
+        pcheckpointLast = GetLastBlockIndex(pcheckpoint, false);
+    }
+
+    obj.push_back(Pair("checkpoint-height", pcheckpoint->nHeight));
+    obj.push_back(Pair("deltaTime", (int) deltaTime));
+    obj.push_back(Pair("pcheckpointLast-height", pcheckpointLast->nHeight));
+
+    obj.push_back(Pair("bnNewBlock", HexBits(pblockindex->nBits)));
+    obj.push_back(Pair("bnRequired", HexBits(nRequired)));
+
+    return obj;
+}
+
 int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
 //double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
 Value getnewblockvaluebynumber(const Array& params, bool fHelp)
@@ -363,13 +426,12 @@ Value getnewblockvaluebynumber(const Array& params, bool fHelp)
     return obj;
 }
 
-// ppcoin: get information of sync-checkpoint
-Value getcheckpoint(const Array& params, bool fHelp)
+Value getautocheckpoint(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
-            "getcheckpoint\n"
-            "Show info of synchronized checkpoint.\n");
+            "getautocheckpoint\n"
+            "Show info of auto synchronized checkpoint.\n");
 
     Object result;
     const CBlockIndex* pindexCheckpoint = Checkpoints::AutoSelectSyncCheckpoint();
@@ -378,7 +440,77 @@ Value getcheckpoint(const Array& params, bool fHelp)
     result.push_back(Pair("height", pindexCheckpoint->nHeight));
     result.push_back(Pair("timestamp", DateTimeStrFormat(pindexCheckpoint->GetBlockTime()).c_str()));
 
-    result.push_back(Pair("policy", "rolling"));
+    return result;
+}
+
+Value getsynccheckpoint(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getsynccheckpoint\n"
+            "Show info of synchronized checkpoint.\n");
+
+    Object result;
+    result.push_back(Pair("checkpoint", Checkpoints::hashSyncCheckpoint.ToString().c_str()));
+    if (mapBlockIndex.count(Checkpoints::hashSyncCheckpoint))
+    {
+        CBlockIndex* pindexCheckpoint = mapBlockIndex[Checkpoints::hashSyncCheckpoint];
+        result.push_back(Pair("height", pindexCheckpoint->nHeight));
+        result.push_back(Pair("timestamp", DateTimeStrFormat(pindexCheckpoint->GetBlockTime()).c_str()));
+    }
+
+    if (mapArgs.count("-checkpointkey"))
+        result.push_back(Pair("checkpointmaster", true));
 
     return result;
+}
+
+Value sendcheckpoint(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "sendcheckpoint <blockhash>\n"
+            "Send a synchronized checkpoint.\n");
+
+    if (!mapArgs.count("-checkpointkey") || CSyncCheckpoint::strMasterPrivKey.empty())
+        throw runtime_error("Not a checkpointmaster node, first set checkpointkey in configuration and restart client. ");
+
+    std::string strHash = params[0].get_str();
+    uint256 hash(strHash);
+
+    if (!Checkpoints::SendSyncCheckpoint(hash))
+        throw runtime_error("Failed to send checkpoint, check log. ");
+
+    Object result;
+    CBlockIndex* pindexCheckpoint;
+
+    result.push_back(Pair("synccheckpoint", Checkpoints::hashSyncCheckpoint.ToString().c_str()));
+    if (mapBlockIndex.count(Checkpoints::hashSyncCheckpoint))
+    {
+        pindexCheckpoint = mapBlockIndex[Checkpoints::hashSyncCheckpoint];
+        result.push_back(Pair("height", pindexCheckpoint->nHeight));
+        result.push_back(Pair("timestamp", (boost::int64_t) pindexCheckpoint->GetBlockTime()));
+    }
+    result.push_back(Pair("subscribemode", Checkpoints::IsSyncCheckpointEnforced()? "enforce" : "advisory"));
+    if (mapArgs.count("-checkpointkey"))
+        result.push_back(Pair("checkpointmaster", true));
+
+    return result;
+}
+
+Value enforcecheckpoint(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "enforcecheckpoint <enforce>\n"
+            "<enforce> is true or false to enable or disable enforcement of broadcasted checkpoints by developer.");
+
+    bool fEnforceCheckpoint = params[0].get_bool();
+    if (mapArgs.count("-checkpointkey") && !fEnforceCheckpoint)
+        throw runtime_error(
+            "checkpoint master node must enforce synchronized checkpoints.");
+    if (fEnforceCheckpoint)
+        Checkpoints::strCheckpointWarning = "";
+    mapArgs["-checkpointenforce"] = (fEnforceCheckpoint ? "1" : "0");
+    return Value::null;
 }

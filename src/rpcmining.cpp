@@ -62,10 +62,6 @@ Value gethashespersec(const Array& params, bool fHelp)
     return (boost::int64_t)dHashesPerSec;
 }
 
-int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fLastBlock);
-//double GetDifficultyFromBitsV2(const CBlockIndex* pindex0);
-double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
-double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR);
 Value getmininginfo(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -80,7 +76,7 @@ Value getmininginfo(const Array& params, bool fHelp)
 		  ((double)GetProofOfWorkRewardV2(pindexBest, 0, true))/((double)COIN) : 
 		  (double)((uint64_t)(GetProofOfWorkReward(pindexBest->nBits, pindexBest->nHeight, 0)/COIN));
     double rAPR = (IsPoSIIProtocolV2(pindexBest->nHeight+1)) ? 
-		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
+		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE, pindexBest) : 
 		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
 
     Object obj, diff, blockvalue, weight;
