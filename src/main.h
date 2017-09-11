@@ -186,6 +186,7 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo=false
 double GetDifficultyFromBits(unsigned int nBits);
 double GetAnnualInterest_TestNet(int64 nNetWorkWeit, double rMaxAPR);
 double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR);
+double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR, CBlockIndex* pindex0 = NULL);
 bool IsChainInSwitch(const CBlockIndex* pindex_);
 int GetCoinbaseMaturity(int nHeight);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);

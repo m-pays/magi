@@ -1078,7 +1078,7 @@ int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
     if (rDiff > rDiffcu && rSubsidy < 3.) {
 	rSubsidy = 6. * exp_n2( pow( abs( rDiff - (18.02428*exp_n(-M7Mv2_move/0.17628) + 6.58466*exp_n(-M7Mv2_move/0.71943) + 0.93489) )/(1./M7Mv2_move), 0.5 ), 0.);
     }
-    if (IsMaintainence) rSubsidy *= 0.3;
+    if (IsMaintainence(pindex0)) rSubsidy *= 0.3;
     rSubsidy *= double(COIN);
     if (rSubsidy > 50*COIN) { rSubsidy = 50*COIN; }
     else if (rSubsidy < MIN_TX_FEE) { rSubsidy = MIN_TX_FEE; }
@@ -1239,13 +1239,13 @@ double GetAnnualInterest(int64 nNetWorkWeit, double rMaxAPR)
     return rAPR;
 }
 
-double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR)
+double GetAnnualInterestV2(int64 nNetWorkWeit, double rMaxAPR, CBlockIndex* pindex0)
 {
     double rAPR, rWeit=500000.;
 //    if (fTestNet) return GetAnnualInterest_TestNet(nNetWorkWeit, rMaxAPR);
     rAPR = ( ( 2./( 1.+exp_n(1./(nNetWorkWeit/rWeit+1.)) ) - 0.53788 ) * rMaxAPR 
            / ( 2./( 1.+exp_n(1./(rWeit+1.)) ) - 0.53788 ) );
-    if (IsMaintainence) rAPR *= 1.2;
+    if (pindex0 && IsMaintainence(pindex0)) rAPR *= 1.2;
     if (fDebugMagiPoS) printf("@PoS-APRV2 rAPR = %f\n", rAPR);
     return rAPR;
 }
@@ -1255,7 +1255,7 @@ int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees, CBlockIndex* pindex)
 {
     int64 nNetWorkWeit = GetPoSKernelPS(pindex);
     double rAPR = (IsPoSIIProtocolV2(pindex->nHeight+1)) ? 
-		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE) : 
+		  GetAnnualInterestV2(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE, pindex) : 
 		  GetAnnualInterest(nNetWorkWeit, MAX_MAGI_PROOF_OF_STAKE);
 
     int64 nSubsidy = nCoinAge * rAPR * COIN * 33 / (365 * 33 + 8);
