@@ -126,6 +126,9 @@ inline int64 FutureDrift(int64 nTime)
     return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
 }
 
+int64 GetTargetTimespan(bool fProofOfStake);
+int64 GetTargetSpacing(bool fProofOfStake);
+
 extern CScript COINBASE_FLAGS;
 
 extern CCriticalSection cs_main;
@@ -211,6 +214,10 @@ int GetCoinbaseMaturity(int nHeight);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
+
+bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
+bool IsProofOfWorkBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
+bool IsProofOfStakeBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
 
 /** Position on disk for a particular transaction. */
 class CDiskTxPos
@@ -1195,9 +1202,6 @@ public:
     bool GetCoinAge(uint64& nCoinAge) const; // ppcoin: calculate total coin age spent in block
     bool SignBlock(const CKeyStore& keystore);
     bool CheckBlockSignature() const;
-    bool IsProofOfWorkBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev);
-    bool IsProofOfStakeBlocksInvalid(int nHeight0, const CBlockIndex* pindexPrev);
-
 private:
     bool SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew);
 };
