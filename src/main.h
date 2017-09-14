@@ -106,6 +106,15 @@ static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff3
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
 
 static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
+inline int64 PastDrift(int64 nTime)
+{
+    return ( nTime - 2 * 60 * 60 ); // up to two hours from the past
+}
+
+inline int64 FutureDrift(int64 nTime)
+{
+    return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
+}
 
 extern CScript COINBASE_FLAGS;
 
@@ -1166,7 +1175,6 @@ public:
         printf("\n");
     }
 
-
     bool DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex);
     bool ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck=false);
     bool ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions=true);
@@ -1177,7 +1185,6 @@ public:
     bool GetCoinAge(uint64& nCoinAge) const; // ppcoin: calculate total coin age spent in block
     bool SignBlock(const CKeyStore& keystore);
     bool CheckBlockSignature() const;
-
 private:
     bool SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew);
 };
