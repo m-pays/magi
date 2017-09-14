@@ -96,6 +96,16 @@ inline bool IsPoSIIProtocolV2(int nHeight)
 inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446791; }
 inline unsigned int GetStakeMinAge(unsigned int nTime0) { return ( (nTime0 > 1503248400) ? (60 * 60 * 8) : (60 * 60 * 2) ); }
 
+inline int64 GetMaxPoWWaitingTime()
+{
+    return (15 * 60); // Maximum time for PoW on hold
+}
+
+inline int64 GetMaxPoSWaitingTime()
+{
+    return (15 * 60); // Maximum time for PoS on hold
+}
+
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
 #else
@@ -115,6 +125,9 @@ inline int64 FutureDrift(int64 nTime)
 {
     return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
 }
+
+int64 GetTargetTimespan(bool fProofOfStake);
+int64 GetTargetSpacing(bool fProofOfStake);
 
 extern CScript COINBASE_FLAGS;
 
@@ -201,6 +214,10 @@ int GetCoinbaseMaturity(int nHeight);
 //bool CheckMoneySupply(CBlockIndex* pindexPrev);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
+
+bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
+bool IsProofOfWorkBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
+bool IsProofOfStakeBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev);
 
 /** Position on disk for a particular transaction. */
 class CDiskTxPos

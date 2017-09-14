@@ -2781,6 +2781,40 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
 //    return (pindexPrev->nMoneySupply) > (pindexPrev->pprev->nMoneySupply);
 //}
 
+#define BLOCK_VALID_CHECK_INIT_HEIGHT 1451300
+bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
+{
+    return ( fProofOfStake ? 
+             IsProofOfStakeBlockInvalid(nHeight0, nTime, fProofOfStake, pindexPrev) : 
+             IsProofOfWorkBlockInvalid(nHeight0, nTime, fProofOfStake, pindexPrev) );
+}
+
+/* two PoS blocks must be confirmed in-between PoW blocks */
+bool IsProofOfWorkBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
+{
+    if (fProofOfStake || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
+    const CBlockIndex* pindexPrevPoW = GetLastBlockIndex(pindexPrev, false);
+    if ( (nHeight0 - pindexPrevPoW->nHeight > 2) || 
+        ( nTime - pindexPrevPoW->GetBlockTime() > GetMaxPoWWaitingTime() ) )
+        return false;
+    return true;
+}
+
+/* within five blocks contain at least one PoW block */
+bool IsProofOfStakeBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
+{
+    if (!fProofOfStake || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
+    const CBlockIndex* pindexPrevPoS = GetLastBlockIndex(pindexPrev, true);
+    if ( nTime - pindexPrevPoS->GetBlockTime() > GetMaxPoSWaitingTime() ) return false;
+    bool f = false;
+    while (pindexPrev && nHeight0 - pindexPrev->nHeight < 5)
+    {
+        f |= pindexPrev->IsProofOfWork();
+        pindexPrev = pindexPrev->pprev;
+    }
+    return !f;
+}
+
 bool CBlock::AcceptBlock()
 {
     // Check for duplicate
@@ -2805,6 +2839,12 @@ bool CBlock::AcceptBlock()
 
     if (IsProofOfStake() && !IsMiningProofOfStake(nHeight))
         return DoS(100, error("AcceptBlock() : reject proof-of-stake at height %d", nHeight));
+
+    if (IsProofOfWork() && IsProofOfWorkBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
+        return DoS(100, error("AcceptBlock() : proof-of-work block violation (height = %d)", nHeight)); 
+
+    if (IsProofOfStake() && IsProofOfStakeBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
+        return DoS(100, error("AcceptBlock() : proof-of-stake block violation (height = %d)", nHeight)); 
 
 //    if (IsProofOfStake() && !CheckMoneySupply(pindexPrev))
 //        return DoS(100, error("AcceptBlock() : Wrong Money Supply = %"PRI64d" at height %d", pindexPrev->nMoneySupply, nHeight-1));
