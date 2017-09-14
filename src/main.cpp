@@ -1663,7 +1663,7 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 }
 
 
-#define DIFF_ADJ_V3_INIT_HEIGHT 1452170
+#define DIFF_ADJ_V3_INIT_HEIGHT 1479000
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     int DiffMode = 1;
@@ -2781,7 +2781,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
 //    return (pindexPrev->nMoneySupply) > (pindexPrev->pprev->nMoneySupply);
 //}
 
-#define BLOCK_VALID_CHECK_INIT_HEIGHT 1451300
+#define BLOCK_VALID_CHECK_INIT_HEIGHT 1478500
 bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
 {
     return ( fProofOfStake ? 
