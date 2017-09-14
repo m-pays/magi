@@ -98,12 +98,12 @@ inline unsigned int GetStakeMinAge(unsigned int nTime0) { return ( (nTime0 > 150
 
 inline int64 GetMaxPoWWaitingTime()
 {
-    return (15 * 60); // Maximum time for PoW on hold
+    return (10 * 60); // Maximum time for PoW on hold
 }
 
 inline int64 GetMaxPoSWaitingTime()
 {
-    return (15 * 60); // Maximum time for PoS on hold
+    return (3 * 60); // Maximum time for PoS on hold
 }
 
 #ifdef USE_UPNP
