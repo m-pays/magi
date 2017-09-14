@@ -1067,9 +1067,11 @@ double GetDifficultyFromBitsAver(const CBlockIndex* pindex0, int nBlocksAver0)
     return rDiffAver/double(nWeightTot);
 }
 
-bool IsMaintainence(const CBlockIndex* pindex_)
+#define HEIGHT_INIT_MAINTENANCE 1451226
+#define HEIGHT_END_MAINTENANCE 1481500
+bool IsMaintenance(const CBlockIndex* pindex_)
 {
-    return ( (pindex_->nHeight > 1451226) );
+    return ( (pindex_->nHeight > HEIGHT_INIT_MAINTENANCE) && (pindex_->nHeight < HEIGHT_END_MAINTENANCE) );
 }
 
 int64 GetProofOfWorkReward_OPM(const CBlockIndex* pindex0)
@@ -1663,7 +1665,7 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 }
 
 
-#define DIFF_ADJ_V3_INIT_HEIGHT 1479000
+#define DIFF_ADJ_V3_INIT_HEIGHT 1482000
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     int DiffMode = 1;
@@ -2781,7 +2783,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
 //    return (pindexPrev->nMoneySupply) > (pindexPrev->pprev->nMoneySupply);
 //}
 
-#define BLOCK_VALID_CHECK_INIT_HEIGHT 1478500
+#define BLOCK_VALID_CHECK_INIT_HEIGHT 1481500
 bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
 {
     return ( fProofOfStake ? 
