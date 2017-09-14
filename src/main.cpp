@@ -49,7 +49,14 @@ unsigned int nStakeTargetSpacing = 90;		// 90 sec PoS block spacing
 int64 nStakeSplitThreshold = 500; // PoS stake splitting threshold
 int64 nStakeCombineThreshold = nStakeSplitThreshold / 2; // PoS stake combining threshold
 
-static const int64 nTargetTimespan = 60 * 30;	// 30 min
+static const int64 nTargetTimespan = 60 * 30;   // 30 min
+
+static const int64 nTargetTimespanV3Stake = 60 * 30;   // 30 min
+static const int64 nTargetTimespanV3Work = 60 * 16;   // 16 min
+
+static const int64 nTargetSpacingV3Stake = 90;   // 1.5 min
+static const int64 nTargetSpacingV3Work = 60 * 4;   // 4 min
+
 static const int64 nTargetSpacingWork = 2 * nStakeTargetSpacing; // 3 min PoW block spacing
 
 int64 nChainStartTime = 1407209706;
@@ -1409,6 +1416,77 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     return bnNew.GetCompact();
 }
 
+int64 GetTargetTimespanV3(bool fProofOfStake)
+{
+    return ( fProofOfStake? nTargetTimespanV3Stake : nTargetTimespanV3Work );
+}
+
+int64 GetTargetSpacingV3(bool fProofOfStake)
+{
+    return ( fProofOfStake? nTargetSpacingV3Stake : nTargetSpacingV3Work );
+}
+
+unsigned int GetNextTargetRequired_v3(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
+    CBigNum bnTargetLimit = bnProofOfWorkLimit;
+
+    int64 nTargetTimespan0 = GetTargetTimespanV3(fProofOfStake);
+    int64 nTargetSpacing0 = GetTargetSpacingV3(fProofOfStake);
+
+    if(fProofOfStake)
+    {
+        // Proof-of-Stake blocks has own target limit since nVersion=3 supermajority on mainNet and always on testNet
+        bnTargetLimit = bnProofOfStakeLimit;
+    }
+
+    if (pindexLast == NULL)
+        return bnTargetLimit.GetCompact(); // genesis block
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+    if (pindexPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // first block
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+    if (pindexPrevPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // second block
+
+    int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+    if(nActualSpacing < 0)
+    {
+        // printf(">> nActualSpacing = %"PRI64d" corrected to 1.\n", nActualSpacing);
+        nActualSpacing = 1;
+    }
+    else if(nActualSpacing > nTargetTimespan0)
+    {
+        // printf(">> nActualSpacing = %"PRI64d" corrected to nTargetTimespan0 (900).\n", nActualSpacing);
+        nActualSpacing = nTargetTimespan0;
+    }
+
+    // no adjustment
+    if (IsBlockInvalid(pindexPrev->nHeight, pindexPrev->GetBlockTime(), fProofOfStake, pindexPrev->pprev))
+        nActualSpacing = nTargetSpacing0;
+
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    CBigNum bnNew;
+    bnNew.SetCompact(pindexPrev->nBits);
+
+    int64 nInterval = nTargetTimespan0 / nTargetSpacing0;
+    bnNew *= ((nInterval - 1) * nTargetSpacing0 + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing0);
+
+    /*
+    printf(">> Height = %d, fProofOfStake = %d, nInterval = %"PRI64d", nTargetSpacing0 = %"PRI64d", nActualSpacing = %"PRI64d"\n",
+        pindexPrev->nHeight, fProofOfStake, nInterval, nTargetSpacing0, nActualSpacing);
+    printf(">> pindexPrev->GetBlockTime() = %"PRI64d", pindexPrev->nHeight = %d, pindexPrevPrev->GetBlockTime() = %"PRI64d", pindexPrevPrev->nHeight = %d\n",
+        pindexPrev->GetBlockTime(), pindexPrev->nHeight, pindexPrevPrev->GetBlockTime(), pindexPrevPrev->nHeight);
+    */
+
+    if (bnNew <= 0 || bnNew > bnTargetLimit)
+        bnNew = bnTargetLimit;
+
+    return bnNew.GetCompact();
+}
+
 #define MQW_TIME_COEFF_TESNT 1.0
 #define MQW_AVER_COEFF_TESNT 1.0
 #define MQW_EXPON_COEFF_TESNT 2.3
@@ -1584,20 +1662,19 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
     return bnNew.GetCompact();
 }
 
+
+#define DIFF_ADJ_V3_INIT_HEIGHT 1452170
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
-        int DiffMode = 1;
-        if (fTestNet) {
-            if (pindexLast->nHeight+1 >= 24500) { DiffMode = 2; }
-            else if (pindexLast->nHeight+1 >= 20370) { DiffMode = 21; }
-        }
-        else {
-            if (pindexLast->nHeight+1 >= 33500) { DiffMode = 2; }
-        }
-        if (DiffMode == 1) { return GetNextTargetRequired_v1(pindexLast, fProofOfStake); }
-        else if (DiffMode == 2) { return MagiQuantumWave(pindexLast, fProofOfStake); }
-	else if (DiffMode == 21) { return MagiQuantumWave_TESNT(pindexLast, fProofOfStake); }
-        return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
+    int DiffMode = 1;
+    if (fTestNet) DiffMode = 2;
+    else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < DIFF_ADJ_V3_INIT_HEIGHT) DiffMode = 2;
+    else if (pindexLast->nHeight+1 >= DIFF_ADJ_V3_INIT_HEIGHT) DiffMode = 3;
+    
+    if (DiffMode == 1) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
+    else if (DiffMode == 2) return MagiQuantumWave(pindexLast, fProofOfStake);
+    else if (DiffMode == 3) return GetNextTargetRequired_v3(pindexLast, fProofOfStake);
+    return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
 }
 
 
