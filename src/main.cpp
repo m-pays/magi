@@ -2849,10 +2849,10 @@ bool CBlock::AcceptBlock()
         return DoS(100, error("AcceptBlock() : reject proof-of-stake at height %d", nHeight));
 
     if (IsProofOfWork() && IsProofOfWorkBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
-        return DoS(100, error("AcceptBlock() : proof-of-work block violation (height = %d)", nHeight)); 
+        return DoS(100, error("AcceptBlock() : proof-of-work block violation (prior PoS not seen or wait 10 mins) (height = %d)", nHeight)); 
 
     if (IsProofOfStake() && IsProofOfStakeBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
-        return DoS(100, error("AcceptBlock() : proof-of-stake block violation (height = %d)", nHeight)); 
+        return DoS(100, error("AcceptBlock() : proof-of-stake block violation (prior PoW not seen in the last five blocks or wait 3 mins) (height = %d)", nHeight)); 
 
 //    if (IsProofOfStake() && !CheckMoneySupply(pindexPrev))
 //        return DoS(100, error("AcceptBlock() : Wrong Money Supply = %"PRI64d" at height %d", pindexPrev->nMoneySupply, nHeight-1));
