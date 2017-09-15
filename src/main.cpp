@@ -1007,7 +1007,7 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo)
     }
     nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     // moving average factor depending on block time; less rfw, smoother the diff
-    rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(nTargetSpacingWork)) ) * BRW_AVER_COEFF;
+    rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(GetTargetSpacingWork(pindex0->nHeight+1))) ) * BRW_AVER_COEFF;
     if (rfw < BRW_WEIGHT_MIN) { rfw = BRW_WEIGHT_MIN; }
     else if (rfw > BRW_WEIGHT_MAX) { rfw = BRW_WEIGHT_MAX; }
 
@@ -1023,7 +1023,7 @@ double GetDifficultyFromBitsV2(const CBlockIndex* pindex0, bool fPrintInfo)
 	    break;
 	}
 	nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-	rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(nTargetSpacingWork)) ) * BRW_AVER_COEFF;
+	rfw = (1. - exp_n(-double(nActualBlockSpacing)*BRW_EXPON_COEFF*BRW_BLKTIME_COEFF/double(GetTargetSpacingWork(pindex0->nHeight+1))) ) * BRW_AVER_COEFF;
 	if (rfw < BRW_WEIGHT_MIN) { rfw = BRW_WEIGHT_MIN; }
 	else if (rfw > BRW_WEIGHT_MAX) { rfw = BRW_WEIGHT_MAX; }
 	rDiffAverEMA += GetDifficultyFromBits(pindexPrev->nBits) * ((int64)(rfw * rWeight * BRW_WEIGHT_SCALE));
@@ -1400,7 +1400,7 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
 
-    int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : nTargetSpacingWork;
+    int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nInterval = nTargetTimespan / nTargetSpacing;
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
@@ -1416,6 +1416,13 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
         bnNew = bnTargetLimit;
 
     return bnNew.GetCompact();
+}
+
+#define HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT 1482000
+int64 GetTargetSpacingWork(int nHeight)
+{
+    return ( (nHeight >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) ? 
+        nTargetSpacingV3Work : nTargetSpacingWork );
 }
 
 int64 GetTargetTimespanV3(bool fProofOfStake)
@@ -1524,7 +1531,7 @@ unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfS
     nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     if(nActualBlockSpacing < 0) { nActualBlockSpacing = 1; }
     nActualTimeSpanMQW = nActualBlockSpacing;
-    double fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(nTargetSpacingWork)) * MQW_AVER_COEFF_TESNT;
+    double fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(GetTargetSpacingWork(pindexLast->nHeight+1))) * MQW_AVER_COEFF_TESNT;
     bnAverage.SetCompact(pindexPrev->nBits);
     bnAverage = bnAverage * ((int64)(fw*WEIGHT_SCALE_TESNT));
     
@@ -1542,7 +1549,7 @@ unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfS
 	{
 	    nAveragedBlocks++;
 	    nActualTimeSpanMQW += nActualBlockSpacing;
-	    fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(nTargetSpacingWork)) * MQW_AVER_COEFF_TESNT;
+	    fw = exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF_TESNT*MQW_TIME_COEFF_TESNT/double(GetTargetSpacingWork(pindexLast->nHeight+1))) * MQW_AVER_COEFF_TESNT;
 	    bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
 	    nWeightTot += ((int64)(fw*rWeight*WEIGHT_SCALE_TESNT));
 	    rWeight *= (1.-fw);
@@ -1552,7 +1559,7 @@ unsigned int MagiQuantumWave_TESNT(const CBlockIndex* pindexLast, bool fProofOfS
 
     CBigNum bnNew(bnAverage);
 
-    int64 nTargetTimeSpanMQW = nAveragedBlocks*nTargetSpacingWork;
+    int64 nTargetTimeSpanMQW = nAveragedBlocks*GetTargetSpacingWork(pindexLast->nHeight+1);
 
     if (nActualTimeSpanMQW < nTargetTimeSpanMQW/3)
         nActualTimeSpanMQW = nTargetTimeSpanMQW/3;
@@ -1607,7 +1614,7 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
     nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     if(nActualBlockSpacing < 0) { nActualBlockSpacing = 1; }
     nActualTimeSpanMQW = nActualBlockSpacing;
-    double fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) ) * MQW_AVER_COEFF;
+    double fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
     if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
     else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
     bnAverage.SetCompact(pindexPrev->nBits);
@@ -1629,7 +1636,7 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 	{
 	    nAveragedBlocks++;
 	    nActualTimeSpanMQW += nActualBlockSpacing;
-	    fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(nTargetSpacingWork)) ) * MQW_AVER_COEFF;
+	    fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
 	    if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
 	    else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
 //	    int64 w1 = fw * WEIGHT_SCALE;
@@ -1646,7 +1653,7 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 
     CBigNum bnNew(bnAverage);
 
-    int64 nTargetTimeSpanMQW = nAveragedBlocks*nTargetSpacingWork;
+    int64 nTargetTimeSpanMQW = nAveragedBlocks*GetTargetSpacingWork(pindexLast->nHeight+1);
 
     if (nActualTimeSpanMQW < nTargetTimeSpanMQW/3)
         nActualTimeSpanMQW = nTargetTimeSpanMQW/3;
@@ -1665,13 +1672,12 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
 }
 
 
-#define DIFF_ADJ_V3_INIT_HEIGHT 1482000
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     int DiffMode = 1;
     if (fTestNet) DiffMode = 2;
-    else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < DIFF_ADJ_V3_INIT_HEIGHT) DiffMode = 2;
-    else if (pindexLast->nHeight+1 >= DIFF_ADJ_V3_INIT_HEIGHT) DiffMode = 3;
+    else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 2;
+    else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 3;
     
     if (DiffMode == 1) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
     else if (DiffMode == 2) return MagiQuantumWave(pindexLast, fProofOfStake);

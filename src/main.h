@@ -126,8 +126,9 @@ inline int64 FutureDrift(int64 nTime)
     return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
 }
 
-int64 GetTargetTimespan(bool fProofOfStake);
+int64 GetTargetSpacingWork(int nHeight);
 int64 GetTargetSpacing(bool fProofOfStake);
+int64 GetTargetTimespan(bool fProofOfStake);
 
 extern CScript COINBASE_FLAGS;
 
