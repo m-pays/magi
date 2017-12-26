@@ -2858,7 +2858,7 @@ bool CBlock::AcceptBlock()
 //        return DoS(100, error("AcceptBlock() : Wrong Money Supply = %" PRI64d " at height %d", pindexPrev->nMoneySupply, nHeight-1));
 
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
-        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
+        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%" PRI64d " nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
@@ -4715,7 +4715,7 @@ if (fTestNet || pindexBest->nHeight >= 131100) {
 	CTransaction txCoinStake;
 	int64 nSearchTime = txCoinStake.nTime; // search to current time
 	if (fDebugMagiPoS)
-            printf("@CreateNewBlock -> txCoinStake.nTime=%" PRI64d "\n", txCoinStake.nTime);
+            printf("@CreateNewBlock -> txCoinStake.nTime=%u\n", txCoinStake.nTime);
 	if (nSearchTime > nLastCoinStakeSearchTime)
 	{
 			// printf(">>> OK1\n");
@@ -4728,7 +4728,7 @@ if (fTestNet || pindexBest->nHeight >= 131100) {
 		    pblock->vtx[0].nTime = txCoinStake.nTime;
 		    pblock->vtx.push_back(txCoinStake); 
 		    if (fDebugMagiPoS)
-			printf("@CreateNewBlock-PoS found -> txCoinStake.nTime=%" PRI64d "\n", txCoinStake.nTime);
+			printf("@CreateNewBlock-PoS found -> txCoinStake.nTime=%u\n", txCoinStake.nTime);
 		}
 	    }
 	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
