@@ -134,7 +134,7 @@ int64 GetMagiWeight_TestNetV2(int64 nValueIn, int64 nIntervalBeginning, int64 nI
     double rMro = (double)(nValueIn*6)/(double)nnMoneySupply, rEpf = exp_n(1/wfa(rMro)/wfb(rMro)/wfc(rMro));
     nWeight = 5.55243 * ( pow(rEpf, -0.3 * rStakeDays * 480. / 8.177) - pow(rEpf, -0.6 * rStakeDays * 480. / 8.177) ) * rStakeDays * 240.;
 
-    if (fDebugMagiPoS) printf("@GetMagiWeight_TestNetV2 = %"PRI64d"\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge))));
+    if (fDebugMagiPoS) printf("@GetMagiWeight_TestNetV2 = %" PRI64d "\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge))));
 
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60/2), (int64)(nStakeMaxAge)));
 }
@@ -176,7 +176,7 @@ int64 GetMagiWeightV2(int64 nValueIn, int64 nIntervalBeginning, int64 nIntervalE
     
     nWeight = 42.2474 * ( pow(rEpf, -0.55 * (rStakeDays+2.) / 0.4719) - pow(rEpf, -0.6 * (rStakeDays+2.) / 0.4719) ) * rStakeDays;
 
-    if (fDebugMagiPoS) printf("@GetMagiWeightV2 = %"PRI64d"\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge)));
+    if (fDebugMagiPoS) printf("@GetMagiWeightV2 = %" PRI64d "\n", max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge)));
 
     return max((int64)0, min((int64)(nWeight * 24 * 60 * 60), (int64)nStakeMaxAge));
 }
@@ -302,7 +302,7 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64& nStakeModif
         return error("ComputeNextStakeModifier: unable to get last modifier");
     if (fDebug)
     {
-        printf("ComputeNextStakeModifier: prev modifier=0x%016"PRI64x" time=%s\n", nStakeModifier, DateTimeStrFormat(nModifierTime).c_str());
+        printf("ComputeNextStakeModifier: prev modifier=0x%016" PRI64x " time=%s\n", nStakeModifier, DateTimeStrFormat(nModifierTime).c_str());
     }
     if (nModifierTime / nModifierInterval >= pindexPrev->GetBlockTime() / nModifierInterval)
         return true;
@@ -366,7 +366,7 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64& nStakeModif
     }
     if (fDebug)
     {
-        printf("ComputeNextStakeModifier: new modifier=0x%016"PRI64x" time=%s\n", nStakeModifierNew, DateTimeStrFormat(pindexPrev->GetBlockTime()).c_str());
+        printf("ComputeNextStakeModifier: new modifier=0x%016" PRI64x " time=%s\n", nStakeModifierNew, DateTimeStrFormat(pindexPrev->GetBlockTime()).c_str());
     }
 
     nStakeModifier = nStakeModifierNew;
@@ -398,7 +398,7 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64& nStakeModifier
             else
 			{
 			if(fDebug)
-				 printf(">> nStakeModifierTime = %"PRI64d", pindexFrom->GetBlockTime() = %"PRI64d", nStakeModifierSelectionInterval = %"PRI64d"\n",
+				 printf(">> nStakeModifierTime = %" PRI64d ", pindexFrom->GetBlockTime() = %" PRI64d ", nStakeModifierSelectionInterval = %" PRI64d "\n",
 				 	nStakeModifierTime, pindexFrom->GetBlockTime(), nStakeModifierSelectionInterval);
                 return false;
 			}
@@ -464,7 +464,7 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
 			GetMagiWeight(nValueIn, txPrev.nTime, nTimeTx);
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
 
-	// printf(">>> CheckStakeKernelHash: nTimeWeight = %"PRI64d"\n", nTimeWeight);
+	// printf(">>> CheckStakeKernelHash: nTimeWeight = %" PRI64d "\n", nTimeWeight);
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);
     uint64 nStakeModifier = 0;
@@ -485,12 +485,12 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
     hashProofOfStake = Hash(ss.begin(), ss.end());
     if (fPrintProofOfStake)
     {
-        printf("CheckStakeKernelHash() : using modifier 0x%016"PRI64x" at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+        printf("CheckStakeKernelHash() : using modifier 0x%016" PRI64x " at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
             nStakeModifier, nStakeModifierHeight,
             DateTimeStrFormat(nStakeModifierTime).c_str(),
             mapBlockIndex[blockFrom.GetHash()]->nHeight,
             DateTimeStrFormat(blockFrom.GetBlockTime()).c_str());
-        printf("CheckStakeKernelHash() : check protocol=%s modifier=0x%016"PRI64x" nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
+        printf("CheckStakeKernelHash() : check protocol=%s modifier=0x%016" PRI64x " nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
             "0.3",
             nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, txPrev.nTime, prevout.n, nTimeTx,
@@ -504,7 +504,7 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
 	{
 		if(fDebug)
 		{
-			printf(">>> nValueIn = %"PRI64d", nTimeWeight = %"PRI64d", nPrevMoneySupply = %"PRI64d"\n", nValueIn, nTimeWeight, pindexPrev->nMoneySupply);
+			printf(">>> nValueIn = %" PRI64d ", nTimeWeight = %" PRI64d ", nPrevMoneySupply = %" PRI64d "\n", nValueIn, nTimeWeight, pindexPrev->nMoneySupply);
 			CBigNum hashTargett_ = bnCoinDayWeight * bnTargetPerCoinDay;
 			printf(">>> bnCoinDayWeight = %s, bnTargetPerCoinDay = %s\n",
 			bnCoinDayWeight.ToString().c_str(), bnTargetPerCoinDay.ToString().c_str());
@@ -522,12 +522,12 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
 
     if (fDebug && !fPrintProofOfStake)
     {
-        printf("CheckStakeKernelHash() : using modifier 0x%016"PRI64x" at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+        printf("CheckStakeKernelHash() : using modifier 0x%016" PRI64x " at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
             nStakeModifier, nStakeModifierHeight,
             DateTimeStrFormat(nStakeModifierTime).c_str(),
             mapBlockIndex[blockFrom.GetHash()]->nHeight,
             DateTimeStrFormat(blockFrom.GetBlockTime()).c_str());
-        printf("CheckStakeKernelHash() : pass protocol=%s modifier=0x%016"PRI64x" nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
+        printf("CheckStakeKernelHash() : pass protocol=%s modifier=0x%016" PRI64x " nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
             "0.3",
             nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, txPrev.nTime, prevout.n, nTimeTx,
@@ -535,7 +535,7 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
     }
 		if(fDebug)
 		{
-			printf(">>> nValueIn = %"PRI64d", nTimeWeight = %"PRI64d"\n", nValueIn, nTimeWeight);
+			printf(">>> nValueIn = %" PRI64d ", nTimeWeight = %" PRI64d "\n", nValueIn, nTimeWeight);
 			CBigNum hashTargett_ = bnCoinDayWeight * bnTargetPerCoinDay;
 			printf(">>> bnCoinDayWeight = %s, bnTargetPerCoinDay = %s\n",
 			bnCoinDayWeight.ToString().c_str(), bnTargetPerCoinDay.ToString().c_str());
