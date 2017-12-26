@@ -15,7 +15,7 @@
  */
 #ifndef BITCOIN_STRLCPY_H
 #define BITCOIN_STRLCPY_H
-
+#if !defined(__linux__) || defined(__GLIB__)
 #include <stdlib.h>
 #include <string.h>
 
@@ -87,4 +87,5 @@ inline size_t strlcat(char *dst, const char *src, size_t siz)
 
     return(dlen + (s - src)); /* count does not include NUL */
 }
+#endif
 #endif
