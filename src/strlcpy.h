@@ -15,7 +15,7 @@
  */
 #ifndef BITCOIN_STRLCPY_H
 #define BITCOIN_STRLCPY_H
-#if !defined(__linux__) || defined(__GLIB__)
+#if !defined(__linux__) || defined(__GLIBC__)
 #include <stdlib.h>
 #include <string.h>
 
