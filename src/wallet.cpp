@@ -1618,12 +1618,14 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 // Do not add single input which is already greater than nStakeCombineThreshold
                 if (nCoinStakeValue > nStakeCombineThreshold * COIN)
                     continue;
-        	    // Do not add input that is still too young
-        	    CTransaction txPrev=*pcoin.first;
-        	    COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
-        	    int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
+
+        	// Do not add input that is still too young
+        	CTransaction txPrev=*pcoin.first;
+        	COutPoint prevout = COutPoint(pcoin.first->GetHash(), pcoin.second);
+        	int64 nTimeWeight = (IsPoSIIProtocolV2(nHeightV2)) ?
         				GetMagiWeightV2(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime) : 
         				GetMagiWeight(txPrev.vout[prevout.n].nValue, (int64)pcoin.first->nTime, (int64)txNew.nTime);
+
                 if ( nTimeWeight < GetStakeMinAge((int64)txNew.nTime) )
                     continue;
                 txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
