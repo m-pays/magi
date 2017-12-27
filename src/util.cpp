@@ -500,7 +500,7 @@ long hex2long(const char* hexString)
 
 	while (*hexString && ret >= 0) 
 	{
-		ret = (ret << 4) | hextable[*hexString++];
+		ret = (ret << 4) | hextable[(int)*hexString++];
 	}
 
 	return ret; 
