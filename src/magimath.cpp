@@ -46,8 +46,8 @@ void gauleg(double x1, double x2, double x[], double w[], int n)
 double GaussianQuad_N(double func(const double), const double a2, const double b2, const int NptGQ)
 {
     double s=0.0;
-    double *x=new double[NptGQ];
-    double *w=new double[NptGQ];
+    double *x=new double[NptGQ+1];
+    double *w=new double[NptGQ+1];
 //    double dh=(b2-a2)/double(divs);
     gauleg(a2, b2, x, w, NptGQ);
     for (int j=1; j<=NptGQ; j++) {
