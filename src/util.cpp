@@ -1396,7 +1396,7 @@ bool StringToDouble(const std::string &s, double &val)
 
 unsigned int GetClientVersion(int nClientVersion, std::string str)
 {
-    unsigned int nVersion = nClientVersion * 10, nPos;
+    unsigned int nVersion = nClientVersion * 10, nPos = 0;
     if (str.find("ALPHA") == 0) {
         nVersion -= 10;
         nPos = 5;
