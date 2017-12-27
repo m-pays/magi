@@ -115,16 +115,17 @@ static const int fHaveUPnP = false;
 static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff34291ad671e59ae46630ffd8f985dd56cc");
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
 
-static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
-inline int64 PastDrift(int64 nTime)
-{
-    return ( nTime - 2 * 60 * 60 ); // up to two hours from the past
-}
+#define HEIGHT_CHAIN_SWITCH 1600180
 
-inline int64 FutureDrift(int64 nTime)
-{
-    return ( nTime + 2 * 60 * 60 ); // up to two hours from the future
-}
+static const int64 nMaxClockDriftV1 = 2 * 60 * 60;        // two hours
+static const int64 nMaxClockDriftV2 = 5 * 60;             // 5 mins
+inline int64 GetMaxClockDrift(int nHeight) { return ( (nHeight > HEIGHT_CHAIN_SWITCH) ? nMaxClockDriftV2 : nMaxClockDriftV1 ); }
+inline int64 PastDrift(int64 nTime, int nHeight) { return ( nTime - GetMaxClockDrift(nHeight) ); }
+inline int64 FutureDrift(int64 nTime, int nHeight) { return ( nTime + GetMaxClockDrift(nHeight) ); }
+inline int64 FutureDriftV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
+
+inline bool IsChainAtSwitchPoint(int nHeight) { return (nHeight == HEIGHT_CHAIN_SWITCH); }
+inline bool IsChainRuleSwitchedOff(int nHeight) { return (nHeight > HEIGHT_CHAIN_SWITCH); }
 
 int64 GetTargetSpacingWork(int nHeight);
 int64 GetTargetSpacing(bool fProofOfStake);

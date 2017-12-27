@@ -333,11 +333,11 @@ Value getblockbynumber(const Array& params, bool fHelp)
 
 unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake);
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
-Value getdebuginfo(const Array& params, bool fHelp)
+Value getchainfo(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "getdebuginfobyheight <height>\n");
+            "getchainfobyheight <height>\n");
 
     int nHeight = params[0].get_int();
     if (nHeight < 1 || nHeight > nBestHeight)

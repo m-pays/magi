@@ -1677,7 +1677,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     int DiffMode = 1;
     if (fTestNet) DiffMode = 2;
     else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 2;
-    else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 3;
+    else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT && pindexLast->nHeight+1 < HEIGHT_CHAIN_SWITCH-2) DiffMode = 3;
+    else if (pindexLast->nHeight+1 >= HEIGHT_CHAIN_SWITCH-2) DiffMode = 2;
     
     if (DiffMode == 1) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
     else if (DiffMode == 2) return MagiQuantumWave(pindexLast, fProofOfStake);
@@ -2719,14 +2720,6 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
         if (vtx[i].IsCoinBase())
             return DoS(100, error("CheckBlock() : more than one coinbase"));
 
-    // Check timestamp
-    if (GetBlockTime() > FutureDrift(GetAdjustedTime()))
-        return error("CheckBlock() : block timestamp too far in the future");
-
-    // Check coinbase timestamp
-    if (GetBlockTime() > FutureDrift((int64)vtx[0].nTime))
-        return DoS(50, error("CheckBlock() : coinbase timestamp is too early"));
-
     // Check proof-of-stake block
     if (IsProofOfStake())
     {
@@ -2800,6 +2793,7 @@ bool IsBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockI
 /* two PoS blocks must be confirmed in-between PoW blocks */
 bool IsProofOfWorkBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
 {
+    if (IsChainRuleSwitchedOff(nHeight0)) return false; 
     if (fProofOfStake || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
     const CBlockIndex* pindexPrevPoW = GetLastBlockIndex(pindexPrev, false);
     if ( (nHeight0 - pindexPrevPoW->nHeight > 2) || 
@@ -2811,6 +2805,7 @@ bool IsProofOfWorkBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, co
 /* within five blocks contain at least one PoW block */
 bool IsProofOfStakeBlockInvalid(int nHeight0, int64 nTime, bool fProofOfStake, const CBlockIndex* pindexPrev)
 {
+    if (IsChainRuleSwitchedOff(nHeight0)) return false; 
     if (!fProofOfStake || nHeight0 < BLOCK_VALID_CHECK_INIT_HEIGHT) return false;
     const CBlockIndex* pindexPrevPoS = GetLastBlockIndex(pindexPrev, true);
     if ( nTime - pindexPrevPoS->GetBlockTime() > GetMaxPoSWaitingTime() ) return false;
@@ -2837,6 +2832,11 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
+    // Check proof of work matches claimed amount
+    printf("Block %i BlockTime=%"PRI64d" CurrTime=%"PRI64d" AdjustedTime=%"PRI64d" vtx[0].nTime=%"PRI64d"\n", nHeight, GetBlockTime(), GetTime(), GetAdjustedTime(), (int64)vtx[0].nTime);
+    if (IsChainAtSwitchPoint(nHeight) && GetTime() < (GetBlockTime() - 15)) 
+        return DoS(100, error("AcceptBlock() : chain switch point reached"));
+
     if (IsBlockVersion5(nHeight) && nVersion < 5)
         return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
     else if (!IsBlockVersion5(nHeight) && nVersion > 4)
@@ -2848,6 +2848,17 @@ bool CBlock::AcceptBlock()
     if (IsProofOfStake() && !IsMiningProofOfStake(nHeight))
         return DoS(100, error("AcceptBlock() : reject proof-of-stake at height %d", nHeight));
 
+    // Check timestamp
+    if (GetBlockTime() > FutureDrift(GetAdjustedTime(), nHeight))
+        return DoS(50, error("AcceptBlock() : block timestamp too far in the future"));
+
+    // Check coinbase timestamp
+    if (GetBlockTime() > FutureDriftV1((int64)vtx[0].nTime, nHeight))
+        return DoS(50, error("AcceptBlock() : coinbase timestamp is too early"));
+
+    if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
+        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
+
     if (IsProofOfWork() && IsProofOfWorkBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
         return DoS(100, error("AcceptBlock() : proof-of-work block violation (prior PoS not seen or wait 10 mins) (height = %d)", nHeight)); 
 
@@ -2857,15 +2868,12 @@ bool CBlock::AcceptBlock()
 //    if (IsProofOfStake() && !CheckMoneySupply(pindexPrev))
 //        return DoS(100, error("AcceptBlock() : Wrong Money Supply = %"PRI64d" at height %d", pindexPrev->nMoneySupply, nHeight-1));
 
-    if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
-        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
-
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 
     // Check timestamp against prev
-    if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || GetBlockTime() + nMaxClockDrift < pindexPrev->GetBlockTime())
+    if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || FutureDrift(GetBlockTime(), nHeight) < pindexPrev->GetBlockTime())
         return error("AcceptBlock() : block's timestamp is too early");
 
     // Check that all transactions are finalized
@@ -4721,7 +4729,7 @@ if (fTestNet || pindexBest->nHeight >= 131100) {
 			// printf(">>> OK1\n");
 	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, 0, txCoinStake))
 	    {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1)))
 		{   // make sure coinstake would meet timestamp protocol
 		    // as it would be the same as the block timestamp
 		    pblock->vtx[0].vout[0].SetEmpty();
@@ -4942,7 +4950,7 @@ if (!fTestNet && pindexBest->nHeight < 131100) {
 			// printf(">>> OK1\n");
 	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
 	    {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1)))
 		{   // make sure coinstake would meet timestamp protocol
 		    // as it would be the same as the block timestamp
 		    pblock->vtx[0].vout[0].SetEmpty();
@@ -4965,14 +4973,25 @@ if (!fTestNet && pindexBest->nHeight < 131100) {
 	}
 */
 	
-        // Fill in header
-        pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
+    // Fill in header
+    pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
 //        pblock->nPrevMoneySupply = pindexPrev->nMoneySupply;
-        if (pblock->IsProofOfStake())
-            pblock->nTime      = pblock->vtx[1].nTime; //same as coinstake timestamp
-        pblock->nTime          = max(pindexPrev->GetMedianTimePast()+1, pblock->GetMaxTransactionTime());
-        pblock->nTime          = max(pblock->GetBlockTime(), pindexPrev->GetBlockTime() - nMaxClockDrift);
-        if (pblock->IsProofOfWork())
+    if (pblock->IsProofOfStake())
+        pblock->nTime      = pblock->vtx[1].nTime; //same as coinstake timestamp
+    int64 nMaxTransactionTime = pblock->GetMaxTransactionTime();
+    pblock->nTime          = max(pindexPrev->GetMedianTimePast()+1, nMaxTransactionTime);
+    pblock->nTime          = max(pblock->GetBlockTime(), PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1));
+
+    if (fDebug) {
+        printf("NewBlock: MedianPast=%"PRI64d" MaxTransTime=%"PRI64d" vtx[0].nTime=%"PRI64d" PastDrift=%"PRI64d" BlockTime=%"PRI64d"\n",   
+            pindexPrev->GetMedianTimePast()+1, 
+            nMaxTransactionTime, 
+            (int64)pblock->vtx[0].nTime, 
+            PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1), 
+            pblock->GetBlockTime());
+    }
+
+    if (pblock->IsProofOfWork())
 	{
             pblock->UpdateTime(pindexPrev);
 	    pblock->vtx[0].vout[0].nValue = (IsPoWIIRewardProtocolV2(pblock->nTime)) ? 

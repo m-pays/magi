@@ -2020,8 +2020,8 @@ void CWallet::ReturnKey(int64 nIndex)
         LOCK(cs_wallet);
         setKeyPool.insert(nIndex);
     }
-    if(fDebug)
-        printf("keypool return %"PRI64d"\n", nIndex);
+//    if(fDebug)
+//        printf("keypool return %"PRI64d"\n", nIndex);
 }
 
 bool CWallet::GetKeyFromPool(CPubKey& result, bool fAllowReuse)

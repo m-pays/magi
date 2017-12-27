@@ -537,6 +537,8 @@ Value getwork(const Array& params, bool fHelp)
 
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
+        if (fDebug) pblock->print();
+
 if (fDebug && fDebugMagi)
 {
     std::string cdata = HexStr(BEGIN(pdata), END(pdata));

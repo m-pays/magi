@@ -17,8 +17,8 @@ static const int DATABASE_VERSION = 72001;
  * network protocol versioning
  */
 
-// as of v1.4.3.1
-static const int PROTOCOL_VERSION = 71062;
+// v1.4.5
+static const int PROTOCOL_VERSION = 71064;
 static const int MIN_PROTO_VERSION = 71062;
 
 /* prior to v1.4.3
