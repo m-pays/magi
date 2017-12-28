@@ -57,7 +57,7 @@ namespace boost {
 # include <sys/prctl.h>
 #endif
 
-#ifndef WIN32
+#ifdef __GLIBC__
 #include <execinfo.h>
 #endif
 
@@ -381,7 +381,7 @@ string FormatMoney(int64 n, bool fPlus)
     int64 n_abs = (n > 0 ? n : -n);
     int64 quotient = n_abs/COIN;
     int64 remainder = n_abs%COIN;
-    string str = strprintf("%"PRI64d".%06"PRI64d, quotient, remainder);
+    string str = strprintf("%" PRI64d ".%06" PRI64d, quotient, remainder);
 
     // Right-trim excess zeros before the decimal point:
     int nTrim = 0;
@@ -500,7 +500,7 @@ long hex2long(const char* hexString)
 
 	while (*hexString && ret >= 0) 
 	{
-		ret = (ret << 4) | hextable[*hexString++];
+		ret = (ret << 4) | hextable[(int)*hexString++];
 	}
 
 	return ret; 
@@ -1050,7 +1050,7 @@ void LogStackTrace() {
     printf("\n\n******* exception encountered *******\n");
     if (fileout)
     {
-#ifndef WIN32
+#ifdef __GLIBC__
         void* pszBuffer[32];
         size_t size;
         size = backtrace(pszBuffer, 32);
@@ -1283,7 +1283,7 @@ void AddTimeData(const CNetAddr& ip, int64 nTime)
 
     // Add data
     vTimeOffsets.input(nOffsetSample);
-    printf("Added time data, samples %d, offset %+"PRI64d" (%+"PRI64d" minutes)\n", vTimeOffsets.size(), nOffsetSample, nOffsetSample/60);
+    printf("Added time data, samples %d, offset %+" PRI64d " (%+" PRI64d " minutes)\n", vTimeOffsets.size(), nOffsetSample, nOffsetSample/60);
     if (vTimeOffsets.size() >= 5 && vTimeOffsets.size() % 2 == 1)
     {
         int64 nMedian = vTimeOffsets.median();
@@ -1318,10 +1318,10 @@ void AddTimeData(const CNetAddr& ip, int64 nTime)
         }
         if (fDebug) {
             BOOST_FOREACH(int64 n, vSorted)
-                printf("%+"PRI64d"  ", n);
+                printf("%+" PRI64d "  ", n);
             printf("|  ");
         }
-        printf("nTimeOffset = %+"PRI64d"  (%+"PRI64d" minutes)\n", nTimeOffset, nTimeOffset/60);
+        printf("nTimeOffset = %+" PRI64d "  (%+" PRI64d " minutes)\n", nTimeOffset, nTimeOffset/60);
     }
 }
 
@@ -1396,7 +1396,7 @@ bool StringToDouble(const std::string &s, double &val)
 
 unsigned int GetClientVersion(int nClientVersion, std::string str)
 {
-    unsigned int nVersion = nClientVersion * 10, nPos;
+    unsigned int nVersion = nClientVersion * 10, nPos = 0;
     if (str.find("ALPHA") == 0) {
         nVersion -= 10;
         nPos = 5;
