@@ -10,8 +10,7 @@ Note that it may be tough to get everything + the blockchain installed on a 4GB 
 #expand the default swapfile size to 1GB since 100MB is not enough
 $ sudo nano /etc/dphys-swapfile
 #change CONF_SWAPSIZE=100 to CONF_SWAPSIZE=1024
-$ sudo /etc/init.d/dphys-swapfile stop
-$ sudo /etc/init.d/dphys-swapfile start
+$ sudo service dphys-swapfile restart
 
 sudo apt-get install qttools5-dev-tools
 sudo apt-get install qt5-default
