@@ -115,7 +115,7 @@ static const int fHaveUPnP = false;
 static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff34291ad671e59ae46630ffd8f985dd56cc");
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
 
-#define HEIGHT_CHAIN_SWITCH 1600180
+#define HEIGHT_CHAIN_SWITCH 1606950
 
 static const int64 nMaxClockDriftV1 = 2 * 60 * 60;        // two hours
 static const int64 nMaxClockDriftV2 = 5 * 60;             // 5 mins
