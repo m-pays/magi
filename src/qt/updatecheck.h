@@ -33,14 +33,14 @@
  *  of the version string file. The file can be hosted be hosted in the official
  *  repository (using the raw file URL) or the coin's website.
  */
-#define _UPDATE_VERSION_URL "http://info.coinmagi.org/version"
+#define _UPDATE_VERSION_URL "http://info.m-core.org/version"
 
 /** \def _UPDATE_DOWNLOAD_URL The URL linked when a new wallet version is available
  *  \details This URL string should reflect the offical wallet download location, be
  *  it a web page or directory. This macro contains \ characters before quotation marks
  *  to escape them for use with QString
  */
-#define _UPDATE_DOWNLOAD_URL "http://coinmagi.org/bin/"
+#define _UPDATE_DOWNLOAD_URL "http://m-core.org/bin/"
 
 // url (temporary) for checking price
 #define BTC_PRICE_URL "https://api.coinmarketcap.com/v1/ticker/bitcoin/"

@@ -86,8 +86,8 @@ bool fReopenDebugLog = false;
 bool fTestNetWeightV2 = false;
 
 #ifdef QT_GUI
-const char *websiteUrl = "http://www.coinmagi.org/";
-const char *feedbackUrl = "http://www.coinmagi.org/feedback";
+const char *websiteUrl = "http://www.m-core.org/";
+const char *feedbackUrl = "http://www.m-core.org/feedback";
 #endif
 
 // Init OpenSSL library multithreading support

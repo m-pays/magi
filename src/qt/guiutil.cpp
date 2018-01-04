@@ -284,7 +284,7 @@ void openConfigfile()
     if (! boost::filesystem::exists(pathConfig))
     {
         boost::filesystem::ofstream ofs(pathConfig);
-        ofs << "# example: http://coinmagi.org/bin/example-conf/magi.conf \n";
+        ofs << "# example: http://m-core.org/bin/example-conf/magi.conf \n";
         ofs << "# this configuration file allows a user to load runtime options when the program starts\n";
     }
     if (boost::filesystem::exists(pathConfig))
