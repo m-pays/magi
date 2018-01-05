@@ -550,7 +550,7 @@ if (fDebug && fDebugMagi)
     printf("nTime:          %i\n", pblock->nTime);
     printf("nBits:          %i\n", pblock->nBits);
     printf("nNonce:         %i\n", pblock->nNonce);
-//    printf("nPrevMoneySupply: %"PRI64d"\n", pblock->nPrevMoneySupply);
+//    printf("nPrevMoneySupply: %" PRI64d "\n", pblock->nPrevMoneySupply);
     printf("-----------------\n");
     printf("hashTarget:     0x%s\n", hashTarget.GetHex().c_str());
     printf(">>$ work sent (bytes swapped): \n");
