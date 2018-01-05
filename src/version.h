@@ -19,7 +19,7 @@ static const int DATABASE_VERSION = 72001;
 
 // v1.4.5
 static const int PROTOCOL_VERSION = 71064;
-static const int MIN_PROTO_VERSION = 71062;
+static const int MIN_PROTO_VERSION = 71063;
 
 /* prior to v1.4.3
 static const int PROTOCOL_VERSION = 71061;
