@@ -332,6 +332,7 @@ Value getblockbynumber(const Array& params, bool fHelp)
 }
 
 unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake);
+unsigned int MagiQuantumWave_v2(const CBlockIndex* pindexLast, bool fProofOfStake);
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
 Value getchainfo(const Array& params, bool fHelp)
 {
@@ -355,10 +356,12 @@ Value getchainfo(const Array& params, bool fHelp)
     obj.push_back(Pair("difficulty", GetDifficulty(pblockindex)));
 
     int bnBitsMQW = MagiQuantumWave(pblockindexprev, pblockindexprev->IsProofOfStake());
+    int bnBitsMQW_v2 = MagiQuantumWave_v2(pblockindexprev, pblockindexprev->IsProofOfStake());
     int bnBitsTarget = GetNextTargetRequired(pblockindexprev, pblockindexprev->IsProofOfStake());
 
     obj.push_back(Pair("nBits", HexBits(pblockindex->nBits)));
     obj.push_back(Pair("nBitsMQW", HexBits(bnBitsMQW)));
+    obj.push_back(Pair("bnBitsMQW_v2", HexBits(bnBitsMQW_v2)));
     obj.push_back(Pair("nBitsTarget", HexBits(bnBitsTarget)));
 
     obj.push_back(Pair("diff", GetDifficultyFromBits(pblockindex->nBits)));

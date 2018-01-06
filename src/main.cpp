@@ -1599,66 +1599,86 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
         // Proof-of-Stake blocks has own target limit since nVersion=3 supermajority on mainNet and always on testNet
         bnTargetLimit = bnProofOfStakeLimit;
     }
-
-    if (pindexLast == NULL)
+    if (pindexLast == NULL) {
         return bnTargetLimit.GetCompact(); // genesis block
+    }
 
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
-    if (pindexPrev->pprev == NULL)
+
+    if (pindexPrev->pprev == NULL) {
         return bnTargetLimit.GetCompact(); // first block
+    }
 
     const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
-    if (pindexPrevPrev->pprev == NULL)
+
+    if (pindexPrevPrev->pprev == NULL) {
         return bnTargetLimit.GetCompact(); // second block
+    }
 
     nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-    if(nActualBlockSpacing < 0) { nActualBlockSpacing = 1; }
+
+    if(nActualBlockSpacing < 0) {
+        nActualBlockSpacing = 1;
+    }
+
     nActualTimeSpanMQW = nActualBlockSpacing;
-    double fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
-    if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
-    else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
+    double fw = ( 1. - exp_n(-double(nActualBlockSpacing) * MQW_EXPON_COEFF*MQW_TIME_COEFF / double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
+    if (fw < WEIGHT_MIN) {
+        fw = WEIGHT_MIN;
+    } else if (fw > WEIGHT_MAX) {
+        fw = WEIGHT_MAX;
+    }
+
     bnAverage.SetCompact(pindexPrev->nBits);
-    bnAverage *= ((int64)(fw*WEIGHT_SCALE));
-    
-    int64 nWeightTot = ((int64)(fw*WEIGHT_SCALE));
+    bnAverage *= ((int64)(fw * WEIGHT_SCALE));
+
+    int64 nWeightTot = ((int64)(fw * WEIGHT_SCALE));
     double rWeight = 1.-fw;
 
     for(unsigned int i = 1; pindexPrevPrev; i++)
     {
-        if (i >= nTotPastBlocks) { break; }
-//        if (i == 1) { bnAverage.SetCompact(pindexPrev->nBits); }
- //       else {
-	pindexPrev = pindexPrevPrev;
-	pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+        if (i >= nTotPastBlocks) {
+            break;
+        }
+
+        pindexPrev = pindexPrevPrev;
+        pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+
         if (pindexPrevPrev == NULL) { assert(pindexPrev); break; }
-	nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-	if (nActualBlockSpacing > 0)
-	{
-	    nAveragedBlocks++;
-	    nActualTimeSpanMQW += nActualBlockSpacing;
-	    fw = ( 1. - exp_n(-double(nActualBlockSpacing)*MQW_EXPON_COEFF*MQW_TIME_COEFF/double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
-	    if (fw<WEIGHT_MIN) { fw = WEIGHT_MIN; }
-	    else if (fw>WEIGHT_MAX) { fw = WEIGHT_MAX; }
-//	    int64 w1 = fw * WEIGHT_SCALE;
-//	    int64 w2 = (1.-fw) * WEIGHT_SCALE;
-//		bnAverage = (w1 * (CBigNum().SetCompact(pindexPrev->nBits)) + w2 * bnAveragePrev) / (w1 + w2);
-	    bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64)(fw*rWeight*WEIGHT_SCALE));
-	    nWeightTot += ((int64)(fw*rWeight*WEIGHT_SCALE));
-	    rWeight *= (1.-fw);
-	}
-//	}
-//	bnAveragePrev = bnAverage;
+        nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+        if (nActualBlockSpacing > 0)
+        {
+            nAveragedBlocks++;
+            nActualTimeSpanMQW += nActualBlockSpacing;
+            fw = ( 1. - exp_n(-double(nActualBlockSpacing) * MQW_EXPON_COEFF*MQW_TIME_COEFF / double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
+
+            if (fw < WEIGHT_MIN) {
+                fw = WEIGHT_MIN;
+            } else if (fw > WEIGHT_MAX) {
+                fw = WEIGHT_MAX;
+            }
+
+            bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64_t)(fw*rWeight*WEIGHT_SCALE));
+            nWeightTot += ((int64_t)(fw * rWeight * WEIGHT_SCALE));
+
+            rWeight *= (1.-fw);
+        }
     }
+
     bnAverage /= nWeightTot;
 
     CBigNum bnNew(bnAverage);
 
-    int64 nTargetTimeSpanMQW = nAveragedBlocks*GetTargetSpacingWork(pindexLast->nHeight+1);
+    int64 nTargetTimeSpanMQW = nAveragedBlocks * GetTargetSpacingWork(pindexLast->nHeight+1);
 
-    if (nActualTimeSpanMQW < nTargetTimeSpanMQW/3)
-        nActualTimeSpanMQW = nTargetTimeSpanMQW/3;
-    if (nActualTimeSpanMQW > nTargetTimeSpanMQW*3)
-        nActualTimeSpanMQW = nTargetTimeSpanMQW*3;
+    if (nActualTimeSpanMQW < nTargetTimeSpanMQW / 3) {
+        nActualTimeSpanMQW = nTargetTimeSpanMQW / 3;
+    }
+
+    if (nActualTimeSpanMQW > nTargetTimeSpanMQW * 3){
+        nActualTimeSpanMQW = nTargetTimeSpanMQW * 3;
+    }
 
     // Retarget
     bnNew *= nActualTimeSpanMQW;
@@ -1667,22 +1687,139 @@ unsigned int MagiQuantumWave(const CBlockIndex* pindexLast, bool fProofOfStake)
     if (bnNew > bnProofOfWorkLimit){
         bnNew = bnProofOfWorkLimit;
     }
-     
+
     return bnNew.GetCompact();
 }
 
+#define MQW_DUMMY_NUMBER 100
+unsigned int MagiQuantumWave_v2(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
+    /* Magi Quantum Wave (MQW) for XMG - Coin Magi, written by Joe Lao */
+    if (fProofOfStake) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
+
+    int64 nActualBlockSpacing, nActualTimeSpanMQW;
+    int64 nAveragedBlocks = 1, nTotPastBlocks = 13;
+    CBigNum bnAverage;
+    CBigNum bnAveragePrev;
+
+    CBigNum bnTargetLimit = bnProofOfWorkLimit;
+    if (fProofOfStake)
+    {
+        // Proof-of-Stake blocks has own target limit since nVersion=3 supermajority on mainNet and always on testNet
+        bnTargetLimit = bnProofOfStakeLimit;
+    }
+    if (pindexLast == NULL) {
+        return bnTargetLimit.GetCompact(); // genesis block
+    }
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+
+    if (pindexPrev->pprev == NULL) {
+        return bnTargetLimit.GetCompact(); // first block
+    }
+
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+
+    if (pindexPrevPrev->pprev == NULL) {
+        return bnTargetLimit.GetCompact(); // second block
+    }
+
+    nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+    if(nActualBlockSpacing < 0) {
+        nActualBlockSpacing = 1;
+    }
+
+    nActualTimeSpanMQW = nActualBlockSpacing;
+    double fw = ( 1. - exp_n(-double(nActualBlockSpacing) * MQW_EXPON_COEFF*MQW_TIME_COEFF / double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
+    if (fw < WEIGHT_MIN) {
+        fw = WEIGHT_MIN;
+    } else if (fw > WEIGHT_MAX) {
+        fw = WEIGHT_MAX;
+    }
+
+    bnAverage.SetCompact(pindexPrev->nBits);
+    bnAverage *= ((int64)(fw * WEIGHT_SCALE * MQW_DUMMY_NUMBER));
+
+    double rWeightTot = fw * WEIGHT_SCALE * MQW_DUMMY_NUMBER;
+    double rWeight = 1.-fw;
+
+    for(unsigned int i = 1; pindexPrevPrev; i++)
+    {
+        if (i >= nTotPastBlocks) {
+            break;
+        }
+
+        pindexPrev = pindexPrevPrev;
+        pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+
+        if (pindexPrevPrev == NULL) { assert(pindexPrev); break; }
+        nActualBlockSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+        if (nActualBlockSpacing > 0)
+        {
+            nAveragedBlocks++;
+            nActualTimeSpanMQW += nActualBlockSpacing;
+            fw = ( 1. - exp_n(-double(nActualBlockSpacing) * MQW_EXPON_COEFF*MQW_TIME_COEFF / double(GetTargetSpacingWork(pindexLast->nHeight+1))) ) * MQW_AVER_COEFF;
+
+            if (fw < WEIGHT_MIN) {
+                fw = WEIGHT_MIN;
+            } else if (fw > WEIGHT_MAX) {
+                fw = WEIGHT_MAX;
+            }
+
+            bnAverage += (CBigNum().SetCompact(pindexPrev->nBits)) * ((int64_t)(fw * rWeight * WEIGHT_SCALE * MQW_DUMMY_NUMBER));
+            rWeightTot += (fw * rWeight * WEIGHT_SCALE * MQW_DUMMY_NUMBER);
+            rWeight *= (1.-fw);
+        }
+    }
+
+    int64 nWeightTot = (int64_t)rWeightTot;
+
+    if (nWeightTot < 1) {
+        nWeightTot = 1;
+    }
+    if (fDebug) printf("nWeightTot: %d\n", nWeightTot);
+
+    bnAverage /= nWeightTot;
+
+    CBigNum bnNew(bnAverage);
+
+    int64 nTargetTimeSpanMQW = nAveragedBlocks * GetTargetSpacingWork(pindexLast->nHeight+1);
+
+    if (nActualTimeSpanMQW < nTargetTimeSpanMQW / 3) {
+        nActualTimeSpanMQW = nTargetTimeSpanMQW / 3;
+    }
+
+    if (nActualTimeSpanMQW > nTargetTimeSpanMQW * 3){
+        nActualTimeSpanMQW = nTargetTimeSpanMQW * 3;
+    }
+
+    // Retarget
+    bnNew *= nActualTimeSpanMQW;
+    bnNew /= nTargetTimeSpanMQW;
+
+    if (bnNew > bnProofOfWorkLimit){
+        bnNew = bnProofOfWorkLimit;
+    }
+
+    return bnNew.GetCompact();
+}
 
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
+    if (fDebug) printf("nHeight: %d\n", pindexLast->nHeight);
     int DiffMode = 1;
     if (fTestNet) DiffMode = 2;
     else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 2;
     else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT && pindexLast->nHeight+1 < HEIGHT_CHAIN_SWITCH-2) DiffMode = 3;
-    else if (pindexLast->nHeight+1 >= HEIGHT_CHAIN_SWITCH-2) DiffMode = 2;
+    else if (pindexLast->nHeight+1 >= HEIGHT_CHAIN_SWITCH-2 && pindexLast->nHeight+1 < 1606988) DiffMode = 2;
+    else if (pindexLast->nHeight+1 >= 1606988) DiffMode = 4;
     
     if (DiffMode == 1) return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
     else if (DiffMode == 2) return MagiQuantumWave(pindexLast, fProofOfStake);
     else if (DiffMode == 3) return GetNextTargetRequired_v3(pindexLast, fProofOfStake);
+    else if (DiffMode == 4) return MagiQuantumWave_v2(pindexLast, fProofOfStake);
     return GetNextTargetRequired_v1(pindexLast, fProofOfStake);
 }
 
