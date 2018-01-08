@@ -370,7 +370,7 @@ static string HTTPReply(int nStatus, const string& strMsg, bool keepalive)
             "HTTP/1.1 %d %s\r\n"
             "Date: %s\r\n"
             "Connection: %s\r\n"
-            "Content-Length: %"PRIszu"\r\n"
+            "Content-Length: %" PRIszu "\r\n"
             "Content-Type: application/json\r\n"
             "Server: Magi-json-rpc/%s\r\n"
             "\r\n"
@@ -522,17 +522,19 @@ bool ClientAllowed(const boost::asio::ip::address& address)
     // Make sure that IPv4-compatible and IPv4-mapped IPv6 addresses are treated as IPv4 addresses
     if (address.is_v6()
      && (address.to_v6().is_v4_compatible()
-      || address.to_v6().is_v4_mapped()))
+      || address.to_v6().is_v4_mapped())){
         return ClientAllowed(address.to_v6().to_v4());
+    }
 
-	std::string ipv4addr = address.to_string();
+    std::string ipv4addr = address.to_string();
 
     if (address == asio::ip::address_v4::loopback()
      || address == asio::ip::address_v6::loopback()
      || (address.is_v4()
          // Check whether IPv4 addresses match 127.0.0.0/8 (loopback subnet)
-      && (address.to_v4().to_ulong() & 0xff000000) == 0x7f000000))
+      && (address.to_v4().to_ulong() & 0xff000000) == 0x7f000000)){
         return true;
+    }
 
     const string strAddress = address.to_string();
     const vector<string>& vAllow = mapMultiArgs["-rpcallowip"];
