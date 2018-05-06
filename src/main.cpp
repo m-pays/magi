@@ -1363,12 +1363,13 @@ const CBlockIndex* GetLastPoWBlockIndex(const CBlockIndex* pindex)
     return pindex;
 }
 
+
+#define HEIGHT_LOOKUP_DEPTH 10
 unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     CBigNum bnTargetLimit = bnProofOfWorkLimit;
 
-    if(fProofOfStake)
-    {
+    if(fProofOfStake) {
         // Proof-of-Stake blocks has own target limit since nVersion=3 supermajority on mainNet and always on testNet
         bnTargetLimit = bnProofOfStakeLimit;
     }
@@ -1383,14 +1384,54 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     if (pindexPrevPrev->pprev == NULL)
         return bnTargetLimit.GetCompact(); // second block
 
+    int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-	if(nActualSpacing < 0)
-	{
-		// printf(">> nActualSpacing = %"PRI64d" corrected to 1.\n", nActualSpacing);
-		nActualSpacing = 1;
-	}
-	else if(nActualSpacing > nTargetTimespan)
-	{
+	if (nActualSpacing < 0)	{
+        if (IsProtocolFixFutureBlockRetargeting(pindexLast->nHeight+1)) {
+            int nBlks = 1;
+            do {
+                pindexPrevPrev = GetLastBlockIndex(pindexPrevPrev->pprev, fProofOfStake);
+                if (pindexPrevPrev->pprev == NULL) break;
+                nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+                ++nBlks;
+            } while ( (nActualSpacing < 0) && (nBlks <= HEIGHT_LOOKUP_DEPTH) );
+            {
+                if (nActualSpacing < 0) 
+                    nActualSpacing = 1;
+                else
+                    nActualSpacing = nActualSpacing / nBlks;
+            }
+        } else {
+            // printf(">> nActualSpacing = %"PRI64d" corrected to 1.\n", nActualSpacing);
+            nActualSpacing = 1;
+        }
+    } else if( (nActualSpacing > nTargetSpacing*3) && (IsProtocolFixFutureBlockRetargeting(pindexLast->nHeight+1)) ) { // guess on future block
+        int nBlks = 1;
+        do {
+            pindexPrev = GetLastBlockIndex(pindexPrev, fProofOfStake);
+            if (pindexPrev->pprev == NULL) break; 
+            pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+            if (pindexPrevPrev->pprev == NULL) break; 
+            nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+            ++nBlks;
+        } while ( (nActualSpacing > nTargetSpacing*3) && (nBlks <= 2) ); // twice tries at most
+
+        if (nActualSpacing < 0) { // in case run into prior future block
+            nBlks = 1;
+            do {
+                pindexPrevPrev = GetLastBlockIndex(pindexPrevPrev->pprev, fProofOfStake);
+                if (pindexPrevPrev->pprev == NULL) break;
+                ++nBlks;
+                nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+            } while ( (nActualSpacing < 0) && (nBlks <= HEIGHT_LOOKUP_DEPTH) );
+            {
+                if (nActualSpacing < 0) 
+                    nActualSpacing = 1;
+                else
+                    nActualSpacing = nActualSpacing / nBlks;
+            }
+        }
+	} else if(nActualSpacing > nTargetTimespan) {
 		// printf(">> nActualSpacing = %"PRI64d" corrected to nTargetTimespan (900).\n", nActualSpacing);
 		nActualSpacing = nTargetTimespan;
 	}
@@ -1400,7 +1441,6 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
 
-    int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nInterval = nTargetTimespan / nTargetSpacing;
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
@@ -1414,6 +1454,14 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
 
     if (bnNew > bnTargetLimit)
         bnNew = bnTargetLimit;
+
+    /// debug print
+    if (fDebugMagiPoS) {
+        printf("GetNextTargetRequired RETARGET\n");
+        printf("nTargetSpacing = %"PRI64d"    nActualSpacing = %"PRI64d"    nInterval = %"PRI64d"\n", nTargetSpacing, nActualSpacing, nInterval);
+        printf("Before: %08x  %s\n", pindexPrev->nBits, CBigNum().SetCompact(pindexPrev->nBits).getuint256().ToString().c_str());
+        printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+    }
 
     return bnNew.GetCompact();
 }

@@ -127,6 +127,9 @@ inline int64 FutureDriftV1(int64 nTime, int nHeight) { return ( nTime + nMaxCloc
 inline bool IsChainAtSwitchPoint(int nHeight) { return (nHeight == HEIGHT_CHAIN_SWITCH); }
 inline bool IsChainRuleSwitchedOff(int nHeight) { return (nHeight > HEIGHT_CHAIN_SWITCH); }
 
+#define HEIGHT_FIX_FUTURE_BLOCK_RETARGETING 1813045
+inline bool IsProtocolFixFutureBlockRetargeting(int nHeight) { return (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING); }
+
 int64 GetTargetSpacingWork(int nHeight);
 int64 GetTargetSpacing(bool fProofOfStake);
 int64 GetTargetTimespan(bool fProofOfStake);
