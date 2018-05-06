@@ -1387,7 +1387,7 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 	if (nActualSpacing < 0)	{
-        if (IsProtocolFixFutureBlockRetargeting(pindexLast->nHeight+1)) {
+        if (IsProtocolV3FixBlockDrift(pindexLast->nHeight+1)) {
             int nBlks = 1;
             do {
                 pindexPrevPrev = GetLastBlockIndex(pindexPrevPrev->pprev, fProofOfStake);
@@ -1405,7 +1405,7 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
             // printf(">> nActualSpacing = %"PRI64d" corrected to 1.\n", nActualSpacing);
             nActualSpacing = 1;
         }
-    } else if( (nActualSpacing > nTargetSpacing*3) && (IsProtocolFixFutureBlockRetargeting(pindexLast->nHeight+1)) ) { // guess on future block
+    } else if( (nActualSpacing > nTargetSpacing*3) && (IsProtocolV3FixBlockDrift(pindexLast->nHeight+1)) ) { // guess on future block
         int nBlks = 1;
         do {
             pindexPrev = GetLastBlockIndex(pindexPrev, fProofOfStake);
@@ -3038,7 +3038,7 @@ bool CBlock::AcceptBlock()
         return DoS(50, error("AcceptBlock() : block timestamp too far in the future"));
 
     // Check coinbase timestamp
-    if (GetBlockTime() > FutureDriftV1((int64)vtx[0].nTime, nHeight))
+    if (GetBlockTime() > FutureDriftCoinbase((int64)vtx[0].nTime, nHeight))
         return DoS(50, error("AcceptBlock() : coinbase timestamp is too early"));
 
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))

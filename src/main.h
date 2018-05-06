@@ -116,19 +116,37 @@ static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff3
 static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
 
 #define HEIGHT_CHAIN_SWITCH 1606950
+#define HEIGHT_FIX_FUTURE_BLOCK_RETARGETING 1813045
 
-static const int64 nMaxClockDriftV1 = 2 * 60 * 60;        // two hours
-static const int64 nMaxClockDriftV2 = 5 * 60;             // 5 mins
-inline int64 GetMaxClockDrift(int nHeight) { return ( (nHeight > HEIGHT_CHAIN_SWITCH) ? nMaxClockDriftV2 : nMaxClockDriftV1 ); }
+static const int64 nMaxClockDriftV1 = 2 * 60 * 60;      // two hours
+static const int64 nMaxClockDriftV2 = 5 * 60;           // 5 mins
+static const int64 nMaxClockDriftV3 = 20;               // 20 secs
+
+inline int64 GetMaxClockDrift(int nHeight) 
+{
+//    return ( (nHeight > HEIGHT_CHAIN_SWITCH) ? nMaxClockDriftV2 : nMaxClockDriftV1 ); 
+    if (nHeight > HEIGHT_CHAIN_SWITCH && nHeight <= HEIGHT_FIX_FUTURE_BLOCK_RETARGETING)
+        return nMaxClockDriftV2;
+    else if (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING)
+        return nMaxClockDriftV3;
+    return nMaxClockDriftV1;
+}
+
 inline int64 PastDrift(int64 nTime, int nHeight) { return ( nTime - GetMaxClockDrift(nHeight) ); }
 inline int64 FutureDrift(int64 nTime, int nHeight) { return ( nTime + GetMaxClockDrift(nHeight) ); }
 inline int64 FutureDriftV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
 
+inline int64 FutureDriftCoinbase(int64 nTime, int nHeight) 
+{
+    if (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING)
+        return FutureDrift(nTime, nHeight);
+    return FutureDriftV1(nTime, nHeight);
+}
+
 inline bool IsChainAtSwitchPoint(int nHeight) { return (nHeight == HEIGHT_CHAIN_SWITCH); }
 inline bool IsChainRuleSwitchedOff(int nHeight) { return (nHeight > HEIGHT_CHAIN_SWITCH); }
 
-#define HEIGHT_FIX_FUTURE_BLOCK_RETARGETING 1813045
-inline bool IsProtocolFixFutureBlockRetargeting(int nHeight) { return (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING); }
+inline bool IsProtocolV3FixBlockDrift(int nHeight) { return (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING); }
 
 int64 GetTargetSpacingWork(int nHeight);
 int64 GetTargetSpacing(bool fProofOfStake);
