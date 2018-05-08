@@ -1121,7 +1121,7 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 //    nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
-        if (nHeight%2 == 0) nSubsidy = 100 * COIN;
+        if (nHeight%2 == 0) nSubsidy = 1000 * COIN;
         else nSubsidy = GetProofOfWorkReward_OPM(pindex0);
         return nSubsidy + nFees;
     }
@@ -1858,7 +1858,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
     if (fDebug) printf("nHeight: %d\n", pindexLast->nHeight);
     int DiffMode = 1;
-    if (fTestNet) DiffMode = 2;
+    if (fTestNet) DiffMode = 1;
     else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 2;
     else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT && pindexLast->nHeight+1 < HEIGHT_CHAIN_SWITCH-2) DiffMode = 3;
     else if (pindexLast->nHeight+1 >= HEIGHT_CHAIN_SWITCH-2 && pindexLast->nHeight+1 < 1606988) DiffMode = 2;
@@ -3504,7 +3504,7 @@ bool LoadBlockIndex(bool fAllowNew)
         if (fTestNet)
         {
             block.nTime    = 1407209708;
-            block.nNonce   = 23721450;
+            block.nNonce   = 24141715;
         }
 
         if (true && (block.GetHash() != hashGenesisBlock)) {
