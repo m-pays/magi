@@ -3019,7 +3019,7 @@ bool CBlock::AcceptBlock()
     int nHeight = pindexPrev->nHeight+1;
 
     // Check proof of work matches claimed amount
-    printf("Block %i BlockTime=%"PRI64d" CurrTime=%"PRI64d" AdjustedTime=%"PRI64d" vtx[0].nTime=%"PRI64d"\n", nHeight, GetBlockTime(), GetTime(), GetAdjustedTime(), (int64)vtx[0].nTime);
+    printf("Block %i BlockTime=%"PRI64d" CurrTime=%"PRI64d" AdjustedTime=%"PRI64d" vtx[0].nTime=%"PRI64d" dT=%"PRI64d"\n", nHeight, GetBlockTime(), GetTime(), GetAdjustedTime(), (int64)vtx[0].nTime, GetBlockTime()-(int64)vtx[0].nTime);
     if (IsChainAtSwitchPoint(nHeight) && GetTime() < (GetBlockTime() - 15)) 
         return DoS(100, error("AcceptBlock() : chain switch point reached"));
 

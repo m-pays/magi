@@ -136,14 +136,15 @@ inline int64 GetMaxClockDrift(int nHeight)
 
 inline int64 PastDrift(int64 nTime, int nHeight) { return ( nTime - GetMaxClockDrift(nHeight) ); }
 inline int64 FutureDrift(int64 nTime, int nHeight) { return ( nTime + GetMaxClockDrift(nHeight) ); }
-inline int64 FutureDriftV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
+inline int64 FutureDriftCoinbaseV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
+inline int64 FutureDriftCoinbaseV2(int64 nTime, int nHeight) { return ( nTime + 30 * 60 ); }
 
 inline int64 FutureDriftCoinbase(int64 nTime, int nHeight) 
 {
-    if (fTestNet) return FutureDrift(nTime, nHeight);
+    if (fTestNet) return FutureDriftCoinbaseV2(nTime, nHeight);
     if (nHeight > HEIGHT_FIX_FUTURE_BLOCK_RETARGETING)
-        return FutureDrift(nTime, nHeight);
-    return FutureDriftV1(nTime, nHeight);
+        return FutureDriftCoinbaseV2(nTime, nHeight);
+    return FutureDriftCoinbaseV1(nTime, nHeight);
 }
 
 inline bool IsChainAtSwitchPoint(int nHeight) { return (nHeight == HEIGHT_CHAIN_SWITCH); }
