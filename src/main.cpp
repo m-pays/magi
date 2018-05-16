@@ -57,7 +57,7 @@ static const int64 nTargetTimespanV3Work = 60 * 16;   // 16 min
 static const int64 nTargetSpacingV3Stake = 90;   // 1.5 min
 static const int64 nTargetSpacingV3Work = 60 * 4;   // 4 min
 
-static const int64 nTargetSpacingWork = 2 * nStakeTargetSpacing; // 3 min PoW block spacing
+static const int64 nTargetSpacingWork = 2 * 90; // 3 min PoW block spacing
 
 int64 nChainStartTime = 1407209706;
 CBlockIndex* pindexGenesisBlock = NULL;
@@ -1121,8 +1121,9 @@ int64 GetProofOfWorkRewardV2(const CBlockIndex* pindexPrev, int64 nFees, bool fL
 //    nHeight, rDiff, double(nSubsidy)/double(COIN));
       
     if (fTestNet) {
-        if (nHeight%2 == 0) nSubsidy = 100 * COIN;
-        else nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+//        if (nHeight%2 == 0) nSubsidy = 1000 * COIN;
+//        else nSubsidy = GetProofOfWorkReward_OPM(pindex0);
+        nSubsidy = 1000 * COIN;
         return nSubsidy + nFees;
     }
 
@@ -1363,6 +1364,8 @@ const CBlockIndex* GetLastPoWBlockIndex(const CBlockIndex* pindex)
     return pindex;
 }
 
+
+#define HEIGHT_LOOKUP_DEPTH 10
 unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     CBigNum bnTargetLimit = bnProofOfWorkLimit;
@@ -1383,24 +1386,34 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
     if (pindexPrevPrev->pprev == NULL)
         return bnTargetLimit.GetCompact(); // second block
 
+    int64 nTargetSpacing = fProofOfStake? GetStakeTargetSpacing(pindexLast->nHeight+1): GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-	if(nActualSpacing < 0)
-	{
-		// printf(">> nActualSpacing = %"PRI64d" corrected to 1.\n", nActualSpacing);
-		nActualSpacing = 1;
-	}
-	else if(nActualSpacing > nTargetTimespan)
-	{
-		// printf(">> nActualSpacing = %"PRI64d" corrected to nTargetTimespan (900).\n", nActualSpacing);
+	if (nActualSpacing < 0)
+    {
+        if (IsProtocolV3(pindexLast->nHeight+1))
+        {
+            int nBlks = 1;
+            do {
+                pindexPrevPrev = GetLastBlockIndex(pindexPrevPrev->pprev, fProofOfStake);
+                if (pindexPrevPrev->pprev == NULL) break;
+                nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+                ++nBlks;
+            } while ( (nActualSpacing < 0) && (nBlks <= HEIGHT_LOOKUP_DEPTH) );
+            {
+                if (nActualSpacing < 0) 
+                    nActualSpacing = 1;
+                else
+                    nActualSpacing = nActualSpacing / nBlks;
+            }
+        } else
+            nActualSpacing = 1;
+    } else if (nActualSpacing > nTargetTimespan)
 		nActualSpacing = nTargetTimespan;
-	}
 
     // ppcoin: target change every block
     // ppcoin: retarget with exponential moving toward target spacing
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
-
-    int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : GetTargetSpacingWork(pindexLast->nHeight+1);
     int64 nInterval = nTargetTimespan / nTargetSpacing;
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
@@ -1411,9 +1424,19 @@ unsigned int GetNextTargetRequired_v1(const CBlockIndex* pindexLast, bool fProof
 	printf(">> pindexPrev->GetBlockTime() = %"PRI64d", pindexPrev->nHeight = %d, pindexPrevPrev->GetBlockTime() = %"PRI64d", pindexPrevPrev->nHeight = %d\n",
 		pindexPrev->GetBlockTime(), pindexPrev->nHeight, pindexPrevPrev->GetBlockTime(), pindexPrevPrev->nHeight);
 	*/
-
-    if (bnNew > bnTargetLimit)
+    if ( IsProtocolV3(pindexLast->nHeight+1) && (bnNew <= 0 || bnNew > bnTargetLimit) )
         bnNew = bnTargetLimit;
+    else if (bnNew > bnTargetLimit)
+        bnNew = bnTargetLimit;
+
+    /// debug print
+    if (fDebugMagiPoS)
+    {
+        printf("GetNextTargetRequired RETARGET\n");
+        printf("nTargetSpacing = %"PRI64d"    nActualSpacing = %"PRI64d"    nInterval = %"PRI64d"\n", nTargetSpacing, nActualSpacing, nInterval);
+        printf("Before: %08x  %s\n", pindexPrev->nBits, CBigNum().SetCompact(pindexPrev->nBits).getuint256().ToString().c_str());
+        printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+    }
 
     return bnNew.GetCompact();
 }
@@ -1810,7 +1833,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
     if (fDebug) printf("nHeight: %d\n", pindexLast->nHeight);
     int DiffMode = 1;
-    if (fTestNet) DiffMode = 2;
+    if (fTestNet) DiffMode = 1;
     else if (pindexLast->nHeight+1 >= 33500 && pindexLast->nHeight+1 < HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT) DiffMode = 2;
     else if (pindexLast->nHeight+1 >= HEIGHT_DIFF_ADJ_TARGET_SPACKING_WORK_V3_INIT && pindexLast->nHeight+1 < HEIGHT_CHAIN_SWITCH-2) DiffMode = 3;
     else if (pindexLast->nHeight+1 >= HEIGHT_CHAIN_SWITCH-2 && pindexLast->nHeight+1 < 1606988) DiffMode = 2;
@@ -2970,14 +2993,22 @@ bool CBlock::AcceptBlock()
     int nHeight = pindexPrev->nHeight+1;
 
     // Check proof of work matches claimed amount
-    printf("Block %i BlockTime=%"PRI64d" CurrTime=%"PRI64d" AdjustedTime=%"PRI64d" vtx[0].nTime=%"PRI64d"\n", nHeight, GetBlockTime(), GetTime(), GetAdjustedTime(), (int64)vtx[0].nTime);
+    if (fDebugMagiPoS)
+        printf("Block %i BlockTime=%"PRI64d" CurrTime=%"PRI64d" AdjustedTime=%"PRI64d" vtx[0].nTime=%"PRI64d"\n", nHeight, GetBlockTime(), GetTime(), GetAdjustedTime(), (int64)vtx[0].nTime);
     if (IsChainAtSwitchPoint(nHeight) && GetTime() < (GetBlockTime() - 15)) 
         return DoS(100, error("AcceptBlock() : chain switch point reached"));
 
+    if (IsProtocolV3(nHeight) && nVersion < 6)
+        return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
+    else if (!IsProtocolV3(nHeight) && nVersion > 5)
+        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
+
+    /*
     if (IsBlockVersion5(nHeight) && nVersion < 5)
         return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
     else if (!IsBlockVersion5(nHeight) && nVersion > 4)
         return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
+    */
 
     if (IsProofOfWork() && !IsMiningProofOfWork(nHeight))
 	return DoS(100, error("AcceptBlock() : no proof-of-work allowed anymore (height = %d)", nHeight));
@@ -2990,10 +3021,10 @@ bool CBlock::AcceptBlock()
         return DoS(50, error("AcceptBlock() : block timestamp too far in the future"));
 
     // Check coinbase timestamp
-    if (GetBlockTime() > FutureDriftV1((int64)vtx[0].nTime, nHeight))
+    if (GetBlockTime() > FutureDriftCoinbase((int64)vtx[0].nTime, nHeight))
         return DoS(50, error("AcceptBlock() : coinbase timestamp is too early"));
 
-    if (IsProofOfStake() && !CheckCoinStakeTimestamp(GetBlockTime(), (int64)vtx[1].nTime))
+    if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64)vtx[1].nTime))
         return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%d nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     if (IsProofOfWork() && IsProofOfWorkBlockInvalid(nHeight, GetBlockTime(), IsProofOfStake(), pindexPrev))
@@ -3010,7 +3041,7 @@ bool CBlock::AcceptBlock()
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 
     // Check timestamp against prev
-    if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || FutureDrift(GetBlockTime(), nHeight) < pindexPrev->GetBlockTime())
+    if (GetBlockTime() <= pindexPrev->GetTimePast() || FutureDrift(GetBlockTime(), nHeight) < pindexPrev->GetBlockTime())
         return error("AcceptBlock() : block's timestamp is too early");
 
     // Check that all transactions are finalized
@@ -3456,7 +3487,7 @@ bool LoadBlockIndex(bool fAllowNew)
         if (fTestNet)
         {
             block.nTime    = 1407209708;
-            block.nNonce   = 23721450;
+            block.nNonce   = 24141715;
         }
 
         if (true && (block.GetHash() != hashGenesisBlock)) {
@@ -4853,34 +4884,35 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     static int64 nLastCoinStakeSearchTime = GetAdjustedTime();  // only initialized at startup
     CBlockIndex* pindexPrev = pindexBest;
 	
-if (fTestNet || pindexBest->nHeight >= 131100) {
-    if (fProofOfStake)  // attempt to find a coinstake
+    if (fTestNet || pindexBest->nHeight >= 131100)
     {
-	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
-	CTransaction txCoinStake;
-	int64 nSearchTime = txCoinStake.nTime; // search to current time
-	if (fDebugMagiPoS)
-            printf("@CreateNewBlock -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
-	if (nSearchTime > nLastCoinStakeSearchTime)
-	{
-			// printf(">>> OK1\n");
-	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, 0, txCoinStake))
-	    {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1)))
-		{   // make sure coinstake would meet timestamp protocol
-		    // as it would be the same as the block timestamp
-		    pblock->vtx[0].vout[0].SetEmpty();
-		    pblock->vtx[0].nTime = txCoinStake.nTime;
-		    pblock->vtx.push_back(txCoinStake); 
-		    if (fDebugMagiPoS)
-			printf("@CreateNewBlock-PoS found -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
-		}
-	    }
-	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
-	    nLastCoinStakeSearchTime = nSearchTime;
-	}
+        if (fProofOfStake) { // attempt to find a coinstake
+        	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
+        	CTransaction txCoinStake;
+            if (IsProtocolV3(nBestHeight+1))
+                txCoinStake.nTime &= ~STAKE_TIMESTAMP_MASK;
+        	int64 nSearchTime = txCoinStake.nTime; // search to current time
+        	if (fDebugMagiPoS)
+                    printf("@CreateNewBlock -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
+        	if (nSearchTime > nLastCoinStakeSearchTime)
+            {
+                int64 nSearchInterval = IsProtocolV3(nBestHeight+1) ? 1 : nSearchTime - nLastCoinStakeSearchTime;
+        	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchInterval, 0, txCoinStake)) {
+                    // make sure coinstake would meet timestamp protocol
+                    if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1))) {
+            		    // as it would be the same as the block timestamp
+            		    pblock->vtx[0].vout[0].SetEmpty();
+            		    pblock->vtx[0].nTime = txCoinStake.nTime;
+            		    pblock->vtx.push_back(txCoinStake); 
+            		    if (fDebugMagiPoS)
+            			printf("@CreateNewBlock-PoS found -> txCoinStake.nTime=%"PRI64d"\n", txCoinStake.nTime);
+                    }
+        	    }
+        	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+        	    nLastCoinStakeSearchTime = nSearchTime;
+        	}
+        }
     }
-}
 	
     pblock->nBits = GetNextTargetRequired(pindexPrev, pblock->IsProofOfStake());
 
@@ -5076,30 +5108,31 @@ if (fTestNet || pindexBest->nHeight >= 131100) {
         if (fDebug && GetBoolArg("-printpriority"))
             printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
 	
-if (!fTestNet && pindexBest->nHeight < 131100) {
-    if (fProofOfStake)  // attempt to find a coinstake
-    {
-	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
-	CTransaction txCoinStake;
-	int64 nSearchTime = txCoinStake.nTime; // search to current time
-	if (nSearchTime > nLastCoinStakeSearchTime)
-	{
-			// printf(">>> OK1\n");
-	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchTime-nLastCoinStakeSearchTime, nFees, txCoinStake))
-	    {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1)))
-		{   // make sure coinstake would meet timestamp protocol
-		    // as it would be the same as the block timestamp
-		    pblock->vtx[0].vout[0].SetEmpty();
-		    pblock->vtx[0].nTime = txCoinStake.nTime;
-		    pblock->vtx.push_back(txCoinStake);
-		}
-	    }
-	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
-	    nLastCoinStakeSearchTime = nSearchTime;
-	}
+    if (!fTestNet && pindexBest->nHeight < 131100) {
+        if (fProofOfStake) // attempt to find a coinstake
+        {
+        	pblock->nBits = GetNextTargetRequired(pindexPrev, true);
+        	CTransaction txCoinStake;
+            if (IsProtocolV3(nBestHeight+1))
+                txCoinStake.nTime &= ~STAKE_TIMESTAMP_MASK;
+        	int64 nSearchTime = txCoinStake.nTime; // search to current time
+        	if (nSearchTime > nLastCoinStakeSearchTime)
+            {
+                int64 nSearchInterval = IsProtocolV3(nBestHeight+1) ? 1 : nSearchTime - nLastCoinStakeSearchTime;
+        	    if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, pindexPrev->nHeight+1, nSearchInterval, nFees, txCoinStake)) {
+                    // make sure coinstake would meet timestamp protocol
+                    if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, PastDrift(pindexPrev->GetBlockTime(), pindexPrev->nHeight+1))) {
+            		    // as it would be the same as the block timestamp
+            		    pblock->vtx[0].vout[0].SetEmpty();
+            		    pblock->vtx[0].nTime = txCoinStake.nTime;
+            		    pblock->vtx.push_back(txCoinStake);
+                    }
+        	    }
+        	    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+        	    nLastCoinStakeSearchTime = nSearchTime;
+        	}
+        }
     }
-}
 	
 /*
 	if (pblock->IsProofOfWork()) // the block under minting is PoW

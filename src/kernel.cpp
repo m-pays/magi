@@ -71,11 +71,6 @@ static std::map<int, unsigned int> mapStakeModifierCheckpoints =
 static std::map<int, unsigned int> mapStakeModifierCheckpointsTestNet =
     boost::assign::map_list_of
         ( 0,	0x0e00670b )
-        ( 999,	0x727489b2 )
-        ( 1999,	0x654dcb7e )
-        ( 9999,	0x2c9333e0 )
-        ( 19999,0xf40a3252 )
-        ( 27680,0xe7957d36 )
     ;
 
 inline double wfa(double x)
@@ -582,10 +577,12 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
 }
 
 // Check whether the coinstake timestamp meets protocol
-bool CheckCoinStakeTimestamp(int64 nTimeBlock, int64 nTimeTx)
+bool CheckCoinStakeTimestamp(int nHeight, int64 nTimeBlock, int64 nTimeTx)
 {
-    // v0.3 protocol
-    return (nTimeBlock == nTimeTx);
+    if (IsProtocolV3(nHeight))
+        return (nTimeBlock == nTimeTx) && ((nTimeTx & STAKE_TIMESTAMP_MASK) == 0);
+    else
+        return (nTimeBlock == nTimeTx);
 }
 
 // Get stake modifier checksum

@@ -6,6 +6,7 @@
 #include "main.h"
 #include "magirpc.h"
 #include "checkpoints.h"
+#include "kernel.h"
 
 using namespace json_spirit;
 using namespace std;
@@ -68,7 +69,15 @@ double GetPoSKernelPS(const CBlockIndex* blockindex, int lookup)
     if (fDebugMagi)
 	printf("@GetPoSKernelPS -> stake blocks for average = %d\n", nStakesHandled);
 
-    return nStakesTime ? dStakeKernelsTriedAvg / nStakesTime : 0;
+    double result = 0;
+
+    if (nStakesTime)
+        result = dStakeKernelsTriedAvg / nStakesTime;
+
+    if (IsProtocolV3(nBestHeight))
+        result *= STAKE_TIMESTAMP_MASK + 1;
+
+    return result;
 }
 
 // hashrate = diff * 2^32/blocktime = diff * 4 294 967 296 / blocktime
@@ -359,6 +368,8 @@ Value getchainfo(const Array& params, bool fHelp)
     int bnBitsMQW_v2 = MagiQuantumWave_v2(pblockindexprev, pblockindexprev->IsProofOfStake());
     int bnBitsTarget = GetNextTargetRequired(pblockindexprev, pblockindexprev->IsProofOfStake());
 
+    obj.push_back(Pair("PoS Blocktime", (int) GetStakeTargetSpacing(nHeight)));
+    obj.push_back(Pair("nTime", (int) pblockindex->GetBlockTime()));
     obj.push_back(Pair("nBits", HexBits(pblockindex->nBits)));
     obj.push_back(Pair("nBitsMQW", HexBits(bnBitsMQW)));
     obj.push_back(Pair("bnBitsMQW_v2", HexBits(bnBitsMQW_v2)));

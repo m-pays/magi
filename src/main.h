@@ -73,8 +73,12 @@ inline bool IsMiningProofOfStake(int nHeight )
     else return (nHeight > 10080); // three weeks
 }
 
-#define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
+//#define FORK_BLOCK_REWARDS_V2_TESNT 1419402600
+#define FORK_BLOCK_REWARDS_V2_TESNT 0
 #define FORK_BLOCK_REWARDS_V2 1420650000
+#define HEIGHT_CHAIN_SWITCH 1606950
+#define HEIGHT_PROTOCOL_V3 1825100
+
 inline bool IsPoWIIRewardProtocolV2(unsigned int nTime0)
 {
     if (fTestNet) {
@@ -91,6 +95,12 @@ inline bool IsPoSIIProtocolV2(int nHeight)
 	   else fTestNetWeightV2 = false;
 	   return nHeight > 40780;
     } else return (nHeight > 131300);
+}
+
+inline bool IsProtocolV3(int nHeight)
+{
+    if (fTestNet) return true;
+    return (nHeight > HEIGHT_PROTOCOL_V3);
 }
 
 inline bool IsBlockVersion5(int nHeight) { return fTestNet || nHeight > 1446791; }
@@ -113,19 +123,39 @@ static const int fHaveUPnP = false;
 #endif
 
 static const uint256 hashGenesisBlockOfficial("0x000004c91ca895a8c63176b1671eff34291ad671e59ae46630ffd8f985dd56cc");
-static const uint256 hashGenesisBlockTestNet ("0x000005fef85d8e77a4307afc8a9dc8f4441241767b06a4035d565bfa5b0b7d31");
+static const uint256 hashGenesisBlockTestNet ("0x0000036df26f4d11af604f86b7bdc5ce5f8bee17a3c6f57e9e6e800ef21d8447");
 
-#define HEIGHT_CHAIN_SWITCH 1606950
+static const int64 nMaxClockDriftV1 = 2 * 60 * 60;      // two hours
+static const int64 nMaxClockDriftV2 = 5 * 60;           // 5 mins
+static const int64 nMaxClockDriftV3 = 30;               // 30 secs
 
-static const int64 nMaxClockDriftV1 = 2 * 60 * 60;        // two hours
-static const int64 nMaxClockDriftV2 = 5 * 60;             // 5 mins
-inline int64 GetMaxClockDrift(int nHeight) { return ( (nHeight > HEIGHT_CHAIN_SWITCH) ? nMaxClockDriftV2 : nMaxClockDriftV1 ); }
+inline int64 GetMaxClockDrift(int nHeight) 
+{
+//    return ( (nHeight > HEIGHT_CHAIN_SWITCH) ? nMaxClockDriftV2 : nMaxClockDriftV1 ); 
+    if (fTestNet) return nMaxClockDriftV3;
+    if (nHeight > HEIGHT_CHAIN_SWITCH && nHeight <= HEIGHT_PROTOCOL_V3)
+        return nMaxClockDriftV2;
+    else if (nHeight > HEIGHT_PROTOCOL_V3)
+        return nMaxClockDriftV3;
+    return nMaxClockDriftV1;
+}
+
 inline int64 PastDrift(int64 nTime, int nHeight) { return ( nTime - GetMaxClockDrift(nHeight) ); }
 inline int64 FutureDrift(int64 nTime, int nHeight) { return ( nTime + GetMaxClockDrift(nHeight) ); }
-inline int64 FutureDriftV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
+inline int64 FutureDriftCoinbaseV1(int64 nTime, int nHeight) { return ( nTime + nMaxClockDriftV1 ); }
+inline int64 FutureDriftCoinbaseV2(int64 nTime, int nHeight) { return ( nTime + 30 * 60 ); }
+
+inline int64 FutureDriftCoinbase(int64 nTime, int nHeight) 
+{
+    if (fTestNet) return FutureDriftCoinbaseV2(nTime, nHeight);
+    if (nHeight > HEIGHT_PROTOCOL_V3)
+        return FutureDriftCoinbaseV2(nTime, nHeight);
+    return FutureDriftCoinbaseV1(nTime, nHeight);
+}
 
 inline bool IsChainAtSwitchPoint(int nHeight) { return (nHeight == HEIGHT_CHAIN_SWITCH); }
 inline bool IsChainRuleSwitchedOff(int nHeight) { return (nHeight > HEIGHT_CHAIN_SWITCH); }
+inline unsigned int GetStakeTargetSpacing(int nHeight) { return IsProtocolV3(nHeight) ? 96 : 90; }
 
 int64 GetTargetSpacingWork(int nHeight);
 int64 GetTargetSpacing(bool fProofOfStake);
@@ -932,7 +962,7 @@ class CBlock
 {
 public:
     // header
-    static const int CURRENT_VERSION=5;
+    static const int CURRENT_VERSION = 6;
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
@@ -1005,25 +1035,22 @@ public:
 
     uint256 GetHash() const
     {
-	if (fTestNet)
-	{
-	    if(nTime<1413590400) {
-		return hash_M7M(BEGIN(nVersion), END(nNonce));
-	    }
-	    else {
-		return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
-	    }
-	}
-	else
-	{
-	    if(nTime<1414330200) {
-		return hash_M7M(BEGIN(nVersion), END(nNonce));
-	    }
-	    else {
-		return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
-	    }
-	}
-    
+        if (fTestNet) {
+            return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
+            /*
+            if(nTime < 1413590400) {
+                return hash_M7M(BEGIN(nVersion), END(nNonce));
+            } else {
+                return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
+            }
+            */
+        } else {
+            if(nTime < 1414330200) {
+                return hash_M7M(BEGIN(nVersion), END(nNonce));
+            } else {
+                return hash_M7M_v2(BEGIN(nVersion), END(nNonce), nNonce);
+            }
+        }
     }
 
     int64 GetBlockTime() const
@@ -1350,6 +1377,14 @@ public:
     bool CheckIndex() const
     {
         return true;
+    }
+
+    int64_t GetTimePast() const
+    {
+        if (IsProtocolV3(nHeight))
+            return GetBlockTime();
+        else
+            return GetMedianTimePast();
     }
 
     enum { nMedianTimeSpan=11 };
