@@ -3000,8 +3000,8 @@ bool CBlock::AcceptBlock()
 
     if (IsProtocolV3(nHeight) && nVersion < 6)
         return DoS(100, error("AcceptBlock() : reject old nVersion = %d", nVersion));
-    else if (!IsProtocolV3(nHeight) && nVersion > 5)
-        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
+//    else if (!IsProtocolV3(nHeight) && nVersion > 5)
+//        return DoS(100, error("AcceptBlock() : reject new nVersion = %d", nVersion));
 
     /*
     if (IsBlockVersion5(nHeight) && nVersion < 5)
