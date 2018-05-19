@@ -1,0 +1,28 @@
+The following dependencies and steps are needed for Raspbian Stretch released in November 2017.
+
+Prequisites may change with newer versions.
+
+This has been tested with Raspberry Pi Zero W.
+
+Note that it may be tough to get everything + the blockchain installed on a 4GB flash card.  It's recommended you use an 8GB or 16GB flash card.
+
+
+#expand the default swapfile size to 1GB since 100MB is not enough
+$ sudo nano /etc/dphys-swapfile
+#change CONF_SWAPSIZE=100 to CONF_SWAPSIZE=1024
+$ sudo service dphys-swapfile restart
+
+sudo apt-get install qttools5-dev-tools
+sudo apt-get install qt5-default
+sudo apt-get install libboost-dev
+sudo apt-get install libboost-all-dev
+sudo apt-get install libssl1.0-dev
+sudo apt-get install libdb5.3++-dev
+sudo apt-get install libminiupnpc-dev
+
+# a restart here is advised, but may not be needed
+
+qmake
+make
+
+
