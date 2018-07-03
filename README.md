@@ -78,5 +78,5 @@ Info
 ---------------------
 - Website: http://www.m-core.org
 - Bitcointalk thread: https://bitcointalk.org/index.php?topic=735170.0
-- Forum: http://www.m-talk.org/
+- Forum: https://forum.m-core.org/
 - Freenode IRC: #magi
