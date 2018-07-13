@@ -919,7 +919,7 @@ std::string LicenseInfo(bool f1, bool f2)
         strprintf(_("Source code: %s"), URL_SOURCE_CODE.c_str()) + "\n" + 
         strprintf(_("Dowloand wallet: %s"), "<http://m-core.org/bin>") + "\n" + 
         strprintf(_("Block-Chain: %s"), "<http://m-core.org/bin/block-chain>") + "\n" + 
-        strprintf(_("Roadmap: %s"), "<http://m-core.org/resources/roadmap>") + "\n" + 
+        strprintf(_("Roadmap: %s"), "https://roadmap.coinmagi.org/") + "\n" + 
         "\n" + 
         _("This is experimental software.") + 
         strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s"), "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" + "\n" +
