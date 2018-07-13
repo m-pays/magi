@@ -515,6 +515,7 @@ bool AppInit2()
 
     uiInterface.InitMessage(_("Verifying database integrity..."));
 
+    LOCK(bitdb.cs_db);
     if (!bitdb.Open(GetDataDir()))
     {
         string msg = strprintf(_("Error initializing database environment %s!"
@@ -917,7 +918,7 @@ std::string LicenseInfo(bool f1, bool f2)
         strprintf(_("Please contribute if you find %s useful. Visit %s for further information about the software. "), PACKAGE_NAME,URL_WEBSITE.c_str()) +
         "\n\n" + 
         strprintf(_("Source code: %s"), URL_SOURCE_CODE.c_str()) + "\n" + 
-        strprintf(_("Dowloand wallet: %s"), "<http://m-core.org/bin>") + "\n" + 
+        strprintf(_("Download wallet: %s"), "<http://m-core.org/bin>") + "\n" +
         strprintf(_("Block-Chain: %s"), "<http://m-core.org/bin/block-chain>") + "\n" + 
         strprintf(_("Roadmap: %s"), "<http://m-core.org/resources/roadmap>") + "\n" + 
         "\n" + 

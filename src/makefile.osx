@@ -5,7 +5,12 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 CXX=llvm-g++
+
+# macports
 #DEPSDIR=/opt/local
+
+#homebrew
+DEPSDIR=/usr/local/Cellar
 
 # :=0 --> UPnP support turned off by default at runtime
 # :=1 --> UPnP support turned on by default at runtime
@@ -20,33 +25,43 @@ INCLUDEPATHS= \
  -I"$(CURDIR)" \
  -I"$(CURDIR)"/obj \
  -I"$(DEPSDIR)/include" \
- -I"$(DEPSDIR)/include/db48"
+ -I"$(DEPSDIR)/berkeley-db@4/4.8.30/include" \
+ -I"$(DEPSDIR)/openssl/1.0.2o_2/include"
 
 LIBPATHS= \
- -L"$(DEPSDIR)/lib" \
- -L"$(DEPSDIR)/lib/db48"
+ -L"$(DEPSDIR)" \
+ -L"$(DEPSDIR)/berkeley-db@4/4.8.30/lib" \
+ -L"$(DEPSDIR)/leveldb/1.20_2/lib"
 
 LIBS = -dead_strip
 
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
-BOOST_LIB_SUFFIX=-mt-s
 
-ifdef STATIC
+# was mt-s (doesn't exist in macport install today)
+BOOST_LIB_SUFFIX=-mt
+
+#ifdef STATIC
 # Build STATIC if you are redistributing the binary
 #DEPSDIR=/opt/crypt
-TESTLIBS += \
- $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
-LIBS += \
- $(DEPSDIR)/lib/libdb_cxx-4.8.a \
- $(DEPSDIR)/lib/libboost_system$(BOOST_LIB_SUFFIX).a \
- $(DEPSDIR)/lib/libboost_filesystem$(BOOST_LIB_SUFFIX).a \
- $(DEPSDIR)/lib/libboost_program_options$(BOOST_LIB_SUFFIX).a \
- $(DEPSDIR)/lib/libboost_thread$(BOOST_LIB_SUFFIX).a \
- $(DEPSDIR)/lib/libssl.a \
- $(DEPSDIR)/lib/libgmp.a \
- $(DEPSDIR)/lib/libcrypto.a \
- -lz
-else
+
+# NOTE: File library (.a) does not exist
+#TESTLIBS += \
+# $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
+
+#LIBS += \
+# $(DEPSDIR)/lib/libdb_cxx-4.8.a \
+# $(DEPSDIR)/lib/libboost_system$(BOOST_LIB_SUFFIX).a \
+# $(DEPSDIR)/lib/libboost_filesystem$(BOOST_LIB_SUFFIX).a \
+# $(DEPSDIR)/lib/libboost_program_options$(BOOST_LIB_SUFFIX).a \
+# $(DEPSDIR)/lib/libboost_thread$(BOOST_LIB_SUFFIX).a \
+# $(DEPSDIR)/lib/libssl.a \
+# $(DEPSDIR)/lib/libgmp.a \
+# $(DEPSDIR)/lib/libcrypto.a \
+# -lz \
+# -lssl \
+# -lcrypto \
+# -lgmp
+#else
 TESTLIBS += \
  -lboost_unit_test_framework$(BOOST_LIB_SUFFIX)
 LIBS += \
@@ -60,7 +75,7 @@ LIBS += \
  -lcrypto \
  -lz
 TESTDEFS += -DBOOST_TEST_DYN_LINK
-endif
+#endif
 
 DEFS=-DMAC_OSX -DMSG_NOSIGNAL=0 -DBOOST_SPIRIT_THREADSAFE
 
