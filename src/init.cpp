@@ -515,6 +515,7 @@ bool AppInit2()
 
     uiInterface.InitMessage(_("Verifying database integrity..."));
 
+    LOCK(bitdb.cs_db);
     if (!bitdb.Open(GetDataDir()))
     {
         string msg = strprintf(_("Error initializing database environment %s!"
